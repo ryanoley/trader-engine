@@ -6,11 +6,13 @@ import javax.swing.JFrame;
 
 import org.zeromq.ZMQ;
 
+import ui.MainFrame;
+
 public class ZMQTradeServer {
 	
 	public static void main (String[] args) {
 		ZMQTradeServer server = new ZMQTradeServer();
-		JFrame frame = new JFrame();
+		JFrame frame = new MainFrame();
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

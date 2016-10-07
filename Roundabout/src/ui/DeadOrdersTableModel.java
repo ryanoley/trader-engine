@@ -4,9 +4,9 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.table.AbstractTableModel;
 
-public class OrdersTableModel extends AbstractTableModel implements ListDataListener {
+public class DeadOrdersTableModel extends AbstractTableModel implements ListDataListener {
 	
-	String[] colNames = new String[] {"Ticker","Type","Shares","Limit","Filled","AvgPrice","oTime","lTime"};
+	String[] colNames = new String[] {"Ticker","Type","Shares","Limit","Filled","AvgPrice","oTime","lTime","Status"};
 
 	@Override
 	public String getColumnName(int col) {

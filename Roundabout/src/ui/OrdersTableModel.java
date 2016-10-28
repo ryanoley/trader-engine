@@ -45,10 +45,10 @@ public class OrdersTableModel extends AbstractTableModel {
 	public void fireTableDataChanged() {
 		if (OrdersContainer.ordIDtoMessagesOpen.size() != ordIDs.size()) {
 			ordIDs = new ArrayList<String>(OrdersContainer.ordIDtoMessagesOpen.keySet());
-			super.fireTableDataChanged();
 			for (String id : ordIDs)
 				System.out.println("open:\t" +id);
 		}
+		super.fireTableDataChanged();
 	}
 
 	@Override

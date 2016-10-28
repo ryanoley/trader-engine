@@ -8,6 +8,7 @@ import org.zeromq.ZMQ;
 import org.zeromq.ZMQException;
 
 import fix.FixApplication;
+import fix.TradeSender;
 import ui.MainFrame;
 
 public class ZMQTradeServer {
@@ -21,7 +22,6 @@ public class ZMQTradeServer {
 		server.startTradePublisher();
 		server.startServer();
 
-		FixApplication.getFixApplication().connectToServer();		
 	}
 
 
@@ -41,15 +41,19 @@ public class ZMQTradeServer {
 	}
 
 	public void disconnect() {
-		if (tradeSocket != null)
-			tradeSocket.close();
-		if (tradeContext != null)
-			tradeContext.term();
+		try {
+			if (tradeSocket != null)
+				tradeSocket.close();
+			if (tradeContext != null)
+				tradeContext.term();
 
-		if (pubSocket != null)
-			pubSocket.close();
-		if (pubContext != null)
-			pubContext.term();
+			if (pubSocket != null)
+				pubSocket.close();
+			if (pubContext != null)
+				pubContext.term();
+		} catch (Exception e) {
+
+		}
 	}
 
 
@@ -65,6 +69,8 @@ public class ZMQTradeServer {
 		tradeSocket.bind("tcp://*:5557");	
 		System.out.println("trade listener started");
 		String message = null;
+		
+		TradeSender sender = TradeSender.getTradeCreator();
 
 		while (true) {
 			try {
@@ -74,7 +80,34 @@ public class ZMQTradeServer {
 			}
 
 			System.out.println("Got msg : \t" + message);
-			queue.offer(message);
+//			queue.offer(message);
+			// MSFT B 100 95.5 <ID> [DEST] [VWAP PARAMS: PERCVOLUME STARTTIME ENDTIME] if there's a startTime, endTime is needed
+			String[] parts = message.split("\\s|\\,");
+			
+			System.out.println("parts:\t" + parts.length);
+			
+			if (parts.length < 4)
+				continue;
+			
+			String ticker = parts[0];
+			
+			char sideChar = '1';
+			if (parts[1].equalsIgnoreCase("S"))
+				sideChar = '2';
+			else 
+				if (parts[1].equalsIgnoreCase("SS"))
+					sideChar = '5';
+			
+			double size = Double.parseDouble(parts[2]);
+			double limit = Double.parseDouble(parts[3]);
+			char ordType = '1';				// negative limit = MOC, 0 = MKT
+			if (limit > 0)
+				ordType = '2';
+			else if (limit < 0)
+				ordType = '5';
+			
+			System.out.println("Sending");
+			sender.createAndSendOrder(parts[0], sideChar, size, ordType, limit, null);
 		}
 
 		//		System.out.println("ENDING TRADE LISTENER.");
@@ -103,9 +136,7 @@ public class ZMQTradeServer {
 		}
 	}
 
-	public void notifyTrade(String ticker, int orderSize, double price,
-			char side) {
-		// TODO 
-
+	public void notifyTrade(String ticker, int orderSize, double price, char side) {
+		queue.offer(ticker + "," + side + "," + orderSize + "," + price);
 	}
 }

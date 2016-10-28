@@ -3,19 +3,21 @@ package fix;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import main.OrdersContainer;
 import network.ZMQTradeServer;
 import quickfix.FieldNotFound;
 import quickfix.Message;
 import quickfix.field.ClOrdID;
 import quickfix.fix42.ExecutionReport;
+import ui.IListenForUIChanges;
 
 public class ExecutionHandler {
-	
-	HashMap<String, ArrayList<Message>> ordIDtoMessagesOpen = new HashMap<>();
+
+
 	HashMap<String, String> partialIDs = new HashMap<>();
-	
+
 	ZMQTradeServer tradeServer = ZMQTradeServer.getZMQTradeServer();
-	
+
 
 	public void handleMessage(ExecutionReport message) {
 		try {
@@ -24,8 +26,8 @@ public class ExecutionHandler {
 
 			char ordStatus = message.getOrdStatus().getValue();
 
-			ArrayList<Message> orders = ordIDtoMessagesOpen.get(id);
-			
+			ArrayList<Message> orders = OrdersContainer.ordIDtoMessagesOpen.get(id);
+
 			if (orders == null) {
 				System.err.println("\nNo order found : handleMessage: \t" + message);
 				return;
@@ -37,38 +39,39 @@ public class ExecutionHandler {
 			//			if (ordStatus == '0' || ordStatus == '1') 
 			//				return;
 			if (ordStatus == '1') {
-//				System.out.println("\nPartial:\t" + message);
+				//				System.out.println("\nPartial:\t" + message);
 				partialIDs.put(id, message.toString());
 				notifyPositionsServer(message, id, true);
 			}
 
-			ordersTableModel.fireTableDataChanged();
+			listener.notifyOpenOrdersChanged();
 			
 			// 		filled 			// done for day			// cancelled		// replaced		// rejected		// expired
 			if (ordStatus == '2' || ordStatus == '3' || ordStatus == '4' || ordStatus == '5' || ordStatus == '8' || ordStatus == 'C') {
 
 				// if not replaced
 				if (ordStatus != '5') {
-					ordIDtoMessagesClosed.put(id, ordIDtoMessagesOpen.remove(id));
-					ordIDlist.removeElement(id);
-					closedOrdIDlist.addElement(id);					
+					OrdersContainer.ordIDtoMessagesClosed.put(id, OrdersContainer.ordIDtoMessagesOpen.remove(id));
+					listener.notifyClosedOrdersChanged();
+					listener.notifyOpenOrdersChanged();
 				}
 
 				// if there is an OrigClOrdID, remove those too
 				if (message.isSetField(41)) {
 					id = message.getOrigClOrdID().getValue();
 
-					ordIDtoMessagesClosed.put(id, ordIDtoMessagesOpen.remove(id));
-					ordIDlist.removeElement(id);
-					closedOrdIDlist.addElement(id);
+					OrdersContainer.ordIDtoMessagesClosed.put(id, OrdersContainer.ordIDtoMessagesOpen.remove(id));
+					listener.notifyClosedOrdersChanged();
+					listener.notifyOpenOrdersChanged();
 				}
 
 				if (ordStatus == '8') {
-					rejectedOrdIDlist.addElement(id);
+					listener.notifyClosedOrdersChanged();
+					listener.notifyOpenOrdersChanged();
 
 					tradesOpen--;
 					tradesRejected++;
-					
+
 					System.err.println("\nRejected:\t" + message);
 				}
 
@@ -76,14 +79,11 @@ public class ExecutionHandler {
 					notifyPositionsServer(message, id);
 
 					tradesOpen--;
-					if (ordStatus != '4') {
+					if (ordStatus != '4')
 						tradesFilled++;
-
-						// notify DROP copy
-//						notifyDropCopy(message);
-					}
+					
 				}
-				
+
 				partialIDs.remove(id);
 			}
 
@@ -91,11 +91,11 @@ public class ExecutionHandler {
 			e.printStackTrace();
 		}
 
-		setStats();
+		listener.updateStats();
 	}
-	
 
-	
+
+
 	private void notifyPositionsServer(ExecutionReport msg, String id) {
 		notifyPositionsServer(msg, id, false);
 	}
@@ -106,8 +106,8 @@ public class ExecutionHandler {
 	int tradesRejected = 0;
 	int tradesOpen = 0;
 	int sharesTraded = 0;
-	
-	
+
+
 	int orderSize = 0;
 	double price = 0;
 	String ticker = null;
@@ -115,16 +115,16 @@ public class ExecutionHandler {
 
 	public static final char BUY = '1', SELL = '2', SHORT = '5';	// SIDES
 	public static final char MKT = '1', LIMIT = '2', MOC = '5';	// ORDER TYPES
-	
-	
+
+
 	private void notifyPositionsServer(ExecutionReport msg, String id, boolean partial) {
 		if (tradeServer == null) 
 			return;
 
 		try {
 			orderSize = (int) msg.getCumQty().getValue();
-//			if (size == 0)
-//				return;
+			//			if (size == 0)
+			//				return;
 
 			price = msg.getAvgPx().getValue();
 
@@ -145,12 +145,18 @@ public class ExecutionHandler {
 			System.err.println("ERROR: MSG NOT SENT TO POSITIONS SERVER:\t"+msg);
 			return;
 		}
-		
-		
+
+
 		if (partial)
 			ticker = "_"+ticker;
-		
+
 		tradeServer.notifyTrade(ticker, orderSize, price, side);
+	}
+
+	IListenForUIChanges listener = null;
+
+	public void setUIListener(IListenForUIChanges uiListener) {
+		listener = uiListener;
 	}
 
 

@@ -19,6 +19,7 @@ import quickfix.SocketAcceptor;
 import quickfix.SocketInitiator;
 import quickfix.UnsupportedMessageType;
 import quickfix.field.MsgSeqNum;
+import ui.IListenForUIChanges;
 
 public class FixApplication implements Application {
 	
@@ -41,7 +42,8 @@ public class FixApplication implements Application {
 	}
 	
 	
-	public void connectToServer() {
+	public void connectToServer(IListenForUIChanges uiListener) {
+		msgHandler.setUIListener(uiListener);
 		connectToServer(defaultSettingsFileName);
 	}
 	
@@ -94,7 +96,7 @@ public class FixApplication implements Application {
 	@Override
 	public void fromApp(Message message, SessionID arg1) throws FieldNotFound,
 			IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
-		
+		System.out.println(message);
 		msgHandler.crack(message, arg1);
 	}
 	
@@ -107,12 +109,14 @@ public class FixApplication implements Application {
 	@Override
 	public void onLogon(SessionID arg0) {
 		msgHandler.notifySessionUpdate(arg0);
+		TradeSender.getTradeCreator().sessionID = arg0;
 	}
 
 	@Override
 	public void onLogout(SessionID arg0) {
 		System.out.println("OnLogout : "+arg0);
 		msgHandler.notifyDisconnect();
+		TradeSender.getTradeCreator().sessionID = null;
 	}
 
 	@Override

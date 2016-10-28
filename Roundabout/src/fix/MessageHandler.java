@@ -12,6 +12,7 @@ import quickfix.fix42.Logout;
 import quickfix.fix42.MessageCracker;
 import quickfix.fix42.OrderCancelReject;
 import quickfix.fix42.Reject;
+import ui.IListenForUIChanges;
 
 public class MessageHandler extends MessageCracker {
 	
@@ -23,6 +24,7 @@ public class MessageHandler extends MessageCracker {
 	public void notifySessionUpdate(SessionID sessionID) {
 		// TODO	update ui and possibly strategy clients		
 		System.out.println("Session logon.");
+		uiListener.updateConnection(true);
 	}
 
 	public void notifyDisconnect() {
@@ -73,6 +75,7 @@ public class MessageHandler extends MessageCracker {
 	public void onMessage(OrderCancelReject message, SessionID sessionID)
 			throws FieldNotFound, UnsupportedMessageType, IncorrectTagValue {
 		// TODO handle cancel reject
+		System.out.println("NOT WIRED FOR ORDER CANCEL REJECT MSG...");
 		super.onMessage(message, sessionID);
 	}
 
@@ -80,7 +83,15 @@ public class MessageHandler extends MessageCracker {
 	public void onMessage(Reject message, SessionID sessionID)
 			throws FieldNotFound, UnsupportedMessageType, IncorrectTagValue {
 		// TODO handle order reject
+		System.out.println("NOT WIRED FOR REJECT MSG...");
 		super.onMessage(message, sessionID);
+	}
+
+	IListenForUIChanges uiListener = null;
+	
+	public void setUIListener(IListenForUIChanges uiListener) {
+		this.uiListener = uiListener;
+		handler.setUIListener(uiListener);
 	}
 	
 	

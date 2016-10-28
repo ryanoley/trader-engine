@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -21,11 +22,15 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-import quickfix.field.OrdType;
-import quickfix.field.Side;
-import quickfix.fix42.NewOrderSingle;
+import main.OrdersContainer;
 import network.ZMQTradeServer;
+import quickfix.FieldNotFound;
+import quickfix.Message;
+import quickfix.field.ClOrdID;
+import quickfix.field.OrdType;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -35,24 +40,33 @@ import com.jgoodies.forms.layout.RowSpec;
 import fix.FixApplication;
 import fix.TradeSender;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements IListenForUIChanges {
 	
 	private FixApplication app = FixApplication.getFixApplication();
 	
 	private JTable liveOrdersTable, deadOrdersTable;
-	private OrdersTableModel ordersTableModel = null;
-	private DeadOrdersTableModel deadOrdersTableModel = null;
+	
+	private OrdersTableModel ordersTableModel = new OrdersTableModel();
+	private DeadOrdersTableModel deadOrdersTableModel = new DeadOrdersTableModel();
+	
 	private JTextField textField_Symbol;
 	private JTextField textField_Side;
 	private JTextField textField_Size;
 	private JTextField textField_Type;
 	private JTextField textField_Limit;
-	private JTextField textField_Suffix;
+	private JLabel lblStatusInformation = new JLabel("STATUS INFORMATION");
+	private JLabel lblOrdid = new JLabel("OrdID");
+
+	private TradeSender tradeSender = null;
 	
 	
 	public MainFrame() {
 		init();
-		app.connectToServer();
+		
+		tradeSender = TradeSender.getTradeCreator();
+		tradeSender.addUIListener(this);
+		
+		app.connectToServer(this);
 	}
 
 	private void shutDown() {
@@ -75,6 +89,7 @@ public class MainFrame extends JFrame {
 		}
 
 		setBounds(100, 100, 800, 400);
+		setTitle("TradeServer");
 		
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
@@ -88,16 +103,22 @@ public class MainFrame extends JFrame {
 			}
 		});
 
-		ordersTableModel = new OrdersTableModel();
-		deadOrdersTableModel = new DeadOrdersTableModel();
 		
 		JPanel panel_1 = new JPanel();
 		getContentPane().add(panel_1, BorderLayout.NORTH);
 		
-		JLabel lblStatusInformation = new JLabel("STATUS INFORMATION");
 		panel_1.add(lblStatusInformation);
 
 		liveOrdersTable = new JTable(ordersTableModel);
+		liveOrdersTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting())
+					return;
+				displaySelectedOrder();
+			}
+		});
 		JScrollPane scrollPane = new JScrollPane(liveOrdersTable);
 		
 		deadOrdersTable = new JTable(deadOrdersTableModel);
@@ -147,8 +168,6 @@ public class MainFrame extends JFrame {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.DEFAULT_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.DEFAULT_ROWSPEC,}));
 		
 		JLabel lblSymbol = new JLabel("Symbol:");
@@ -158,63 +177,66 @@ public class MainFrame extends JFrame {
 		panel.add(textField_Symbol, "4, 2, fill, default");
 		textField_Symbol.setColumns(5);
 		
-		JLabel lblSuffix = new JLabel("Suffix:");
-		panel.add(lblSuffix, "2, 4, right, default");
-		
-		textField_Suffix = new JTextField();
-		panel.add(textField_Suffix, "4, 4, fill, default");
-		textField_Suffix.setColumns(5);
-		
-		JLabel lblSide = new JLabel("Side:");
-		panel.add(lblSide, "2, 6, right, default");
+		JLabel lblSide = new JLabel("Side: 1=B,2=S,5=SS");
+		panel.add(lblSide, "2, 4, right, default");
 		
 		textField_Side = new JTextField();
-		panel.add(textField_Side, "4, 6, fill, default");
+		panel.add(textField_Side, "4, 4, fill, default");
 		textField_Side.setColumns(5);
 		
 		JLabel lblSize = new JLabel("Size:");
-		panel.add(lblSize, "2, 8, right, default");
+		panel.add(lblSize, "2, 6, right, default");
 		
 		textField_Size = new JTextField();
-		panel.add(textField_Size, "4, 8, fill, default");
+		panel.add(textField_Size, "4, 6, fill, default");
 		textField_Size.setColumns(5);
 		
-		JLabel lblType = new JLabel("Type:");
-		panel.add(lblType, "2, 10, right, default");
+		JLabel lblType = new JLabel("Type: 1=Mkt,2=Lmt");
+		panel.add(lblType, "2, 8, right, default");
 		
 		textField_Type = new JTextField();
-		panel.add(textField_Type, "4, 10, fill, default");
+		panel.add(textField_Type, "4, 8, fill, default");
 		textField_Type.setColumns(5);
 		
 		JLabel lblLimit = new JLabel("Limit:");
-		panel.add(lblLimit, "2, 12, right, default");
+		panel.add(lblLimit, "2, 10, right, default");
 		
 		textField_Limit = new JTextField();
-		panel.add(textField_Limit, "4, 12, fill, default");
+		panel.add(textField_Limit, "4, 10, fill, default");
 		textField_Limit.setColumns(5);
 		
-		JLabel lblOrdid = new JLabel("OrdID");
-		panel.add(lblOrdid, "2, 14, center, default");
+		panel.add(lblOrdid, "2, 12, center, default");
 		
 		JButton btnSend = new JButton("SEND");
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendOrder();
+//				ordersTableModel.fireTableDataChanged();
 			}
 		});
-		panel.add(btnSend, "4, 14");
+		panel.add(btnSend, "4, 12");
 		
 		JButton btnCancelAll = new JButton("Cancel ALL");
-		panel.add(btnCancelAll, "2, 16");
+		panel.add(btnCancelAll, "2, 14");
 		
 		JButton btnCancel = new JButton("Cancel");
-		panel.add(btnCancel, "4, 16");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				cancelOrder();
+			}
+		});
+		panel.add(btnCancel, "4, 14");
 		
 		JButton btnMarketAll = new JButton("Market ALL");
-		panel.add(btnMarketAll, "2, 18");
+		panel.add(btnMarketAll, "2, 16");
 		
 		JButton btnReplace = new JButton("Replace");
-		panel.add(btnReplace, "4, 18");
+		btnReplace.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				replaceOrder();
+			}
+		});
+		panel.add(btnReplace, "4, 16");
 		
 		JPanel panel_2 = new JPanel();
 		tabbedPane.addTab("Control", null, panel_2, null);
@@ -225,7 +247,7 @@ public class MainFrame extends JFrame {
 		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_2.setLayout(gbl_panel_2);
 		
-		JCheckBox chckbxSendTrades = new JCheckBox("Send Trades");
+		JCheckBox chckbxSendTrades = new JCheckBox("Send Trades", true);
 		GridBagConstraints gbc_chckbxSendTrades = new GridBagConstraints();
 		gbc_chckbxSendTrades.insets = new Insets(0, 0, 5, 0);
 		gbc_chckbxSendTrades.anchor = GridBagConstraints.NORTH;
@@ -269,19 +291,113 @@ public class MainFrame extends JFrame {
 		}
 
 		String destStr = null;
-		if (textField_Symbol.getText().length() > 0)
-			destStr = textField_Symbol.getText().trim();
+		// TODO set dest
+//		if (textField_Symbol.getText().length() > 0)
+//			destStr = textField_Symbol.getText().trim();
 
 		double size = Double.parseDouble(textField_Size.getText());
-
-		String suffix = null;
-		if (textField_Suffix.getText().length() > 0)
-			suffix = textField_Suffix.getText();
 
 		double limit = 0;
 		if (typeStr.equals("2"))
 			limit = Double.parseDouble(textField_Limit.getText());
 		
-		TradeSender.getTradeCreator().createAndSendOrder(ticker, sideStr.charAt(0), size, typeStr.charAt(0), limit, destStr, suffix);
+		tradeSender.createAndSendOrder(ticker, sideStr.charAt(0), size, typeStr.charAt(0), limit, destStr);
+	}
+	
+	private void replaceOrder() {
+		if (displayedOrderID == null)
+			return;
+		double size = Double.parseDouble(textField_Size.getText());		
+		String typeStr = textField_Type.getText();
+		if (typeStr.length() != 1) {
+			System.err.println("\nNot entered, type is blank or too long.");
+			return;
+		}
+		double limit = 0;
+		if (typeStr.equals("2"))
+			limit = Double.parseDouble(textField_Limit.getText());
+
+		// can only change size / limit
+		tradeSender.replaceOrder(displayedOrderID, size, limit);
+	}
+	
+	private void cancelOrder() {
+		if (displayedOrderID == null)
+			return;
+		tradeSender.cancelOrder(displayedOrderID);		
+	}
+	
+	String displayedOrderID = null;
+	
+	private void displaySelectedOrder() {
+		int row = liveOrdersTable.getSelectedRow();
+		if (row < 0) {
+//			lblOrdid.setText("");
+//			displayedOrderID = null;
+			return;
+		}
+//		
+//		ArrayList<Message> msgs = OrdersContainer.ordIDtoMessagesOpen.get(row);
+//		if (msgs == null || msgs.size() == 0)
+//			return;
+//		
+//		Message msg = msgs.get(msgs.size()-1);
+
+		// gets msg selected		
+		Message msg = (Message) ordersTableModel.getValueAt(row, -1);
+		
+		
+		try {
+			displayedOrderID = msg.getString(ClOrdID.FIELD); 
+			lblOrdid.setText(displayedOrderID);
+			
+			textField_Type.setText(msg.getString(OrdType.FIELD));
+		} catch (FieldNotFound e) {
+			e.printStackTrace();
+		}
+		
+		//{"Ticker","Type","Shares","Limit","Filled","AvgPrice","oTime","lTime"};
+
+		textField_Symbol.setText(liveOrdersTable.getValueAt(row, 0).toString());
+		String side = liveOrdersTable.getValueAt(row, 1).toString();
+		if (side.equalsIgnoreCase("B"))
+			textField_Side.setText("1");
+		else if (side.equalsIgnoreCase("S"))
+			textField_Side.setText("2");
+		else textField_Side.setText("5");
+		
+		Object limit = liveOrdersTable.getValueAt(row, 3);
+		if (limit != null)
+			textField_Limit.setText(limit.toString());
+		else textField_Limit.setText("");
+		
+		textField_Size.setText(liveOrdersTable.getValueAt(row, 2).toString());
+	}
+
+	@Override
+	public void notifyOpenOrdersChanged() {
+//		int sel = liveOrdersTable.getSelectedRow();
+		ordersTableModel.fireTableDataChanged();
+//		ordersTableModel.fireTableRowsUpdated(0, 0);
+//		liveOrdersTable.getSelectionModel().setSelectionInterval(sel, sel);
+	}
+
+	@Override
+	public void notifyClosedOrdersChanged() {
+		deadOrdersTableModel.fireTableDataChanged();
+	}
+
+	@Override
+	public void updateStats() {
+		// TODO 
+		
+	}
+
+	@Override
+	public void updateConnection(boolean connected) {
+		// TODO 
+		if (connected)
+			lblStatusInformation.setText("Connected");
+		else lblStatusInformation.setText("NOT Connected");
 	}
 }

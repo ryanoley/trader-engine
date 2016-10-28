@@ -3,25 +3,32 @@ package fix;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import main.OrdersContainer;
 import quickfix.Message;
 import quickfix.Session;
+import quickfix.SessionID;
 import quickfix.field.ClOrdID;
 import quickfix.field.ExDestination;
 import quickfix.field.HandlInst;
 import quickfix.field.LocateReqd;
 import quickfix.field.OrdType;
 import quickfix.field.OrderQty;
+import quickfix.field.OrigClOrdID;
 import quickfix.field.Price;
 import quickfix.field.Side;
 import quickfix.field.Symbol;
 import quickfix.field.SymbolSfx;
+import quickfix.field.TargetSubID;
 import quickfix.field.TimeInForce;
 import quickfix.field.TransactTime;
 import quickfix.fix42.NewOrderSingle;
+import quickfix.fix42.OrderCancelReplaceRequest;
+import quickfix.fix42.OrderCancelRequest;
+import ui.IListenForUIChanges;
+import ui.OrdersTableModel;
 
 public class TradeSender {
 	
@@ -34,6 +41,7 @@ public class TradeSender {
 			tradeCreator = new TradeSender();
 		return tradeCreator;
 	}
+	
 	
 	public static boolean allowTrades = true;
 	
@@ -69,8 +77,21 @@ public class TradeSender {
 	private String locateBroker = "BAML";	// TODO set this, or put it in UI
 	
 	
-	public void createAndSendOrder (String ticker, char sideChar, double size, char ordType, double limit, String dest, String suffix) {
-
+	public void createAndSendOrder (String ticker, char sideChar, double size, char ordType, double limit, String dest) {
+		ticker = ticker.toUpperCase();
+		
+		String suffix = null;
+		int separatorIndex = ticker.indexOf('.');
+		if (separatorIndex < 0)
+			separatorIndex = ticker.indexOf('/');
+		if (separatorIndex < 0)
+			separatorIndex = ticker.indexOf('-');
+		
+		if (separatorIndex >= 0) {
+			suffix = ticker.substring(separatorIndex + 1);
+			ticker = ticker.substring(0, separatorIndex);
+		}
+		
 		ClOrdID id = getNextClOrdID();
 		
 		Side side = new Side(sideChar);
@@ -91,38 +112,123 @@ public class TradeSender {
 			order.set(new Price(limit));
 
 
-//		if (tif != null) {
 		order.set(tif);
-//			System.out.println("\n\nSET TIME IN FORCE : \t" + tif);
-//		}
 
 		if (sideChar == SHORT) {					
 			order.set(new LocateReqd(false));
 			order.setString(5700, locateBroker);
 		}
 		
+		setDMAtag(order);
+//		setVWAPtag(order, 20, null, null);
+		
 		sendOrder(order);
 	}
 	
 	
+	/** Start Time
+* End Time	20161024-20:10:23
+* % of Volume*/
+	
+	private void setVWAPtag(Message message, int percVolume, String startTime, String endTime) {
+		message.setString(TargetSubID.FIELD, "ML_ALGO_US");
+		String algoParams = "6401=1";
+		if (percVolume > 0)
+			algoParams = algoParams + ";6403=" + percVolume;
+		if (startTime != null)
+			algoParams = algoParams  +";6168=" + startTime;
+		if (endTime != null)
+			algoParams = algoParams + ";126=" + endTime;
+		
+		message.setString(9999, algoParams + ";9682=v4.3.0BRT;");
+	}
+	
+	
+	String defaultTarget ="ML_ARCA";
+	
+	private void setDMAtag(Message message) {
+		message.setString(TargetSubID.FIELD, defaultTarget);
+/*
+ML_ALGO_US (This is the only route where we can accept the custom tag with algo parameters)
+ML_ARCA
+ML_DOT
+ML_NSDQ
+ML_SMARTDMA*/
+	}
+	
+	
+	public void cancelOrder(String id) {
+		ArrayList<Message> orders = OrdersContainer.ordIDtoMessagesOpen.get(id);
+		if (orders == null)
+			return;
+		
+		Message msg = orders.get(orders.size()-1);
+		if (msg == null)
+			return;
 
-	HashMap <String, ArrayList<Message>> ordIDtoMessagesOpen = new HashMap<String, ArrayList<Message>> ();
+		try {
+			String ticker = msg.getString(Symbol.FIELD);
+			Side side = new Side(msg.getChar(Side.FIELD));
+			OrderCancelRequest cancelOrder = new OrderCancelRequest(new OrigClOrdID(id), getNextClOrdID(), new Symbol(ticker), side, new TransactTime());
+			
+			if (msg.isSetField(SymbolSfx.FIELD))
+				cancelOrder.set(new SymbolSfx(msg.getString(SymbolSfx.FIELD)));
+			cancelOrder.set(new OrderQty(msg.getDouble(OrderQty.FIELD)));
+			
+			sendOrder(cancelOrder);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+	}
+	
+	
+	public void replaceOrder(String id, double size, double limit) {
+		ArrayList<Message> orders = OrdersContainer.ordIDtoMessagesOpen.get(id);
+		if (orders == null)
+			return;
+		
+		Message msg = orders.get(orders.size()-1);
+		if (msg == null)
+			return;
+
+		try {
+			String ticker = msg.getString(Symbol.FIELD);
+			Side side = new Side(msg.getChar(Side.FIELD));
+			OrdType type = new OrdType(msg.getChar(OrdType.FIELD));
+
+			OrderCancelReplaceRequest order = new OrderCancelReplaceRequest(new OrigClOrdID(id), getNextClOrdID(), handInst, new Symbol(ticker), side, new TransactTime(), type);
+
+			if (msg.isSetField(SymbolSfx.FIELD))
+				order.set(new SymbolSfx(msg.getString(SymbolSfx.FIELD)));
+
+			order.set(new OrderQty(size));
+			if (limit > 0)
+				order.set(new Price(limit));
+			
+			sendOrder(order);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+	}
+	
+
 
 
 	private void sendOrder (Message order) {
 		try {
 			String ordID = order.getString(ordIDfieldNum);
 
-			ArrayList<Message> orders = ordIDtoMessagesOpen.get(ordID);
+			ArrayList<Message> orders = OrdersContainer.ordIDtoMessagesOpen.get(ordID);
 			if (orders == null) {
 				orders = new ArrayList<Message>();
-				ordIDtoMessagesOpen.put(ordID, orders);
+				OrdersContainer.ordIDtoMessagesOpen.put(ordID, orders);
 			}
 
 			orders.add(order);
 
 
-			// check for checkbox enabled
 			sendToSession(order);
 
 
@@ -148,7 +254,8 @@ public class TradeSender {
 	Thread orderThread = null;
 	int maxPerSecond = 30;
 
-
+	SessionID sessionID = null;
+			
 
 	// thread to send orders, waiting 1 sec between max size bursts
 	class OrderSender implements Runnable {
@@ -159,7 +266,7 @@ public class TradeSender {
 		public void run() {
 			try {
 				while (true) {
-					if (allowTrades == false) {
+					if (allowTrades == false || sessionID == null) {
 						if (orderQueue.size() > 0)
 							System.out.println("Waiting for ok to send pending trades : \t" + orderQueue.size());
 						Thread.sleep(1000);
@@ -171,17 +278,17 @@ public class TradeSender {
 					// usually null
 					if (nextOrder == null) {
 						burstOrders = 0;
-						// TODO update UI table
+//						uiListener.notifyOpenOrdersChanged();
 						continue;
 					}
 
-					Session.sendToTarget(nextOrder);
+					Session.sendToTarget(nextOrder, sessionID);
 
 					burstOrders++;
 					if (burstOrders > maxPerSecond) {
 						System.out.println("Waiting 2 secs.");
 
-						// TODO update UI 
+						uiListener.notifyOpenOrdersChanged();
 						Thread.sleep(2000);
 						burstOrders = 0;
 					}	
@@ -192,6 +299,12 @@ public class TradeSender {
 			}
 		}
 	}
-
+	
+	IListenForUIChanges uiListener = null;
+	
+	public void addUIListener(IListenForUIChanges listener) {
+		uiListener = listener;
+	}
+	
 
 }

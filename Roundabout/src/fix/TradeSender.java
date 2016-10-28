@@ -119,8 +119,8 @@ public class TradeSender {
 			order.setString(5700, locateBroker);
 		}
 		
-		setDMAtag(order);
-//		setVWAPtag(order, 20, null, null);
+//		setDMAtag(order);
+		setVWAPtag(order, 0, null, null);
 		
 		sendOrder(order);
 	}

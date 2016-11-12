@@ -76,8 +76,17 @@ public class TradeSender {
 	
 	private String locateBroker = "BAML";	// TODO set this, or put it in UI
 	
+		
 	
+	
+
 	public void createAndSendOrder (String ticker, char sideChar, double size, char ordType, double limit, String dest) {
+		createAndSendOrder(ticker, sideChar, size, ordType, limit, dest, 0, null, null);
+	}
+	
+
+	public void createAndSendOrder (String ticker, char sideChar, double size, char ordType, double limit, String dest, int percVol, String startTime, String endTime) {
+	
 		ticker = ticker.toUpperCase();
 		
 		String suffix = null;
@@ -100,9 +109,6 @@ public class TradeSender {
 
 		NewOrderSingle order = new NewOrderSingle(id, handInst, new Symbol(ticker), side, new TransactTime(), type);
 
-		if (dest != null)
-			order.set(new ExDestination(dest));
-
 		order.set(new OrderQty(size));
 
 		if (suffix != null)
@@ -119,9 +125,17 @@ public class TradeSender {
 			order.setString(5700, locateBroker);
 		}
 		
-//		setDMAtag(order);
-		setVWAPtag(order, 0, null, null);
-		
+
+		// check order type and set tags
+		if (dest != null && dest.equalsIgnoreCase("VWAP"))
+			setVWAPtag(order, percVol, startTime, endTime);
+		else {
+			setDMAtag(order, dest);
+
+			if (dest != null)
+				order.set(new ExDestination(dest));
+		}
+
 		sendOrder(order);
 	}
 	
@@ -146,8 +160,10 @@ public class TradeSender {
 	
 	String defaultTarget ="ML_ARCA";
 	
-	private void setDMAtag(Message message) {
-		message.setString(TargetSubID.FIELD, defaultTarget);
+	private void setDMAtag(Message message, String dest) {
+		if (dest == null)
+			message.setString(TargetSubID.FIELD, dest);
+		else message.setString(TargetSubID.FIELD, defaultTarget);
 /*
 ML_ALGO_US (This is the only route where we can accept the custom tag with algo parameters)
 ML_ARCA
@@ -305,6 +321,6 @@ ML_SMARTDMA*/
 	public void addUIListener(IListenForUIChanges listener) {
 		uiListener = listener;
 	}
-	
+
 
 }

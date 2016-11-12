@@ -13,17 +13,6 @@ import ui.MainFrame;
 
 public class ZMQTradeServer {
 
-	public static void main (String[] args) {
-		ZMQTradeServer server = ZMQTradeServer.getZMQTradeServer();
-
-		JFrame frame = new MainFrame();
-		frame.setVisible(true);
-
-		server.startTradePublisher();
-		server.startServer();
-
-	}
-
 
 
 	static LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
@@ -81,6 +70,7 @@ public class ZMQTradeServer {
 
 			System.out.println("Got msg : \t" + message);
 //			queue.offer(message);
+			// ticker side size limit/0/-moc ID [dest] [vwap params]
 			// MSFT B 100 95.5 <ID> [DEST] [VWAP PARAMS: PERCVOLUME STARTTIME ENDTIME] if there's a startTime, endTime is needed
 			String[] parts = message.split("\\s|\\,");
 			
@@ -107,7 +97,34 @@ public class ZMQTradeServer {
 				ordType = '5';
 			
 			System.out.println("Sending");
-			sender.createAndSendOrder(parts[0], sideChar, size, ordType, limit, null);
+			
+			String id = ticker;
+			if (parts.length >= 5)
+				id = parts[4];
+			
+			String dest = null;
+			if (parts.length >= 6)
+				dest = parts[5];
+			
+			int percVol = 0;
+			String startTime = null;
+			String endTime = null;
+			
+			boolean isVWAP = false;
+			
+			if (dest != null && dest.equalsIgnoreCase("VWAP")) {
+				isVWAP = true;
+				if (parts.length >=7)
+					percVol = (int)Double.parseDouble(parts[6]);
+				if (parts.length >= 8)
+					startTime = parts[7];
+				if (parts.length >= 9)
+					endTime = parts[8];
+			}
+			
+			if (isVWAP == false)
+				sender.createAndSendOrder(ticker, sideChar, size, ordType, limit, dest);
+			else sender.createAndSendOrder(ticker, sideChar, size, ordType, limit, dest, percVol, startTime, endTime);
 		}
 
 		//		System.out.println("ENDING TRADE LISTENER.");

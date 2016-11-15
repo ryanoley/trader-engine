@@ -13,10 +13,7 @@ import ui.MainFrame;
 
 public class ZMQTradeServer {
 
-
-
 	static LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-
 
 	private static ZMQTradeServer server = null;
 
@@ -45,20 +42,19 @@ public class ZMQTradeServer {
 		}
 	}
 
-
-	ZMQ.Context tradeContext = null;	
+	ZMQ.Context tradeContext = null;
 	ZMQ.Socket tradeSocket = null;
 	ZMQ.Context pubContext = null;
 	ZMQ.Socket pubSocket = null;
 
-	public void startServer () {		
+	public void startServer() {
 		tradeContext = ZMQ.context(1);
 		tradeSocket = tradeContext.socket(ZMQ.PULL);
 
-		tradeSocket.bind("tcp://*:5557");	
+		tradeSocket.bind("tcp://*:5557");
 		System.out.println("trade listener started");
 		String message = null;
-		
+
 		TradeSender sender = TradeSender.getTradeCreator();
 
 		while (true) {
@@ -69,65 +65,72 @@ public class ZMQTradeServer {
 			}
 
 			System.out.println("Got msg : \t" + message);
-//			queue.offer(message);
+			// queue.offer(message);
 			// ticker side size limit/0/-moc ID [dest] [vwap params]
-			// MSFT B 100 95.5 <ID> [DEST] [VWAP PARAMS: PERCVOLUME STARTTIME ENDTIME] if there's a startTime, endTime is needed
+			// MSFT B 100 95.5 <ID> [DEST] [VWAP PARAMS: PERCVOLUME STARTTIME ENDTIME] 
+			// if there's a startTime, endTime is needed
 			String[] parts = message.split("\\s|\\,");
-			
+
 			System.out.println("parts:\t" + parts.length);
-			
+
 			if (parts.length < 4)
 				continue;
-			
+
 			String ticker = parts[0];
-			
+
 			char sideChar = '1';
 			if (parts[1].equalsIgnoreCase("S"))
 				sideChar = '2';
-			else 
-				if (parts[1].equalsIgnoreCase("SS"))
-					sideChar = '5';
-			
-			double size = Double.parseDouble(parts[2]);
-			double limit = Double.parseDouble(parts[3]);
-			char ordType = '1';				// negative limit = MOC, 0 = MKT
-			if (limit > 0)
-				ordType = '2';
-			else if (limit < 0)
-				ordType = '5';
-			
-			System.out.println("Sending");
-			
-			String id = ticker;
-			if (parts.length >= 5)
-				id = parts[4];
-			
-			String dest = null;
-			if (parts.length >= 6)
-				dest = parts[5];
-			
-			int percVol = 0;
-			String startTime = null;
-			String endTime = null;
-			
-			boolean isVWAP = false;
-			
-			if (dest != null && dest.equalsIgnoreCase("VWAP")) {
-				isVWAP = true;
-				if (parts.length >=7)
-					percVol = (int)Double.parseDouble(parts[6]);
-				if (parts.length >= 8)
-					startTime = parts[7];
-				if (parts.length >= 9)
-					endTime = parts[8];
+			else if (parts[1].equalsIgnoreCase("SS"))
+				sideChar = '5';
+
+			try {
+				double size = Double.parseDouble(parts[2]);
+				double limit = Double.parseDouble(parts[3]);
+				char ordType = '1'; // negative limit = MOC, 0 = MKT
+				if (limit > 0)
+					ordType = '2';
+				else if (limit < 0)
+					ordType = '5';
+
+				System.out.println("Sending");
+
+				String id = ticker;
+				if (parts.length >= 5)
+					id = parts[4];
+
+				String dest = null;
+				if (parts.length >= 6)
+					dest = parts[5];
+
+				int percVol = 0;
+				String startTime = null;
+				String endTime = null;
+
+				boolean isVWAP = false;
+
+				if (dest != null && dest.equalsIgnoreCase("VWAP")) {
+					isVWAP = true;
+					if (parts.length >= 7)
+						percVol = (int) Double.parseDouble(parts[6]);
+					if (parts.length >= 8)
+						startTime = parts[7];
+					if (parts.length >= 9)
+						endTime = parts[8];
+				}
+
+				if (isVWAP == false)
+					sender.createAndSendOrder(ticker, sideChar, size, ordType,
+							limit, dest);
+				else
+					sender.createAndSendOrder(ticker, sideChar, size, ordType,
+							limit, dest, percVol, startTime, endTime);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
-			if (isVWAP == false)
-				sender.createAndSendOrder(ticker, sideChar, size, ordType, limit, dest);
-			else sender.createAndSendOrder(ticker, sideChar, size, ordType, limit, dest, percVol, startTime, endTime);
 		}
 
-		//		System.out.println("ENDING TRADE LISTENER.");
+		// System.out.println("ENDING TRADE LISTENER.");
 	}
 
 	public void startTradePublisher() {
@@ -153,7 +156,8 @@ public class ZMQTradeServer {
 		}
 	}
 
-	public void notifyTrade(String ticker, int orderSize, double price, char side) {
+	public void notifyTrade(String ticker, int orderSize, double price,
+			char side) {
 		queue.offer(ticker + "," + side + "," + orderSize + "," + price);
 	}
 }

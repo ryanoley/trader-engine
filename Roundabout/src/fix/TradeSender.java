@@ -161,7 +161,7 @@ public class TradeSender {
 	String defaultTarget ="ML_ARCA";
 	
 	private void setDMAtag(Message message, String dest) {
-		if (dest == null)
+		if (dest != null)
 			message.setString(TargetSubID.FIELD, dest);
 		else message.setString(TargetSubID.FIELD, defaultTarget);
 /*

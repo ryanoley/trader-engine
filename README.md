@@ -9,3 +9,6 @@ Trading engine
 5. Select: crankshaft
 6. Select: Import existing Eclipse projects
 7. Finish
+
+### FIX Engine external library
+Reference: https://github.com/quickfix-j/quickfixj

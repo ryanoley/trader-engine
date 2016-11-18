@@ -1,6 +1,6 @@
 *.class
 
-Roundabout/bin/
+Roundabout/bin/*
 Roundabout/.settings/
 
 # Mobile Tools for Java (J2ME)

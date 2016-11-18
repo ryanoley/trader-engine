@@ -2,8 +2,8 @@
 
 .gitignore
 
-Roundabout/bin/*
-Roundabout/.settings/
+crankshaft/bin/*
+crankshaft/.settings/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

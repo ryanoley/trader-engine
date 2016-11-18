@@ -1,7 +1,9 @@
 *.class
 
+# Eclipse default generates .gitignores everywhere
 .gitignore
 
+# Hard-coded folders
 crankshaft/bin/*
 crankshaft/.settings/
 

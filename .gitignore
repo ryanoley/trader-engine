@@ -1,5 +1,7 @@
 *.class
 
+.gitignore
+
 Roundabout/bin/*
 Roundabout/.settings/
 

@@ -27,8 +27,7 @@ public class FixApplication implements Application {
 	MessageHandler msgHandler = new MessageHandler();
 	SocketInitiator initiator = null;
 	
-	String defaultSettingsFileName = "C:\\FixServer\\RoundAboutFix\\settings.txt";
-	
+	String defaultSettingsFileName = ".\\settings.txt";
 	
 	private static FixApplication app = null;
 	

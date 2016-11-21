@@ -1,0 +1,16 @@
+[SESSION]
+BeginString=FIX.4.2
+TargetCompID=REALTICK
+SenderCompID=ROUND
+HeartBtInt=60
+StartTime=01:00:01
+EndTime=01:00:00
+ConnectionType=initiator
+SocketConnectPort=1892
+#SocketConnectHost=63.75.63.220
+SocketConnectHost=63.75.63.250
+FileStorePath=C:\\FixServer\\RoundaboutFix\\fileStore
+AllowUnknownMsgFields=Y
+FileLogPath=C:\\FixServer\\RoundaboutFix\\logs
+ValidateUnorderedGroupFields=N
+ValidateFieldsOutOfOrder=N

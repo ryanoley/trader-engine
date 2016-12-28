@@ -4,6 +4,7 @@ target
 ## Eclipse IDE files
 .project
 .classpath
+.settings
 
 ## Mac
 .DS_Store

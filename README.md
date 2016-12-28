@@ -16,3 +16,7 @@
 
 7. Create .gitignore file in diretory include "target", ".project", ".classpath"
 
+8. Create Git Repo via: https://help.github.com/articles/adding-an-existing-project-to-github-using-the-command-line/
+
+
+

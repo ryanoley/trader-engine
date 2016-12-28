@@ -1,0 +1,9 @@
+## Maven directory
+target
+
+## Eclipse IDE files
+.project
+.classpath
+
+## Mac
+.DS_Store

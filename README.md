@@ -8,15 +8,12 @@
 3. From GitHub direcotry, create Maven project with:
 	mvn archetype:generate -DgroupId=com.roundaboutam.app -DartifactId=crankshaft -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
 
-4. Initial build from directory with: 	mvn package
+4. Create Git Repo via: https://help.github.com/articles/adding-an-existing-project-to-github-using-the-command-line/
 
-5. Test jar file: java -cp target\crankshaft-1.0-SNAPSHOT.jar com.roundaboutam.app.App
+5. Create .gitignore file in diretory include "target", ".project", ".classpath", ".settings"
 
-6. Import project into Eclipse: File > Import > Existing Maven Project > Browse... crankshaft directory
+6. Initial build from directory with: 	mvn package
 
-7. Create .gitignore file in diretory include "target", ".project", ".classpath"
+7. Test jar file: java -cp target\crankshaft-1.0-SNAPSHOT.jar com.roundaboutam.app.App
 
-8. Create Git Repo via: https://help.github.com/articles/adding-an-existing-project-to-github-using-the-command-line/
-
-
-
+8. Import project into Eclipse: File > Import > Existing Maven Project > Browse... crankshaft directory

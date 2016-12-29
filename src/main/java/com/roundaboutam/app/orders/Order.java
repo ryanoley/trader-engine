@@ -2,9 +2,20 @@ package com.roundaboutam.app.orders;
 
 public class Order {
 
-	public Order(int orderId, String instrumentId, OrderType orderType, OrderSide orderSide, 
+	private String orderId;
+	private String orderIdReplace = null;
+	private String orderIdCancel = null;
+	private String instrumentId;
+	private OrderType orderType;
+	private OrderSide orderSide;
+	private int quantity;
+	private double limitPrice = -9999.0;
+	private int executedQuantity = 0;
+	private double avgExecutedPrice = -9999.0;
+
+	public Order(String instrumentId, OrderType orderType, OrderSide orderSide, 
 			int quantity) {
-		this.orderId = orderId;
+		this.orderId = OrderIdMaker.getNextId();
 		this.instrumentId = instrumentId.toUpperCase();
 		this.orderType = orderType;
 		this.orderSide = orderSide;
@@ -12,38 +23,53 @@ public class Order {
 	}
 
 	// Limit constructor
-	public Order(int orderId, String instrumentId, OrderType orderType, OrderSide orderSide, 
+	public Order(String instrumentId, OrderType orderType, OrderSide orderSide, 
 			int quantity, double limitPrice) {
-		this(orderId, instrumentId, orderType, orderSide, quantity);
+		this(instrumentId, orderType, orderSide, quantity);
 		if (orderType != OrderType.LIMIT)
 			throw new IllegalArgumentException("LimitPrice not necessary for given orderType");
 		this.limitPrice = limitPrice;
 	}
 
-	private int orderId;
-
-	private String instrumentId;
-
-	private OrderType orderType;
-
-	private OrderSide orderSide;
-
-	private int quantity;
-
-	// Default values
-	private double limitPrice = -9999.0;
-
-	private int executedQuantity = 0;
-
-	private double avgExecutedPrice = -9999.0;
-	
-	public void updateExecutedQuantity(int units, double price) {
-		avgExecutedPrice = (avgExecutedPrice * executedQuantity + price * units) / 
-				(executedQuantity + units);
-		executedQuantity = executedQuantity + units;
+	// Interface for received orders
+	public void updateExecutedQuantity(int reportQuantity, double reportPrice) {
+		avgExecutedPrice = (avgExecutedPrice * executedQuantity + reportPrice * reportQuantity) / 
+				(executedQuantity + reportQuantity);
+		executedQuantity = executedQuantity + reportQuantity;
 	}
 
-	public int getOrderId() {
+	// Interface for replacing and cancelling orders
+	public void replaceQuantity(int newQuantity) {
+		replaceQuantityPrice(newQuantity, limitPrice);
+	}
+
+	public void replacePrice(double newPrice) {
+		replaceQuantityPrice(quantity, newPrice);
+	}
+
+	public void cancelOrder() {
+		orderIdCancel = OrderIdMaker.getNextId();
+	}
+
+	public String getCancelOrderId() {
+		return orderIdCancel;
+	}
+
+	public void replaceQuantityPrice(int newQuantity, double newPrice) {
+		// New OrderID must be created
+		orderIdReplace = OrderIdMaker.getNextId();
+		quantity = newQuantity;
+		limitPrice = newPrice;
+	}
+
+	public String getReplaceOrderId() {
+		orderId = orderIdReplace;
+		orderIdReplace = null;
+		return orderId;
+	}
+
+	// Getters
+	public String getOrderId() {
 		return orderId;
 	}
 

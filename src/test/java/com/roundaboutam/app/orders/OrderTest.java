@@ -4,9 +4,8 @@ import junit.framework.TestCase;
 
 public class OrderTest extends TestCase {
 
-	public void testInitLimitOrder() {		
-		Order lo = new Order(123, "AAPL", OrderType.LIMIT, OrderSide.BUY, 100, 200.0);
-		assertEquals(lo.getOrderId(), 123);
+	public void testLimitOrder() {		
+		Order lo = new Order("AAPL", OrderType.LIMIT, OrderSide.BUY, 100, 200.0);
 		assertEquals(lo.getInstrumentId(), "AAPL");
 		assertEquals(lo.getOrderType(), OrderType.LIMIT);
 		assertEquals(lo.getOrderSide(), OrderSide.BUY);
@@ -16,9 +15,8 @@ public class OrderTest extends TestCase {
 		assertEquals(lo.getAvgExecutedPrice(), -9999.0);
 	}
 
-	public void testInitMarketOrder() {		
-		Order mo = new Order(123, "AAPL", OrderType.MARKET, OrderSide.BUY, 100);
-		assertEquals(mo.getOrderId(), 123);
+	public void testMarketOrder() {		
+		Order mo = new Order("AAPL", OrderType.MARKET, OrderSide.BUY, 100);
 		assertEquals(mo.getInstrumentId(), "AAPL");
 		assertEquals(mo.getOrderType(), OrderType.MARKET);
 		assertEquals(mo.getOrderSide(), OrderSide.BUY);
@@ -28,13 +26,13 @@ public class OrderTest extends TestCase {
 		assertEquals(mo.getAvgExecutedPrice(), -9999.0);
 	}
 
-	public void testInitVwapOrder() {
-		Order vo = new Order(123, "AAPL", OrderType.VWAP, OrderSide.BUY, 100);
+	public void testVwapOrder() {
+		Order vo = new Order("AAPL", OrderType.VWAP, OrderSide.BUY, 100);
 		assertEquals(vo.getOrderType(), OrderType.VWAP);
 	}
 
 	public void testExecution() {
-		Order lo = new Order(123, "AAPL", OrderType.LIMIT, OrderSide.BUY, 100, 200.0);
+		Order lo = new Order("AAPL", OrderType.LIMIT, OrderSide.BUY, 100, 200.0);
 		assertEquals(lo.getExecutedQuantity(), 0);
 		assertEquals(lo.getAvgExecutedPrice(), -9999.0);
 		lo.updateExecutedQuantity(10, 100.0);
@@ -46,6 +44,17 @@ public class OrderTest extends TestCase {
 		lo.updateExecutedQuantity(10, 102.0);
 		assertEquals(lo.getExecutedQuantity(), 30);
 		assertEquals(lo.getAvgExecutedPrice(), 101.0);
+	}
+
+	public void testReplace() {
+		Order lo = new Order("AAPL", OrderType.LIMIT, OrderSide.BUY, 100, 200.0);
+		String ordId1 = lo.getOrderId();
+		lo.replaceQuantity(200);
+		String ordId2 = lo.getReplaceOrderId();
+		String ordId3 = lo.getOrderId();
+		assertEquals(lo.getQuantity(), 200);
+		assertFalse(ordId1.equals(ordId2));
+		assertTrue(ordId2.equals(ordId3));
 	}
 
 }

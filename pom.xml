@@ -54,7 +54,7 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>dependency-jars/</classpathPrefix>
                             <!-- TEMP entry point -->
-                            <mainClass>com.roundaboutam.app.App</mainClass>
+                            <mainClass>com.roundaboutam.app.TraderEngine</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

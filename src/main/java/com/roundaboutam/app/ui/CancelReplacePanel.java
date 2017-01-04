@@ -105,7 +105,6 @@ public class CancelReplacePanel extends JPanel {
 
     private class ReplaceListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            System.out.println("REPLACING ORDER");
         	Order newOrder = (Order) order.clone();
             newOrder.setQuantity(Integer.parseInt(quantityTextField.getText()));
             newOrder.setLimit(Double.parseDouble(limitPriceTextField.getText()));
@@ -113,7 +112,7 @@ public class CancelReplacePanel extends JPanel {
             newOrder.setCanceled(false);
             newOrder.setOpen(0);
             newOrder.setExecuted(0);
-            System.out.println("Replacing order: " + " ~ " + newOrder.getID() + " ~ " + order.getID());
+
             application.replace(order, newOrder);
         }
     }

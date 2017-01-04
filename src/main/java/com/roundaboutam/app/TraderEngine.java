@@ -41,7 +41,7 @@ public class TraderEngine {
         SessionSettings settings = new SessionSettings(inputStream);
         inputStream.close();
         boolean logHeartbeats = Boolean.valueOf(System.getProperty("logHeartbeats", "true"));
-        
+
 		OrderTableModel orderTableModel = new OrderTableModel();
         ExecutionTableModel executionTableModel = new ExecutionTableModel();
         TraderApplication application = new TraderApplication(orderTableModel,
@@ -72,7 +72,8 @@ public class TraderEngine {
             }
         } else {
             for (SessionID sessionId : initiator.getSessions()) {
-                Session.lookupSession(sessionId).logon();
+                System.out.println(sessionId);
+            	Session.lookupSession(sessionId).logon();
             }
         }
     }

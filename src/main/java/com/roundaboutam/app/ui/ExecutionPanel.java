@@ -13,7 +13,8 @@ import com.roundaboutam.app.ExecutionTableModel;
 public class ExecutionPanel extends JPanel {
 
     public ExecutionPanel(ExecutionTableModel executionTableModel) {
-        setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+    	setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;

@@ -3,7 +3,8 @@ package com.roundaboutam.app;
 import quickfix.SessionID;
 
 public class LogonEvent {
-    private final SessionID sessionID;
+
+	private final SessionID sessionID;
     private final boolean loggedOn;
 
     public LogonEvent(SessionID sessionID, boolean loggedOn) {
@@ -18,4 +19,5 @@ public class LogonEvent {
     public boolean isLoggedOn() {
         return loggedOn;
     }
+
 }

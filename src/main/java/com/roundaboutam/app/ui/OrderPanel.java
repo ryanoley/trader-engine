@@ -11,9 +11,6 @@ import javax.swing.JTable;
 import com.roundaboutam.app.OrderTableModel;
 import com.roundaboutam.app.TraderApplication;
 
-/**
- * Contains the Order table.
- */
 public class OrderPanel extends JPanel {
 
     private JTable orderTable = null;
@@ -33,4 +30,5 @@ public class OrderPanel extends JPanel {
     public JTable orderTable() {
         return orderTable;
     }
+
 }

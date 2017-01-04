@@ -3,7 +3,8 @@ package com.roundaboutam.app;
 import quickfix.SessionID;
 
 public class Order implements Cloneable {
-    private SessionID sessionID = null;
+
+	private SessionID sessionID = null;
     private String symbol = null;
     private int quantity = 0;
     private int open = 0;
@@ -195,4 +196,5 @@ public class Order implements Cloneable {
     public String getOriginalID() {
         return originalID;
     }
+
 }

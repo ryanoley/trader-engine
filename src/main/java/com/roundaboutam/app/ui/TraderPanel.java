@@ -21,9 +21,6 @@ import com.roundaboutam.app.OrderTableModel;
 import com.roundaboutam.app.TraderApplication;
 
 
-/**
- * Main content panel
- */
 public class TraderPanel extends JPanel implements Observer, ActionListener {
 
     private final OrderEntryPanel orderEntryPanel;
@@ -67,7 +64,7 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
         orderEntryPanel.addActionListener(this);
         orderPanel.orderTable().getSelectionModel().addListSelectionListener(new OrderSelection());
         cancelReplacePanel.addActionListener(this);
-        //application.addOrderObserver(this);
+        application.addOrderObserver(this);
     }
 
     public void update(Observable o, Object arg) {

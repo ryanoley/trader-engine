@@ -71,7 +71,7 @@ public class OrderEntryPanel extends JPanel implements Observer {
         this.orderTableModel = orderTableModel;
         this.application = application;
 
-        //application.addLogonObserver(this);
+        application.addLogonObserver(this);
 
         SubmitActivator activator = new SubmitActivator();
         symbolTextField.addKeyListener(activator);
@@ -241,9 +241,8 @@ public class OrderEntryPanel extends JPanel implements Observer {
             order.setSessionID((SessionID) sessionComboBox.getSelectedItem());
 
             orderTableModel.addOrder(order);
-            System.out.println("ORDER ADDED");
-            // TODO: connect order sender to application
-            //application.send(order);
+
+            application.send(order);
         }
     }
 

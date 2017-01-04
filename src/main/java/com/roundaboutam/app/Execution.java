@@ -1,6 +1,7 @@
 package com.roundaboutam.app;
 
 public class Execution {
+
     private String symbol = null;
     private int quantity = 0;
     private OrderSide side = OrderSide.BUY;
@@ -60,4 +61,5 @@ public class Execution {
     public String getExchangeID() {
         return exchangeID;
     }
+
 }

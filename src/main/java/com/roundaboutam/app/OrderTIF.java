@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OrderTIF {
+
     static private final Map<String, OrderTIF> known = new HashMap<String, OrderTIF>();
     static public final OrderTIF DAY = new OrderTIF("Day");
     static public final OrderTIF IOC = new OrderTIF("IOC");
@@ -42,4 +43,5 @@ public class OrderTIF {
         }
         return result;
     }
+
 }

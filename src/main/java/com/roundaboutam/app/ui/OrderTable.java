@@ -12,7 +12,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class OrderTable extends JTable implements MouseListener {
-    private final transient TraderApplication application;
+
+	private final transient TraderApplication application;
 
     public OrderTable(OrderTableModel orderTableModel, TraderApplication application) {
         super(orderTableModel);
@@ -21,7 +22,8 @@ public class OrderTable extends JTable implements MouseListener {
     }
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-        Order order = ((OrderTableModel) dataModel).getOrder(row);
+
+    	Order order = ((OrderTableModel) dataModel).getOrder(row);
 
         int open = order.getOpen();
         int executed = order.getExecuted();
@@ -50,7 +52,7 @@ public class OrderTable extends JTable implements MouseListener {
             return;
         int row = rowAtPoint(e.getPoint());
         Order order = ((OrderTableModel) dataModel).getOrder(row);
-        //application.cancel(order);
+        application.cancel(order);
     }
 
     public void mouseEntered(MouseEvent e) {}

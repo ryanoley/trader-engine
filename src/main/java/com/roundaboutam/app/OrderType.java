@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OrderType {
+
     static private final Map<String, OrderType> known = new HashMap<String, OrderType>();
     static public final OrderType MARKET = new OrderType("Market");
     static public final OrderType LIMIT = new OrderType("Limit");
@@ -40,4 +41,5 @@ public class OrderType {
         }
         return result;
     }
+
 }

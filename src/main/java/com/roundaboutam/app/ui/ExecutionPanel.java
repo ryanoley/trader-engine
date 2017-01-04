@@ -10,9 +10,6 @@ import javax.swing.JTable;
 
 import com.roundaboutam.app.ExecutionTableModel;
 
-/**
- * Contains the executions panel
- */
 public class ExecutionPanel extends JPanel {
 
     public ExecutionPanel(ExecutionTableModel executionTableModel) {

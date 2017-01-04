@@ -47,9 +47,6 @@ public class OrderTableModel extends AbstractTableModel {
         fireTableRowsInserted(row, row);
     }
 
-    /*
-     * This is used to "replace" an order OR to update the table because of a fill 
-     */
     public void updateOrder(Order order, String id) {
 
         if (!id.equals(order.getID())) {
@@ -130,10 +127,7 @@ public class OrderTableModel extends AbstractTableModel {
         case AVGPX:
             return order.getAvgPx();
         case TARGET:
-        	// TODO: SessionID must be added back to OrderTableModel
-        	// Done because when offline there is no sessionID and returs null
-        	// return order.getSessionID().getTargetCompID();
-            return "1234";
+        	return order.getSessionID().getTargetCompID();
         }
         return "";
     }

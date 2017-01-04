@@ -164,11 +164,12 @@ public class OrderEntryPanel extends JPanel implements Observer {
     }
 
     private void activateSubmit() {
-        OrderType type = (OrderType) typeComboBox.getSelectedItem();
-        boolean activate = symbolEntered && quantityEntered && sessionEntered;
-
+    	OrderType type = (OrderType) typeComboBox.getSelectedItem();
+        // TODO: sessionEntered for submit order button must be reset
+    	// boolean activate = symbolEntered && quantityEntered && sessionEntered;
+        boolean activate = symbolEntered && quantityEntered;
         if (type == OrderType.MARKET)
-            submitButton.setEnabled(activate);
+        	submitButton.setEnabled(activate);
         else if (type == OrderType.LIMIT)
             submitButton.setEnabled(activate && limitEntered);
         else if (type == OrderType.STOP)
@@ -240,6 +241,8 @@ public class OrderEntryPanel extends JPanel implements Observer {
             order.setSessionID((SessionID) sessionComboBox.getSelectedItem());
 
             orderTableModel.addOrder(order);
+            System.out.println("ORDER ADDED");
+            // TODO: connect order sender to application
             //application.send(order);
         }
     }
@@ -260,8 +263,8 @@ public class OrderEntryPanel extends JPanel implements Observer {
         }
 
         public void itemStateChanged(ItemEvent e) {
-            sessionEntered = sessionComboBox.getSelectedItem() != null;
-            activateSubmit();
+        	sessionEntered = sessionComboBox.getSelectedItem() != null;
+        	activateSubmit();
         }
 
         private boolean testField(Object o) {

@@ -23,7 +23,7 @@ public class TraderFrame extends JFrame {
             final TraderApplication application) {
 		super();
 		setTitle("Trader Engine");
-		setSize(600, 1000);
+		setSize(900, 700);
 	
 		createMenuBar(application);
 		getContentPane().add(new TraderPanel(orderTableModel, executionTableModel, application),

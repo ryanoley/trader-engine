@@ -34,6 +34,7 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
     public TraderPanel(OrderTableModel orderTableModel,
                 ExecutionTableModel executionTableModel,
                 TraderApplication application) {
+
         setName("TraderEnginePanel");
         this.orderTableModel = orderTableModel;
 

@@ -98,7 +98,7 @@ public class CancelReplacePanel extends JPanel {
 
     private class CancelListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            //application.cancel(order);
+            application.cancel(order);
         	System.out.println("Cancelling order: " + order);
         }
     }
@@ -114,7 +114,7 @@ public class CancelReplacePanel extends JPanel {
             newOrder.setOpen(0);
             newOrder.setExecuted(0);
             System.out.println("Replacing order: " + " ~ " + newOrder.getID() + " ~ " + order.getID());
-            //application.replace(order, newOrder);
+            application.replace(order, newOrder);
         }
     }
 }

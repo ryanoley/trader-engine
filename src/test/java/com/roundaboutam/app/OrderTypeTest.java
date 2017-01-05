@@ -1,5 +1,7 @@
 package com.roundaboutam.app;
 
+import com.roundaboutam.trader.OrderType;
+
 import junit.framework.TestCase;
 
 public class OrderTypeTest extends TestCase {

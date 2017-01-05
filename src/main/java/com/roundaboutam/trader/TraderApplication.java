@@ -1,4 +1,4 @@
-package com.roundaboutam.app;
+package com.roundaboutam.trader;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -65,7 +65,6 @@ public class TraderApplication implements Application {
 	private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
     private final ObservableOrder observableOrder = new ObservableOrder();
     private final ObservableLogon observableLogon = new ObservableLogon();
-    private boolean isAvailable = true;
 
     static private final TwoWayMap sideMap = new TwoWayMap();
     static private final TwoWayMap typeMap = new TwoWayMap();
@@ -122,21 +121,15 @@ public class TraderApplication implements Application {
         public void run() {
             try {
                 MsgType msgType = new MsgType();
-                if (isAvailable) {
-                    if (message.getHeader().isSetField(DeliverToCompID.FIELD)) {
-                        // This is here to support OpenFIX certification
-                        sendSessionReject(message, SessionRejectReason.COMPID_PROBLEM);
-                    } else if (message.getHeader().getField(msgType).valueEquals("8")) {
-                        executionReport(message, sessionID);
-                    } else if (message.getHeader().getField(msgType).valueEquals("9")) {
-                        cancelReject(message, sessionID);
-                    } else {
-                        sendBusinessReject(message, BusinessRejectReason.UNSUPPORTED_MESSAGE_TYPE,
-                                "Unsupported Message Type");
-                    }
+                if (message.getHeader().isSetField(DeliverToCompID.FIELD)) {
+                	sendSessionReject(message, SessionRejectReason.COMPID_PROBLEM);
+                } else if (message.getHeader().getField(msgType).valueEquals("8")) {
+                	executionReport(message, sessionID);
+                } else if (message.getHeader().getField(msgType).valueEquals("9")) {
+                	cancelReject(message, sessionID);
                 } else {
-                    sendBusinessReject(message, BusinessRejectReason.APPLICATION_NOT_AVAILABLE,
-                            "Application not available");
+                	sendBusinessReject(message, BusinessRejectReason.UNSUPPORTED_MESSAGE_TYPE,
+                			"Unsupported Message Type");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -504,11 +497,4 @@ public class TraderApplication implements Application {
         tifMap.put(OrderTIF.GTX, new TimeInForce(TimeInForce.GOOD_TILL_CROSSING));
     }
 
-    public boolean isAvailable() {
-        return isAvailable;
-    }
-
-    public void setAvailable(boolean isAvailable) {
-        this.isAvailable = isAvailable;
-    }
 }

@@ -1,4 +1,4 @@
-package com.roundaboutam.app;
+package com.roundaboutam.trader;
 
 import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
@@ -8,7 +8,7 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.roundaboutam.app.ui.TraderFrame;
+import com.roundaboutam.trader.ui.TraderFrame;
 
 import quickfix.DefaultMessageFactory;
 import quickfix.FileStoreFactory;

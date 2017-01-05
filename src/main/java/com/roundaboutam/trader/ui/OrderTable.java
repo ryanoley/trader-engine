@@ -1,11 +1,11 @@
-package com.roundaboutam.app.ui;
+package com.roundaboutam.trader.ui;
 
 
 import javax.swing.table.*;
 
-import com.roundaboutam.app.Order;
-import com.roundaboutam.app.OrderTableModel;
-import com.roundaboutam.app.TraderApplication;
+import com.roundaboutam.trader.Order;
+import com.roundaboutam.trader.OrderTableModel;
+import com.roundaboutam.trader.TraderApplication;
 
 import javax.swing.*;
 import java.awt.*;

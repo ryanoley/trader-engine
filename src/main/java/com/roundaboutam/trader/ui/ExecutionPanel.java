@@ -1,4 +1,4 @@
-package com.roundaboutam.app.ui;
+package com.roundaboutam.trader.ui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import com.roundaboutam.app.ExecutionTableModel;
+import com.roundaboutam.trader.ExecutionTableModel;
 
 public class ExecutionPanel extends JPanel {
 

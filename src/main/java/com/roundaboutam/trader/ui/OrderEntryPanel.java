@@ -1,4 +1,4 @@
-package com.roundaboutam.app.ui;
+package com.roundaboutam.trader.ui;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -22,17 +22,17 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import quickfix.SessionID;
-import com.roundaboutam.app.TraderApplication;
-import com.roundaboutam.app.DoubleNumberTextField;
-import com.roundaboutam.app.IntegerNumberTextField;
-import com.roundaboutam.app.LogonEvent;
+import com.roundaboutam.trader.DoubleNumberTextField;
+import com.roundaboutam.trader.IntegerNumberTextField;
+import com.roundaboutam.trader.LogonEvent;
+import com.roundaboutam.trader.Order;
+import com.roundaboutam.trader.OrderSide;
+import com.roundaboutam.trader.OrderTIF;
+import com.roundaboutam.trader.OrderTableModel;
+import com.roundaboutam.trader.OrderType;
+import com.roundaboutam.trader.TraderApplication;
 
-import com.roundaboutam.app.Order;
-import com.roundaboutam.app.OrderSide;
-import com.roundaboutam.app.OrderTIF;
-import com.roundaboutam.app.OrderTableModel;
-import com.roundaboutam.app.OrderType;
+import quickfix.SessionID;
 
 public class OrderEntryPanel extends JPanel implements Observer {
 

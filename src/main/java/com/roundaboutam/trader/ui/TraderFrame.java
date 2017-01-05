@@ -1,4 +1,4 @@
-package com.roundaboutam.app.ui;
+package com.roundaboutam.trader.ui;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -6,17 +6,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
-import com.roundaboutam.app.ExecutionTableModel;
-import com.roundaboutam.app.OrderTableModel;
-import com.roundaboutam.app.TraderApplication;
-import com.roundaboutam.app.TraderEngine;
+import com.roundaboutam.trader.ExecutionTableModel;
+import com.roundaboutam.trader.OrderTableModel;
+import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.TraderEngine;
 
 @SuppressWarnings("serial")
 public class TraderFrame extends JFrame {
@@ -31,9 +30,9 @@ public class TraderFrame extends JFrame {
 		createMenuBar(application);
 		getContentPane().add(new TraderPanel(orderTableModel, executionTableModel, application),
 	                BorderLayout.CENTER);
-		
+
 		addWindowClosingHandler();
-		
+
 		setVisible(true);
 	}
 
@@ -85,18 +84,6 @@ public class TraderFrame extends JFrame {
 			}
 		});
         sessionMenu.add(exitItem);
-
-        JMenu appMenu = new JMenu("Application");
-        menubar.add(appMenu);
-
-        JMenuItem appAvailableItem = new JCheckBoxMenuItem("Available");
-        appAvailableItem.setSelected(application.isAvailable());
-        appAvailableItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				application.setAvailable(((JCheckBoxMenuItem) e.getSource()).isSelected());
-			}
-		});
-        appMenu.add(appAvailableItem);
 
         setJMenuBar(menubar);
     }

@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.roundaboutam.app</groupId>
+    <groupId>com.roundaboutam</groupId>
     <artifactId>trader-engine</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
@@ -67,7 +67,7 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>dependency-jars/</classpathPrefix>
                             <!-- TEMP entry point -->
-                            <mainClass>com.roundaboutam.app.TraderEngine</mainClass>
+                            <mainClass>com.roundaboutam.trader.TraderEngine</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

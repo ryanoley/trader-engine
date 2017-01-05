@@ -1,4 +1,4 @@
-package com.roundaboutam.app.ui;
+package com.roundaboutam.trader.ui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -15,10 +15,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.roundaboutam.app.ExecutionTableModel;
-import com.roundaboutam.app.Order;
-import com.roundaboutam.app.OrderTableModel;
-import com.roundaboutam.app.TraderApplication;
+import com.roundaboutam.trader.ExecutionTableModel;
+import com.roundaboutam.trader.Order;
+import com.roundaboutam.trader.OrderTableModel;
+import com.roundaboutam.trader.TraderApplication;
 
 
 public class TraderPanel extends JPanel implements Observer, ActionListener {

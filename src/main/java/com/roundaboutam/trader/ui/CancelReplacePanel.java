@@ -1,12 +1,12 @@
-package com.roundaboutam.app.ui;
+package com.roundaboutam.trader.ui;
 
 import javax.swing.*;
 
-import com.roundaboutam.app.DoubleNumberTextField;
-import com.roundaboutam.app.IntegerNumberTextField;
-import com.roundaboutam.app.Order;
-import com.roundaboutam.app.OrderType;
-import com.roundaboutam.app.TraderApplication;
+import com.roundaboutam.trader.DoubleNumberTextField;
+import com.roundaboutam.trader.IntegerNumberTextField;
+import com.roundaboutam.trader.Order;
+import com.roundaboutam.trader.OrderType;
+import com.roundaboutam.trader.TraderApplication;
 
 import java.awt.*;
 import java.awt.event.*;

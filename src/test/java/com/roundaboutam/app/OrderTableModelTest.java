@@ -1,5 +1,11 @@
 package com.roundaboutam.app;
 
+import com.roundaboutam.trader.Order;
+import com.roundaboutam.trader.OrderSide;
+import com.roundaboutam.trader.OrderTIF;
+import com.roundaboutam.trader.OrderTableModel;
+import com.roundaboutam.trader.OrderType;
+
 import junit.framework.TestCase;
 
 public class OrderTableModelTest extends TestCase {

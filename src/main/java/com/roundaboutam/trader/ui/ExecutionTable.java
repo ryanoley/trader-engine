@@ -1,4 +1,4 @@
-package com.roundaboutam.app.ui;
+package com.roundaboutam.trader.ui;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -7,7 +7,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import com.roundaboutam.app.ExecutionTableModel;
+import com.roundaboutam.trader.ExecutionTableModel;
 
 public class ExecutionTable extends JTable {
 

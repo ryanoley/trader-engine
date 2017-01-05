@@ -1,4 +1,4 @@
-package com.roundaboutam.app;
+package com.roundaboutam.trader;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.HashMap;

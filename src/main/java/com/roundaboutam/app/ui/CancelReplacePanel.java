@@ -5,6 +5,7 @@ import javax.swing.*;
 import com.roundaboutam.app.DoubleNumberTextField;
 import com.roundaboutam.app.IntegerNumberTextField;
 import com.roundaboutam.app.Order;
+import com.roundaboutam.app.OrderType;
 import com.roundaboutam.app.TraderApplication;
 
 import java.awt.*;
@@ -56,19 +57,48 @@ public class CancelReplacePanel extends JPanel {
         add(limitPriceLabel, ++x, y);
         constraints.weightx = 5;
         add(limitPriceTextField, ++x, y);
+
+        // Disable fields on load
+		cancelButton.setEnabled(false);
+        replaceButton.setEnabled(false);
+        quantityTextField.setEnabled(false);
+        limitPriceTextField.setEnabled(false);
     }
 
-    public void setEnabled(boolean enabled) {
-        cancelButton.setEnabled(enabled);
-        replaceButton.setEnabled(enabled);
-        quantityTextField.setEnabled(enabled);
-        limitPriceTextField.setEnabled(enabled);
+    private void orderSpecificFieldEnabler() {
+    	if (order.getOpen() > 0) {
+    		enableCancelReplaceButtons(true);
+    		enableQuantityField(true);
+    		if (order.getType() == OrderType.LIMIT) {
+    			enableLimitPriceField(true);
+    		} else {
+    			enableLimitPriceField(false);
+    		}
+    	} else {
+    		enableCancelReplaceButtons(false);
+    		enableQuantityField(false);
+    		enableLimitPriceField(false);
+    	}
+    }
 
+    private void enableCancelReplaceButtons(boolean enabled) {
+		cancelButton.setEnabled(enabled);
+        replaceButton.setEnabled(enabled);
+    }
+
+    private void enableQuantityField(boolean enabled) {
         Color labelColor = enabled ? Color.black : Color.gray;
         Color bgColor = enabled ? Color.white : Color.gray;
+        quantityTextField.setEnabled(enabled);
         quantityTextField.setBackground(bgColor);
-        limitPriceTextField.setBackground(bgColor);
         quantityLabel.setForeground(labelColor);
+    }
+    
+    private void enableLimitPriceField(boolean enabled) {
+        Color labelColor = enabled ? Color.black : Color.gray;
+        Color bgColor = enabled ? Color.white : Color.gray;
+        limitPriceTextField.setEnabled(enabled);
+        limitPriceTextField.setBackground(bgColor);
         limitPriceLabel.setForeground(labelColor);
     }
 
@@ -86,7 +116,7 @@ public class CancelReplacePanel extends JPanel {
         Double limit = order.getLimit();
         if (limit != null)
             limitPriceTextField.setText(order.getLimit().toString());
-        setEnabled(order.getOpen() > 0);
+        orderSpecificFieldEnabler();
     }
 
     private JComponent add(JComponent component, int x, int y) {
@@ -105,14 +135,14 @@ public class CancelReplacePanel extends JPanel {
 
     private class ReplaceListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
+        	// Clone method sets OriginalID and generates new ID
         	Order newOrder = (Order) order.clone();
-            newOrder.setQuantity(Integer.parseInt(quantityTextField.getText()));
+        	newOrder.setQuantity(Integer.parseInt(quantityTextField.getText()));
             newOrder.setLimit(Double.parseDouble(limitPriceTextField.getText()));
             newOrder.setRejected(false);
             newOrder.setCanceled(false);
             newOrder.setOpen(0);
-            newOrder.setExecuted(0);
-
+            newOrder.setExecuted(0);  // Do we want to do this if some of VWAP already executed?
             application.replace(order, newOrder);
         }
     }

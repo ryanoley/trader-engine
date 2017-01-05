@@ -3,10 +3,8 @@ package com.roundaboutam.app;
 import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 
-import javax.swing.JFrame;
 import javax.swing.UIManager;
 
-import org.quickfixj.jmx.JmxExporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +21,7 @@ import quickfix.Session;
 import quickfix.SessionID;
 import quickfix.SessionSettings;
 import quickfix.SocketInitiator;
+import org.quickfixj.jmx.JmxExporter;
 
 public class TraderEngine {
 
@@ -32,7 +31,6 @@ public class TraderEngine {
 	private static TraderEngine traderEngine;
 	private boolean initiatorStarted = false;
 	private Initiator initiator = null;
-	private JFrame frame = null;
 
 	public TraderEngine() throws Exception {
 
@@ -40,7 +38,7 @@ public class TraderEngine {
 		InputStream inputStream = TraderEngine.class.getResourceAsStream("FIXConfig.cfg");
         SessionSettings settings = new SessionSettings(inputStream);
         inputStream.close();
-        boolean logHeartbeats = Boolean.valueOf(System.getProperty("logHeartbeats", "true"));
+        boolean logHeartbeats = Boolean.valueOf(System.getProperty("logHeartbeats", "false"));
 
 		OrderTableModel orderTableModel = new OrderTableModel();
         ExecutionTableModel executionTableModel = new ExecutionTableModel();
@@ -56,13 +54,11 @@ public class TraderEngine {
         JmxExporter exporter = new JmxExporter();
         exporter.register(initiator);
 
-    	frame = new TraderFrame(orderTableModel, executionTableModel, application);
-    	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    	new TraderFrame(orderTableModel, executionTableModel, application);
 
 	}
 	
     public synchronized void logon() {
-    	System.out.println("Logging on");
         if (!initiatorStarted) {
             try {
                 initiator.start();
@@ -72,26 +68,24 @@ public class TraderEngine {
             }
         } else {
             for (SessionID sessionId : initiator.getSessions()) {
-                System.out.println(sessionId);
             	Session.lookupSession(sessionId).logon();
             }
         }
     }
-    
+
     public void logout() {
         for (SessionID sessionId : initiator.getSessions()) {
+        	System.out.println("Shutting down session: " + sessionId.toString());
             Session.lookupSession(sessionId).logout("user requested");
         }
     }
-	
-    public void stop() {
-        shutdownLatch.countDown();
+
+    public void shutdown() {
+    	logout();
+    	shutdownLatch.countDown();
+    	System.exit(0);
     }
-    
-    public JFrame getFrame() {
-        return frame;
-    }
-    
+
 	public static TraderEngine get() {
 		return traderEngine;
 	}
@@ -107,7 +101,8 @@ public class TraderEngine {
         if (!System.getProperties().containsKey("openfix")) {
         	traderEngine.logon();
         }
+
         shutdownLatch.await();
     }
-    
+
 }

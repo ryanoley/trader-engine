@@ -56,6 +56,7 @@ public class OrderEntryPanel extends JPanel implements Observer {
 
     private final JLabel limitPriceLabel = new JLabel("Limit");
     private final JLabel stopPriceLabel = new JLabel("Stop");
+    private final JLabel tifLabel = new JLabel("TIF");
 
     private final JLabel messageLabel = new JLabel(" ");
     private final JButton submitButton = new JButton("Submit");
@@ -114,7 +115,7 @@ public class OrderEntryPanel extends JPanel implements Observer {
         add(limitPriceLabel, ++x, y);
         add(stopPriceLabel, ++x, y);
         constraints.ipadx = 0;
-        add(new JLabel("TIF"), ++x, y);
+        add(tifLabel, ++x, y);
         constraints.ipadx = 30;
 
         symbolTextField.setName("SymbolTextField");
@@ -165,9 +166,7 @@ public class OrderEntryPanel extends JPanel implements Observer {
 
     private void activateSubmit() {
     	OrderType type = (OrderType) typeComboBox.getSelectedItem();
-        // TODO: sessionEntered for submit order button must be reset
-    	// boolean activate = symbolEntered && quantityEntered && sessionEntered;
-        boolean activate = symbolEntered && quantityEntered;
+    	boolean activate = symbolEntered && quantityEntered && sessionEntered;
         if (type == OrderType.MARKET)
         	submitButton.setEnabled(activate);
         else if (type == OrderType.LIMIT)
@@ -176,6 +175,9 @@ public class OrderEntryPanel extends JPanel implements Observer {
             submitButton.setEnabled(activate && stopEntered);
         else if (type == OrderType.STOP_LIMIT)
             submitButton.setEnabled(activate && limitEntered && stopEntered);
+        // Custom orders
+        else if (type == OrderType.VWAP01)
+        	submitButton.setEnabled(activate);
     }
 
     private class PriceListener implements ItemListener {
@@ -184,16 +186,24 @@ public class OrderEntryPanel extends JPanel implements Observer {
             if (item == OrderType.MARKET) {
                 enableLimitPrice(false);
                 enableStopPrice(false);
+                enableTIF(true);
             } else if (item == OrderType.STOP) {
                 enableLimitPrice(false);
                 enableStopPrice(true);
+                enableTIF(true);
             } else if (item == OrderType.LIMIT) {
                 enableLimitPrice(true);
                 enableStopPrice(false);
+                enableTIF(true);
+            } else if (item == OrderType.VWAP01) {
+                enableLimitPrice(false);
+                enableStopPrice(false);
+                enableTIF(false);
             } else {
                 enableLimitPrice(true);
                 enableStopPrice(true);
-            }
+                enableTIF(true);
+            } 
             activateSubmit();
         }
 
@@ -212,6 +222,17 @@ public class OrderEntryPanel extends JPanel implements Observer {
             stopPriceTextField.setBackground(bgColor);
             stopPriceLabel.setForeground(labelColor);
         }
+
+        private void enableTIF(boolean enabled) {
+            Color labelColor = enabled ? Color.black : Color.gray;
+            Color bgColor = enabled ? Color.white : Color.gray;
+            // Always set to DAY as default
+            tifComboBox.setSelectedIndex(0);
+            tifComboBox.setEnabled(enabled);
+            tifComboBox.setBackground(bgColor);
+            tifLabel.setForeground(labelColor);
+        }
+
     }
 
     public void update(Observable o, Object arg) {
@@ -223,7 +244,8 @@ public class OrderEntryPanel extends JPanel implements Observer {
     }
 
     private class SubmitListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
+
+    	public void actionPerformed(ActionEvent e) {
             Order order = new Order();
             order.setSide((OrderSide) sideComboBox.getSelectedItem());
             order.setType((OrderType) typeComboBox.getSelectedItem());

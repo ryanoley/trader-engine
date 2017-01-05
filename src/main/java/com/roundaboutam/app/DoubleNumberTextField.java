@@ -3,6 +3,7 @@ package com.roundaboutam.app;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 
+@SuppressWarnings("serial")
 public class DoubleNumberTextField extends JTextField {
 
     public void processKeyEvent(KeyEvent e) {

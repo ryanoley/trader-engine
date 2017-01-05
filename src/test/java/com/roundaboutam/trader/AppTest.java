@@ -1,4 +1,4 @@
-package com.roundaboutam.app;
+package com.roundaboutam.trader;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

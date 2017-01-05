@@ -1,4 +1,4 @@
-package com.roundaboutam.app;
+package com.roundaboutam.trader;
 
 import com.roundaboutam.trader.Order;
 import com.roundaboutam.trader.OrderSide;

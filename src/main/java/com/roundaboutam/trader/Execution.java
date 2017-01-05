@@ -1,5 +1,7 @@
 package com.roundaboutam.trader;
 
+import com.roundaboutam.trader.order.OrderSide;
+
 public class Execution {
 
     private String symbol = null;

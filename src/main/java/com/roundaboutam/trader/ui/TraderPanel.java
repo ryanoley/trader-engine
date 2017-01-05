@@ -16,9 +16,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.roundaboutam.trader.ExecutionTableModel;
-import com.roundaboutam.trader.Order;
 import com.roundaboutam.trader.OrderTableModel;
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.order.Order;
 
 
 public class TraderPanel extends JPanel implements Observer, ActionListener {

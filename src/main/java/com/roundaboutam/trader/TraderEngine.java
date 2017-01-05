@@ -34,7 +34,6 @@ public class TraderEngine {
 
 	public TraderEngine() throws Exception {
 
-		// Get FIX Config
 		InputStream inputStream = TraderEngine.class.getResourceAsStream("FIXConfig.cfg");
         SessionSettings settings = new SessionSettings(inputStream);
         inputStream.close();

@@ -1,4 +1,4 @@
-package com.roundaboutam.trader;
+package com.roundaboutam.trader.order;
 
 import quickfix.SessionID;
 

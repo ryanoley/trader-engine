@@ -1,8 +1,12 @@
 package com.roundaboutam.trader;
 
 import javax.swing.table.AbstractTableModel;
+
+import com.roundaboutam.trader.order.Order;
+
 import java.util.HashMap;
 
+@SuppressWarnings("serial")
 public class OrderTableModel extends AbstractTableModel {
 
     private final static int SYMBOL = 0;

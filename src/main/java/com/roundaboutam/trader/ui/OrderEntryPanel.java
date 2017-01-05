@@ -25,12 +25,12 @@ import javax.swing.JTextField;
 import com.roundaboutam.trader.DoubleNumberTextField;
 import com.roundaboutam.trader.IntegerNumberTextField;
 import com.roundaboutam.trader.LogonEvent;
-import com.roundaboutam.trader.Order;
-import com.roundaboutam.trader.OrderSide;
-import com.roundaboutam.trader.OrderTIF;
 import com.roundaboutam.trader.OrderTableModel;
-import com.roundaboutam.trader.OrderType;
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.order.Order;
+import com.roundaboutam.trader.order.OrderSide;
+import com.roundaboutam.trader.order.OrderTIF;
+import com.roundaboutam.trader.order.OrderType;
 
 import quickfix.SessionID;
 

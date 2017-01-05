@@ -4,9 +4,9 @@ import javax.swing.*;
 
 import com.roundaboutam.trader.DoubleNumberTextField;
 import com.roundaboutam.trader.IntegerNumberTextField;
-import com.roundaboutam.trader.Order;
-import com.roundaboutam.trader.OrderType;
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.order.Order;
+import com.roundaboutam.trader.order.OrderType;
 
 import java.awt.*;
 import java.awt.event.*;

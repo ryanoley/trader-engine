@@ -11,6 +11,11 @@ import java.util.Observer;
 
 import javax.swing.SwingUtilities;
 
+import com.roundaboutam.trader.order.Order;
+import com.roundaboutam.trader.order.OrderSide;
+import com.roundaboutam.trader.order.OrderTIF;
+import com.roundaboutam.trader.order.OrderType;
+
 import quickfix.Application;
 import quickfix.DefaultMessageFactory;
 import quickfix.DoNotSend;
@@ -245,7 +250,6 @@ public class TraderApplication implements Application {
         } catch (FieldNotFound e) {
         }
 
-        // TODO: This is same ClOrdID as above. Is this correct if modified order?
         orderTableModel.updateOrder(order, message.getField(new ClOrdID()).getValue());
         observableOrder.update(order);
 

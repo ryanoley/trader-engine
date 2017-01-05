@@ -1,6 +1,6 @@
 package com.roundaboutam.trader;
 
-import com.roundaboutam.trader.OrderType;
+import com.roundaboutam.trader.order.OrderType;
 
 import junit.framework.TestCase;
 

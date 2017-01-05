@@ -3,9 +3,9 @@ package com.roundaboutam.trader.ui;
 
 import javax.swing.table.*;
 
-import com.roundaboutam.trader.Order;
 import com.roundaboutam.trader.OrderTableModel;
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.order.Order;
 
 import javax.swing.*;
 import java.awt.*;

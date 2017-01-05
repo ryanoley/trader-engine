@@ -1,52 +1,47 @@
 package com.roundaboutam.trader.order;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.roundaboutam.trader.TwoWayMap;
+
+import quickfix.field.Side;
 
 public class OrderSide {
 
-	static private final Map<String, OrderSide> known = new HashMap<String, OrderSide>();
-    static public final OrderSide BUY = new OrderSide("Buy");
+	private final String name;
+
+	// Trader Engine Types
+	static public final OrderSide BUY = new OrderSide("Buy");
     static public final OrderSide SELL = new OrderSide("Sell");
     static public final OrderSide SHORT_SELL = new OrderSide("Short Sell");
-    static public final OrderSide SHORT_SELL_EXEMPT = new OrderSide("Short Sell Exempt");
-    static public final OrderSide CROSS = new OrderSide("Cross");
-    static public final OrderSide CROSS_SHORT = new OrderSide("Cross Short");
-    static public final OrderSide CROSS_SHORT_EXEMPT = new OrderSide("Cross Short Exempt");
 
-    static private final OrderSide[] array = {
-            BUY, SELL, SHORT_SELL, SHORT_SELL_EXEMPT,
-            CROSS, CROSS_SHORT, CROSS_SHORT_EXEMPT
-    };
+    static private final OrderSide[] array = { BUY, SELL, SHORT_SELL };
 
-    private final String name;
+    // Map QuickFIXJ Types
+    static private final TwoWayMap sideMap = new TwoWayMap();
+
+    static {
+    	sideMap.put(OrderSide.BUY, new Side(Side.BUY));
+    	sideMap.put(OrderSide.SELL, new Side(Side.SELL));
+    	sideMap.put(OrderSide.SHORT_SELL, new Side(Side.SELL_SHORT));
+    }
 
     private OrderSide(String name) {
         this.name = name;
-        synchronized (OrderSide.class) {
-            known.put(name, this);
-        }
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String toString() {
         return name;
     }
 
-    static public Object[] toArray() {
-        return array;
+    public static Side toFIX(OrderSide side) {
+    	return (Side) sideMap.getFirst(side);
     }
 
-    public static OrderSide parse(String type) throws IllegalArgumentException {
-        OrderSide result = known.get(type);
-        if (result == null) {
-            throw new IllegalArgumentException
-            ("OrderSide: " + type + " is unknown.");
-        }
-        return result;
+    public static OrderSide fromFIX(Side side) {
+    	return (OrderSide) sideMap.getSecond(side);
+    }
+
+    static public Object[] toArray() {
+        return array;
     }
 
 }

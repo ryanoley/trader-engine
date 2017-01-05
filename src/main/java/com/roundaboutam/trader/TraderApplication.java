@@ -11,6 +11,7 @@ import java.util.Observer;
 
 import javax.swing.SwingUtilities;
 
+import com.roundaboutam.trader.order.FIXOrder;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderSide;
 import com.roundaboutam.trader.order.OrderTIF;
@@ -67,23 +68,24 @@ import quickfix.fix42.OrderCancelReplaceRequest;
 
 public class TraderApplication implements Application {
 
-	private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
     private final ObservableOrder observableOrder = new ObservableOrder();
     private final ObservableLogon observableLogon = new ObservableLogon();
+
+	private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
     static private final TwoWayMap sideMap = new TwoWayMap();
     static private final TwoWayMap typeMap = new TwoWayMap();
     static private final TwoWayMap tifMap = new TwoWayMap();
+
     static private final HashMap<SessionID, HashSet<ExecID>> execIDs = 
     		new HashMap<SessionID, HashSet<ExecID>>();
 
 	private OrderTableModel orderTableModel = null;
     private ExecutionTableModel executionTableModel = null;
 
-	public TraderApplication(OrderTableModel orderTableModel,
-            ExecutionTableModel executionTableModel) {
-        this.orderTableModel = orderTableModel;
-        this.executionTableModel = executionTableModel;
+	public TraderApplication(OrderTableModel orderTable, ExecutionTableModel executionTable) {
+        this.orderTableModel = orderTable;
+        this.executionTableModel = executionTable;
 	}
 
 	public void onCreate(SessionID sessionID) { }
@@ -308,68 +310,9 @@ public class TraderApplication implements Application {
     }
 
     public void send(Order order) {
-
-    	NewOrderSingle newOrderSingle = new NewOrderSingle(
-    			new ClOrdID(order.getID()), 
-    			new HandlInst('1'), 
-    			new Symbol(order.getSymbol()),
-    			sideToFIXSide(order.getSide()), 
-    			new TransactTime(), 
-    			typeToFIXType(order.getType()));
-
-    	newOrderSingle.set(new OrderQty(order.getQuantity()));
-
-    	sendToBroker(populateOrder(order, newOrderSingle), order.getSessionID());
+    	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
     }
 
-    public Message populateOrder(Order order, Message newOrderSingle) {
-    	/*
-    	 * Used to add additional flags, many required by broker
-    	 */
-        newOrderSingle.setField(tifToFIXTif(order.getTIF()));
-
-        if (order.getSide() == OrderSide.SHORT_SELL
-                || order.getSide() == OrderSide.SHORT_SELL_EXEMPT) {
-            newOrderSingle.setField(new LocateReqd(false));
-            newOrderSingle.setString(5700, "BAML");
-        }
-
-        OrderType type = order.getType();
-
-        // CUSTOM ORDERS - Always return from within brackets
-        if (type == OrderType.VWAP01) {
-            // Destination
-        	newOrderSingle.setString(TargetSubID.FIELD, "ML_ALGO_US");
-        	// Current date is automatically generated for bookends
-        	DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        	String currentDate = dateFormat.format(new Date());
-        	// All custom tags were requested to be submitted in this format
-        	String algoParams = "6401=1";
-        	algoParams = algoParams + ";6403=12"; // Percent volume of 12 percent
-        	algoParams = algoParams + ";6168=" + currentDate + "-14:32:00";  // Start time
-        	algoParams = algoParams + ";126=" + currentDate + "-20:58:00";  // End time
-        	algoParams = algoParams + ";9682=v4.3.0BRT;";
-        	newOrderSingle.setString(9999, algoParams);
-        	return newOrderSingle;
-        }
-
-        // STANDARD ORDERS
-        else if (type == OrderType.LIMIT) {
-        	newOrderSingle.setField(new Price(order.getLimit()));
-        }
-        else if (type == OrderType.STOP) {
-            newOrderSingle.setField(new StopPx(order.getStop()));
-        } 
-        else if (type == OrderType.STOP_LIMIT) {
-            newOrderSingle.setField(new Price(order.getLimit()));
-            newOrderSingle.setField(new StopPx(order.getStop()));
-        }
-
-        // Destination
-        newOrderSingle.setString(TargetSubID.FIELD, "ML_ARCA");
-        return newOrderSingle;
-    }
-    
     public void cancel(Order order) {
 
     	String id = order.generateID();

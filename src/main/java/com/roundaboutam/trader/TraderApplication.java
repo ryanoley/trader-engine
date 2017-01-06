@@ -11,9 +11,12 @@ import java.util.Observer;
 
 import javax.swing.SwingUtilities;
 
+import com.roundaboutam.trader.execution.Execution;
+import com.roundaboutam.trader.order.BaseOrder;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.FIXOrder;
 import com.roundaboutam.trader.order.Order;
+import com.roundaboutam.trader.order.OrderBook;
 import com.roundaboutam.trader.order.OrderSide;
 import com.roundaboutam.trader.order.OrderTIF;
 import com.roundaboutam.trader.order.OrderType;
@@ -72,40 +75,20 @@ public class TraderApplication implements Application {
 
     private final ObservableOrder observableOrder = new ObservableOrder();
     private final ObservableLogon observableLogon = new ObservableLogon();
+	
+    private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
-	private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
+	private OrderBook orderBook = null;
+	private ExecutionTableModel executionTableModel = null;
 
-    static private final TwoWayMap sideMap = new TwoWayMap();
-    static private final TwoWayMap typeMap = new TwoWayMap();
-    static private final TwoWayMap tifMap = new TwoWayMap();
-
-    static private final HashMap<SessionID, HashSet<ExecID>> execIDs = 
+	static private final HashMap<SessionID, HashSet<ExecID>> execIDs = 
     		new HashMap<SessionID, HashSet<ExecID>>();
 
-	private OrderTableModel orderTableModel = null;
-    private ExecutionTableModel executionTableModel = null;
-
-	public TraderApplication(OrderTableModel orderTable, ExecutionTableModel executionTable) {
-        this.orderTableModel = orderTable;
+	public TraderApplication(OrderBook orderBook, 
+			ExecutionTableModel executionTable) {
+        this.orderBook = orderBook;
         this.executionTableModel = executionTable;
 	}
-
-	public void onCreate(SessionID sessionID) { }
-
-    public void onLogon(SessionID sessionID) {
-        observableLogon.logon(sessionID);
-    }
-
-    public void onLogout(SessionID sessionID) {
-    	observableLogon.logoff(sessionID);
-    }
-
-    public void toAdmin(Message message, SessionID sessionID) { }
-
-    public void toApp(Message message, SessionID sessionID) throws DoNotSend { }
-
-    public void fromAdmin(Message message, SessionID sessionID) throws FieldNotFound,
-    	IncorrectDataFormat, IncorrectTagValue, RejectLogon { }
 
     // Main message handler
     public void fromApp(Message message, SessionID sessionID) throws FieldNotFound,
@@ -185,31 +168,53 @@ public class TraderApplication implements Application {
 
     private void executionReport(Message message, SessionID sessionID) throws FieldNotFound {
 
-    	/* Fields to pull
-    	 * 
-    	 * OrderQty or LeavesQty ?? Test what comes back if modified order
-    	 * 
-    	 */
-    	
         ExecID execID = (ExecID) message.getField(new ExecID());
-        if (alreadyProcessed(execID, sessionID))
-        	return;
+        if (alreadyProcessed(execID, sessionID)) { return; }
 
-        Order order = orderTableModel.getOrder(message.getField(new ClOrdID()).getValue());
+        String orderID = message.getField(new ClOrdID()).toString();
+
+        BaseOrder order = orderBook.getOrder(orderID);
+
         if (order == null) {
-            System.out.println("Order not found in orderTable: ");
-            System.out.println(message.getField(new Symbol()).getValue());
+            System.out.println("Order not found in OrderBook: ");
         	return;
+        }
+
+        // NO IDEA WHAT THESE LOOK LIKE WHEN THEY COME BACK
+        OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());
+
+        if (ordStatus.valueEquals(OrdStatus.NEW)) {
+        	System.out.println("Order Status - NEW");
+        } else if (ordStatus.valueEquals(OrdStatus.PARTIALLY_FILLED)) {
+        	System.out.println("Order Status - PARTIALLY_FILLED");
+        } else if (ordStatus.valueEquals(OrdStatus.FILLED)) {
+        	System.out.println("Order Status - FILLED");
+        } else if (ordStatus.valueEquals(OrdStatus.DONE_FOR_DAY)) {
+        	System.out.println("Order Status - DONE_FOR_DAY");
+        } else if (ordStatus.valueEquals(OrdStatus.CANCELED)) {
+        	System.out.println("Order Status - CANCELED");
+        } else if (ordStatus.valueEquals(OrdStatus.REPLACED)) {
+        	System.out.println("Order Status - REPLACED");
+        } else if (ordStatus.valueEquals(OrdStatus.PENDING_CANCEL)) {
+        	System.out.println("Order Status - PENDING_CANCEL");
+        } else if (ordStatus.valueEquals(OrdStatus.REJECTED)) {
+        	System.out.println("Order Status - REJECTED");
+        } else if (ordStatus.valueEquals(OrdStatus.PENDING_NEW)) {
+        	System.out.println("Order Status - PENDING_NEW");
         }
 
         BigDecimal fillSize;
 
+        
+        OrderQty orderQty = (OrderQty) message.getField(new OrderQty());
+
+
         if (message.isSetField(LastShares.FIELD)) {
-        	LastShares lastShares = new LastShares();
-            message.getField(lastShares);
+
+        	LastShares lastShares = (LastShares) message.getField(new LastShares());
+        	LeavesQty leavesQty = (LeavesQty) message.getField(new LeavesQty());
+
             fillSize = new BigDecimal("" + lastShares.getValue());
-            LeavesQty leavesQty = new LeavesQty();
-            message.getField(leavesQty);
 
             System.out.println("LEAVES QTY: " + leavesQty);
             System.out.println("LAST SHARES: " + lastShares);
@@ -229,31 +234,7 @@ public class TraderApplication implements Application {
             order.setAvgPx(Double.parseDouble(message.getString(AvgPx.FIELD)));
         }
 
-        OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());
-        
-        if (ordStatus.valueEquals(OrdStatus.REJECTED)) {
-            order.setRejected(true);
-            order.setOpen(0);
-        } else if (ordStatus.valueEquals(OrdStatus.CANCELED)
-                || ordStatus.valueEquals(OrdStatus.DONE_FOR_DAY)) {
-            order.setCanceled(true);
-            order.setOpen(0);
-        } else if (ordStatus.valueEquals(OrdStatus.NEW)) {
-            if (order.isNew()) {
-            	// TODO: This is used to indicate that the broker has received
-            	// the order. Should be indicated in the table somewhere as ACK
-                order.setNew(false);
-            }
-        } 
-        
-        // TODO: TESTING THESE OUT
-        else if (ordStatus.valueEquals(OrdStatus.REPLACED)){
-        	System.out.println("REPLACED");
-        } else if (ordStatus.valueEquals(OrdStatus.PARTIALLY_FILLED)){
-        	System.out.println("PARTIALLY_FILLED");
-        } else if (ordStatus.valueEquals(OrdStatus.PENDING_CANCEL)){
-        	System.out.println("PENDING_CANCEL");
-        }
+
 
         try {
             order.setMessage(message.getField(new Text()).getValue());
@@ -279,19 +260,8 @@ public class TraderApplication implements Application {
     }
 
     private void cancelReject(Message message, SessionID sessionID) throws FieldNotFound {
-
-        String id = message.getField(new ClOrdID()).getValue();
-        Order order = orderTableModel.getOrder(id);
-        if (order == null)
-            return;
-        if (order.getOriginalID() != null)
-            order = orderTableModel.getOrder(order.getOriginalID());
-
-        try {
-            order.setMessage(message.getField(new Text()).getValue());
-        } catch (FieldNotFound e) {
-        }
-        orderTableModel.updateOrder(order, message.getField(new OrigClOrdID()).getValue());
+    	String clOrdId = message.getField(new ClOrdID()).toString();
+    	orderBook.cancelRejected(clOrdId);
     }
 
     private boolean alreadyProcessed(ExecID execID, SessionID sessionID) {
@@ -318,14 +288,17 @@ public class TraderApplication implements Application {
     }
 
     public void send(Order order) {
+    	orderBook.addOrder(order);
     	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
     }
 
     public void cancel(CancelOrder cancelOrder) {
+    	orderBook.addCancelOrder(cancelOrder);
     	sendToBroker(FIXOrder.formatCancelOrder(cancelOrder), cancelOrder.getSessionID());
     }
 
     public void replace(ReplaceOrder replaceOrder) {
+    	orderBook.addReplaceOrder(replaceOrder);
         sendToBroker(FIXOrder.formatReplaceOrder(replaceOrder), replaceOrder.getSessionID());
     }
 
@@ -370,5 +343,22 @@ public class TraderApplication implements Application {
             clearChanged();
         }
     }
+
+    public void onCreate(SessionID sessionID) { }
+
+    public void onLogon(SessionID sessionID) {
+        observableLogon.logon(sessionID);
+    }
+
+    public void onLogout(SessionID sessionID) {
+    	observableLogon.logoff(sessionID);
+    }
+
+    public void toAdmin(Message message, SessionID sessionID) { }
+
+    public void toApp(Message message, SessionID sessionID) throws DoNotSend { }
+
+    public void fromAdmin(Message message, SessionID sessionID) throws FieldNotFound,
+    	IncorrectDataFormat, IncorrectTagValue, RejectLogon { }
 
 }

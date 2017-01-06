@@ -9,7 +9,7 @@ public class CancelOrder extends BaseOrder {
 
     // Trading Session related fields
 	private SessionID sessionID = null;
-    private String cancelOrderID = null;
+    private String orderID = null;
     private String origOrderID = null;
 
     // Order related fields
@@ -25,7 +25,7 @@ public class CancelOrder extends BaseOrder {
 
     public CancelOrder(Order order) {
     	this.sessionID = order.getSessionID();
-    	this.cancelOrderID = IdGenerator.makeID();
+    	this.orderID = IdGenerator.makeID();
     	this.origOrderID = order.getOrderID();
     	this.symbol = order.getSymbol();
     	this.orderSide = order.getOrderSide();
@@ -41,8 +41,8 @@ public class CancelOrder extends BaseOrder {
 		return sessionID;
 	}
 
-	public String getCancelOrderID() {
-		return cancelOrderID;
+	public String getOrderID() {
+		return orderID;
 	}
 
 	public String getOrigOrderID() {

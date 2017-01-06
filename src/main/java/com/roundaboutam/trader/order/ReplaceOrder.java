@@ -9,7 +9,7 @@ public class ReplaceOrder extends BaseOrder {
 
     // Trading Session related fields
 	private SessionID sessionID = null;
-    private String replaceOrderID = null;
+    private String orderID = null;
     private String origOrderID = null;
 
     // Order related fields
@@ -29,7 +29,7 @@ public class ReplaceOrder extends BaseOrder {
     public ReplaceOrder(Order order) {
     	this.symbol = order.getSymbol();
     	this.sessionID = order.getSessionID();
-    	this.replaceOrderID = IdGenerator.makeID();
+    	this.orderID = IdGenerator.makeID();
     	this.origOrderID = order.getOrderID();
     	this.orderSide = order.getOrderSide();
     	this.orderType = order.getOrderType();
@@ -95,8 +95,8 @@ public class ReplaceOrder extends BaseOrder {
 		return sessionID;
 	}
 
-	public String getReplaceOrderID() {
-		return replaceOrderID;
+	public String getOrderID() {
+		return orderID;
 	}
 
 	public String getOrigOrderID() {

@@ -91,7 +91,7 @@ public class FIXOrder {
 
 		OrderCancelRequest fixOrder = new OrderCancelRequest(
 	            new OrigClOrdID(cancelOrder.getOrigOrderID()), 
-	            new ClOrdID(cancelOrder.getCancelOrderID()), 
+	            new ClOrdID(cancelOrder.getOrderID()), 
 	            new Symbol(cancelOrder.getSymbol()),
 	            OrderSide.toFIX(cancelOrder.getOrderSide()), 
 	            new TransactTime());
@@ -105,7 +105,7 @@ public class FIXOrder {
 
     	OrderCancelReplaceRequest fixOrder = new OrderCancelReplaceRequest(
                 new OrigClOrdID(replaceOrder.getOrigOrderID()), 
-                new ClOrdID(replaceOrder.getReplaceOrderID()), 
+                new ClOrdID(replaceOrder.getOrderID()), 
                 new HandlInst('1'),
                 new Symbol(replaceOrder.getSymbol()), 
                 OrderSide.toFIX(replaceOrder.getOrderSide()),

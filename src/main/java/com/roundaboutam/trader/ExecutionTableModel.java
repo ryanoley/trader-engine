@@ -1,6 +1,9 @@
 package com.roundaboutam.trader;
 
 import javax.swing.table.AbstractTableModel;
+
+import com.roundaboutam.trader.execution.Execution;
+
 import java.util.HashMap;
 
 public class ExecutionTableModel extends AbstractTableModel {

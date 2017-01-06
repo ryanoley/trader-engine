@@ -2,199 +2,197 @@ package com.roundaboutam.trader.order;
 
 import quickfix.SessionID;
 
-public class Order implements Cloneable {
+public class Order extends BaseOrder {
 
+	// Identification fields
+    private String customTag = null;
+	private String symbol = null;
+    private String suffix = null;
+
+    // Trading Session related fields
 	private SessionID sessionID = null;
-    private String symbol = null;
+    private String orderID = null;
+
+    // Order related fields
+    private OrderSide orderSide = null;
+    private OrderType orderType = null;
+    private OrderTIF orderTIF = null;
+
+    // Order related fields
     private int quantity = 0;
+    private Double limitPrice = null;
+    private Double stopPrice = null;
+
+    // Execution related fields
     private int open = 0;
     private int executed = 0;
-    private OrderSide side = OrderSide.BUY;
-    private OrderType type = OrderType.MARKET;
-    private OrderTIF tif = OrderTIF.DAY;
-    private Double limit = null;
-    private Double stop = null;
     private double avgPx = 0.0;
+
     private boolean rejected = false;
     private boolean canceled = false;
-    private boolean isNew = true;
+    private boolean modified = false;
+    private boolean acknowledged = false;
+
     private String message = null;
-    private String ID = null;
-    private String originalID = null;
-    private static int nextID = 1;
 
     public Order() {
-        ID = generateID();
+        orderID = IdGenerator.makeID();
     }
 
-    public Order(String ID) {
-        this.ID = ID;
-    }
+	public String getCustomTag() {
+		return customTag;
+	}
 
-    public Object clone() {
-        try {
-            Order order = (Order) super.clone();
-            order.setOriginalID(getID());
-            order.setID(order.generateID());
-            return order;
-        } catch (CloneNotSupportedException e) {}
-        return null;
-    }
+	public void setCustomTag(String customTag) {
+		this.customTag = customTag;
+	}
 
-    public String generateID() {
-        return Long.toString(System.currentTimeMillis() + (nextID++));
-    }
+	public String getSymbol() {
+		return symbol;
+	}
 
-    public SessionID getSessionID() {
-        return sessionID;
-    }
+	public void setSymbol(String symbol) {
+		symbol = symbol.toUpperCase();
+		String[] symbols = symbol.split("[\\p{Punct}\\s]+");
+		this.symbol = symbols[0];
+		if (symbols.length > 1)
+			setSuffix(symbols[1]);
+	}
 
-    public void setSessionID(SessionID sessionID) {
-        this.sessionID = sessionID;
-    }
+	public String getSuffix() {
+		return suffix;
+	}
 
-    public String getSymbol() {
-        return symbol;
-    }
+	private void setSuffix(String suffix) {
+		this.suffix = suffix;
+	}
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
+	public SessionID getSessionID() {
+		return sessionID;
+	}
 
-    public int getQuantity() {
-        return quantity;
-    }
+	public void setSessionID(SessionID sessionID) {
+		this.sessionID = sessionID;
+	}
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+	public String getOrderID() {
+		return orderID;
+	}
 
-    public int getOpen() {
-        return open;
-    }
+	public void setOrderID(String orderID) {
+		this.orderID = orderID;
+	}
 
-    public void setOpen(int open) {
-        this.open = open;
-    }
+	public OrderSide getOrderSide() {
+		return orderSide;
+	}
 
-    public int getExecuted() {
-        return executed;
-    }
+	public void setOrderSide(OrderSide orderSide) {
+		this.orderSide = orderSide;
+	}
 
-    public void setExecuted(int executed) {
-        this.executed = executed;
-    }
+	public OrderType getOrderType() {
+		return orderType;
+	}
 
-    public OrderSide getSide() {
-        return side;
-    }
+	public void setOrderType(OrderType orderType) {
+		this.orderType = orderType;
+	}
 
-    public void setSide(OrderSide side) {
-        this.side = side;
-    }
+	public OrderTIF getOrderTIF() {
+		return orderTIF;
+	}
 
-    public OrderType getType() {
-        return type;
-    }
+	public void setOrderTIF(OrderTIF orderTIF) {
+		this.orderTIF = orderTIF;
+	}
 
-    public void setType(OrderType type) {
-        this.type = type;
-    }
+	public int getQuantity() {
+		return quantity;
+	}
 
-    public OrderTIF getTIF() {
-        return tif;
-    }
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
 
-    public void setTIF(OrderTIF tif) {
-        this.tif = tif;
-    }
+	public Double getLimitPrice() {
+		return limitPrice;
+	}
 
-    public Double getLimit() {
-        return limit;
-    }
+	public void setLimitPrice(Double limitPrice) {
+		this.limitPrice = limitPrice;
+	}
 
-    public void setLimit(Double limit) {
-        this.limit = limit;
-    }
+	public Double getStopPrice() {
+		return stopPrice;
+	}
 
-    public void setLimit(String limit) {
-        if (limit == null || limit.equals("")) {
-            this.limit = null;
-        } else {
-            this.limit = Double.parseDouble(limit);
-        }
-    }
+	public void setStopPrice(Double stopPrice) {
+		this.stopPrice = stopPrice;
+	}
 
-    public Double getStop() {
-        return stop;
-    }
+	public int getOpen() {
+		return open;
+	}
 
-    public void setStop(Double stop) {
-        this.stop = stop;
-    }
+	public void setOpen(int open) {
+		this.open = open;
+	}
 
-    public void setStop(String stop) {
-        if (stop == null || stop.equals("")) {
-            this.stop = null;
-        } else {
-            this.stop = Double.parseDouble(stop);
-        }
-    }
+	public int getExecuted() {
+		return executed;
+	}
 
-    public void setAvgPx(double avgPx) {
-        this.avgPx = avgPx;
-    }
+	public void setExecuted(int executed) {
+		this.executed = executed;
+	}
 
-    public double getAvgPx() {
-        return avgPx;
-    }
+	public double getAvgPx() {
+		return avgPx;
+	}
 
-    public void setRejected(boolean rejected) {
-        this.rejected = rejected;
-    }
+	public void setAvgPx(double avgPx) {
+		this.avgPx = avgPx;
+	}
 
-    public boolean getRejected() {
-        return rejected;
-    }
+	public boolean isRejected() {
+		return rejected;
+	}
 
-    public void setCanceled(boolean canceled) {
-        this.canceled = canceled;
-    }
+	public void setRejected(boolean rejected) {
+		this.rejected = rejected;
+	}
 
-    public boolean getCanceled() {
-        return canceled;
-    }
+	public boolean isCanceled() {
+		return canceled;
+	}
 
-    public void setNew(boolean isNew) {
-        this.isNew = isNew;
-    }
+	public void setCanceled(boolean canceled) {
+		this.canceled = canceled;
+	}
 
-    public boolean isNew() {
-        return isNew;
-    }
+	public boolean isModified() {
+		return modified;
+	}
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+	public void setModified(boolean modified) {
+		this.modified = modified;
+	}
 
-    public String getMessage() {
-        return message;
-    }
+	public boolean isAcknowledged() {
+		return acknowledged;
+	}
 
-    public void setID(String ID) {
-        this.ID = ID;
-    }
+	public void setAcknowledged(boolean acknowledged) {
+		this.acknowledged = acknowledged;
+	}
 
-    public String getID() {
-        return ID;
-    }
+	public String getMessage() {
+		return message;
+	}
 
-    public void setOriginalID(String originalID) {
-        this.originalID = originalID;
-    }
-
-    public String getOriginalID() {
-        return originalID;
-    }
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
 }

@@ -247,13 +247,14 @@ public class OrderEntryPanel extends JPanel implements Observer {
 
     	public void actionPerformed(ActionEvent e) {
             Order order = new Order();
+
             order.setSide((OrderSide) sideComboBox.getSelectedItem());
             order.setType((OrderType) typeComboBox.getSelectedItem());
             order.setTIF((OrderTIF) tifComboBox.getSelectedItem());
 
             order.setSymbol(symbolTextField.getText());
             order.setQuantity(Integer.parseInt(quantityTextField.getText()));
-            order.setOpen(order.getQuantity());
+            // order.setOpen(order.getQuantity());  DELETE THIS AND PUT IN ACK SECTION
 
             OrderType type = order.getType();
             if (type == OrderType.LIMIT || type == OrderType.STOP_LIMIT)

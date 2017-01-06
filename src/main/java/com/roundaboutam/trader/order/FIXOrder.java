@@ -4,121 +4,122 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.roundaboutam.trader.TwoWayMap;
-
 import quickfix.field.ClOrdID;
 import quickfix.field.HandlInst;
 import quickfix.field.LocateReqd;
-import quickfix.field.OrdType;
 import quickfix.field.OrderQty;
+import quickfix.field.OrigClOrdID;
 import quickfix.field.Price;
-import quickfix.field.Side;
-import quickfix.field.StopPx;
 import quickfix.field.Symbol;
+import quickfix.field.SymbolSfx;
 import quickfix.field.TargetSubID;
-import quickfix.field.TimeInForce;
 import quickfix.field.TransactTime;
 import quickfix.fix42.Message;
 import quickfix.fix42.NewOrderSingle;
+import quickfix.fix42.OrderCancelReplaceRequest;
+import quickfix.fix42.OrderCancelRequest;
 
 public class FIXOrder {
 
 	public static Message formatNewOrder(Order order) {
 
-		NewOrderSingle newOrderSingle = new NewOrderSingle(
-    			new ClOrdID(order.getID()), 
-    			new HandlInst('1'), 
-    			new Symbol(order.getSymbol()),
-    			OrderSide.toFIX(order.getSide()), 
-    			new TransactTime(), 
-    			typeToFIXType(order.getType()));
-
+		NewOrderSingle fixOrder = getNewOrderSingle(order);
 		
-		newOrderSingle.set(new OrderQty(order.getQuantity()));
-    	
-		return newOrderSingle;
+		fixOrder.setString(TargetSubID.FIELD, "ML_ARCA");
+
+		return fixOrder;
 
 	}
 
-	public static Message formatReplaceOrder(Order order) {
-		
-	}
+	public static Message formatNewOrder(VwapOrder vwapOrder) {
 
-    public Message populateOrder(Order order, Message newOrderSingle) {
-    	/*
-    	 * Used to add additional flags, many required by broker
-    	 */
-        newOrderSingle.setField(tifToFIXTif(order.getTIF()));
+		// Force OrderType to Market
+		vwapOrder.setOrderType(OrderType.MARKET);
 
-        if (order.getSide() == OrderSide.SHORT_SELL
-                || order.getSide() == OrderSide.SHORT_SELL_EXEMPT) {
-            newOrderSingle.setField(new LocateReqd(false));
-            newOrderSingle.setString(5700, "BAML");
-        }
-
-        OrderType type = order.getType();
-
-        // CUSTOM ORDERS - Always return from within brackets
-        if (type == OrderType.VWAP01) {
-            // Destination
-        	newOrderSingle.setString(TargetSubID.FIELD, "ML_ALGO_US");
-        	// Current date is automatically generated for bookends
-        	DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        	String currentDate = dateFormat.format(new Date());
-        	// All custom tags were requested to be submitted in this format
-        	String algoParams = "6401=1";
-        	algoParams = algoParams + ";6403=12"; // Percent volume of 12 percent
-        	algoParams = algoParams + ";6168=" + currentDate + "-14:32:00";  // Start time
-        	algoParams = algoParams + ";126=" + currentDate + "-20:58:00";  // End time
-        	algoParams = algoParams + ";9682=v4.3.0BRT;";
-        	newOrderSingle.setString(9999, algoParams);
-        	return newOrderSingle;
-        }
-
-        // STANDARD ORDERS
-        else if (type == OrderType.LIMIT) {
-        	newOrderSingle.setField(new Price(order.getLimit()));
-        }
-        else if (type == OrderType.STOP) {
-            newOrderSingle.setField(new StopPx(order.getStop()));
-        } 
-        else if (type == OrderType.STOP_LIMIT) {
-            newOrderSingle.setField(new Price(order.getLimit()));
-            newOrderSingle.setField(new StopPx(order.getStop()));
-        }
+		NewOrderSingle fixOrder = getNewOrderSingle(vwapOrder);
 
         // Destination
-        newOrderSingle.setString(TargetSubID.FIELD, "ML_ARCA");
-        return newOrderSingle;
-    }
+		fixOrder.setString(TargetSubID.FIELD, "ML_ALGO_US");
 
-    
-    
-    static private final TwoWayMap sideMap = new TwoWayMap();
-    static private final TwoWayMap typeMap = new TwoWayMap();
-    static private final TwoWayMap tifMap = new TwoWayMap();
+		// Current date is automatically generated for bookends
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+    	String currentDate = dateFormat.format(new Date());
 
-    static {
-        sideMap.put(OrderSide.BUY, new Side(Side.BUY));
-        sideMap.put(OrderSide.SELL, new Side(Side.SELL));
-        sideMap.put(OrderSide.SHORT_SELL, new Side(Side.SELL_SHORT));
-        sideMap.put(OrderSide.SHORT_SELL_EXEMPT, new Side(Side.SELL_SHORT_EXEMPT));
-        sideMap.put(OrderSide.CROSS, new Side(Side.CROSS));
-        sideMap.put(OrderSide.CROSS_SHORT, new Side(Side.CROSS_SHORT));
+    	// Additional VWAP tags proprietary to BAML
+    	String algoParams = "6401=1";
+    	algoParams = algoParams + ";6403=" + vwapOrder.getParticipationRate();
+    	algoParams = algoParams + ";6168=" + currentDate + "-" + vwapOrder.getStartTime();
+    	algoParams = algoParams + ";126=" + currentDate + "-" + vwapOrder.getEndTime();
+    	algoParams = algoParams + ";9682=v4.3.0BRT;";
+    	fixOrder.setString(9999, algoParams);
 
-        typeMap.put(OrderType.MARKET, new OrdType(OrdType.MARKET));
-        typeMap.put(OrderType.LIMIT, new OrdType(OrdType.LIMIT));
-        typeMap.put(OrderType.STOP, new OrdType(OrdType.STOP));
-        typeMap.put(OrderType.STOP_LIMIT, new OrdType(OrdType.STOP_LIMIT));
-        // CUSTOM
-        typeMap.put(OrderType.VWAP01, new OrdType(OrdType.MARKET));
+		return fixOrder;
 
-        tifMap.put(OrderTIF.DAY, new TimeInForce(TimeInForce.DAY));
-        tifMap.put(OrderTIF.IOC, new TimeInForce(TimeInForce.IMMEDIATE_OR_CANCEL));
-        tifMap.put(OrderTIF.OPG, new TimeInForce(TimeInForce.AT_THE_OPENING));
-        tifMap.put(OrderTIF.GTC, new TimeInForce(TimeInForce.GOOD_TILL_CANCEL));
-        tifMap.put(OrderTIF.GTX, new TimeInForce(TimeInForce.GOOD_TILL_CROSSING));
-    }
+	}
 
+	private static NewOrderSingle getNewOrderSingle(Order order) {
+
+		NewOrderSingle fixOrder = new NewOrderSingle(
+    			new ClOrdID(order.getOrderID()), 
+    			new HandlInst('1'),
+    			new Symbol(order.getSymbol()),
+    			OrderSide.toFIX(order.getOrderSide()), 
+    			new TransactTime(), 
+    			OrderType.toFIX(order.getOrderType()));
+
+    	if (order.getSuffix() != null) {
+    		fixOrder.setField(new SymbolSfx(order.getSuffix()));
+    	}
+
+    	fixOrder.setField(new OrderQty(order.getQuantity()));
+
+    	fixOrder.setField(OrderTIF.toFIX(order.getOrderTIF()));
+
+        if (order.getOrderSide() == OrderSide.SHORT_SELL) {
+        	fixOrder.setField(new LocateReqd(false));
+        	fixOrder.setString(5700, "BAML");
+        }
+
+        if (order.getOrderType() == OrderType.LIMIT) {
+        	fixOrder.setField(new Price(order.getLimitPrice()));
+        }
+        
+        return fixOrder;
+	}
+
+	public static Message formatCancelOrder(CancelOrder cancelOrder) {
+
+		OrderCancelRequest fixOrder = new OrderCancelRequest(
+	            new OrigClOrdID(cancelOrder.getOrigOrderID()), 
+	            new ClOrdID(cancelOrder.getCancelOrderID()), 
+	            new Symbol(cancelOrder.getSymbol()),
+	            OrderSide.toFIX(cancelOrder.getOrderSide()), 
+	            new TransactTime());
+
+		fixOrder.setField(new OrderQty(cancelOrder.getQuantity()));
+		
+		return fixOrder;
+	}
+
+	public static Message formatReplaceOrder(ReplaceOrder replaceOrder) {
+
+    	OrderCancelReplaceRequest fixOrder = new OrderCancelReplaceRequest(
+                new OrigClOrdID(replaceOrder.getOrigOrderID()), 
+                new ClOrdID(replaceOrder.getReplaceOrderID()), 
+                new HandlInst('1'),
+                new Symbol(replaceOrder.getSymbol()), 
+                OrderSide.toFIX(replaceOrder.getOrderSide()),
+                new TransactTime(),
+                OrderType.toFIX(replaceOrder.getOrderType()));
+
+		fixOrder.setField(new OrderQty(replaceOrder.getQuantity()));
+
+		if (replaceOrder.getOrderType() == OrderType.LIMIT) {
+			fixOrder.setField(new Price(replaceOrder.getLimitPrice()));
+    	}
+
+		return fixOrder;
+
+	}
 
 }

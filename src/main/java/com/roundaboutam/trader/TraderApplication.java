@@ -11,11 +11,13 @@ import java.util.Observer;
 
 import javax.swing.SwingUtilities;
 
+import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.FIXOrder;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderSide;
 import com.roundaboutam.trader.order.OrderTIF;
 import com.roundaboutam.trader.order.OrderType;
+import com.roundaboutam.trader.order.ReplaceOrder;
 
 import quickfix.Application;
 import quickfix.DefaultMessageFactory;
@@ -183,6 +185,12 @@ public class TraderApplication implements Application {
 
     private void executionReport(Message message, SessionID sessionID) throws FieldNotFound {
 
+    	/* Fields to pull
+    	 * 
+    	 * OrderQty or LeavesQty ?? Test what comes back if modified order
+    	 * 
+    	 */
+    	
         ExecID execID = (ExecID) message.getField(new ExecID());
         if (alreadyProcessed(execID, sessionID))
         	return;
@@ -313,71 +321,12 @@ public class TraderApplication implements Application {
     	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
     }
 
-    public void cancel(Order order) {
-
-    	String id = order.generateID();
-
-        OrderCancelRequest message = new OrderCancelRequest(
-                new OrigClOrdID(order.getID()), 
-                new ClOrdID(id), 
-                new Symbol(order.getSymbol()),
-                sideToFIXSide(order.getSide()), 
-                new TransactTime());
-
-        message.setField(new OrderQty(order.getQuantity()));
-
-        orderTableModel.addID(order, id);
-        sendToBroker(message, order.getSessionID());
-
+    public void cancel(CancelOrder cancelOrder) {
+    	sendToBroker(FIXOrder.formatCancelOrder(cancelOrder), cancelOrder.getSessionID());
     }
 
-    public void replace(Order oldOrder, Order newOrder) {
-
-    	OrderCancelReplaceRequest message = new OrderCancelReplaceRequest(
-                new OrigClOrdID(oldOrder.getID()), 
-                new ClOrdID(newOrder.getID()), 
-                new HandlInst('1'),
-                new Symbol(oldOrder.getSymbol()), 
-                sideToFIXSide(oldOrder.getSide()), 
-                new TransactTime(),
-                typeToFIXType(oldOrder.getType()));
-
-    	// This doesn't seem correct either. Just maps oldOrder object to newOrder id without
-    	// new params from newOrder. Do these get updated somewhere else?
-        orderTableModel.addID(oldOrder, newOrder.getID());
-        sendToBroker(populateCancelReplace(oldOrder, newOrder, message), oldOrder.getSessionID());
-    }
-
-    Message populateCancelReplace(Order order, Order newOrder, Message message) {
-    	if (order.getType() == OrderType.LIMIT) {
-    		message.setField(new Price(newOrder.getLimit()));
-    	}
-		message.setField(new OrderQty(newOrder.getQuantity()));
-    	return message;
-    }
-
-    public Side sideToFIXSide(OrderSide side) {
-        return (Side) sideMap.getFirst(side);
-    }
-
-    public OrderSide FIXSideToSide(Side side) {
-        return (OrderSide) sideMap.getSecond(side);
-    }
-
-    public OrdType typeToFIXType(OrderType type) {
-        return (OrdType) typeMap.getFirst(type);
-    }
-
-    public OrderType FIXTypeToType(OrdType type) {
-        return (OrderType) typeMap.getSecond(type);
-    }
-
-    public TimeInForce tifToFIXTif(OrderTIF tif) {
-        return (TimeInForce) tifMap.getFirst(tif);
-    }
-
-    public OrderTIF FIXTifToTif(TimeInForce tif) {
-        return (OrderTIF) typeMap.getSecond(tif);
+    public void replace(ReplaceOrder replaceOrder) {
+        sendToBroker(FIXOrder.formatReplaceOrder(replaceOrder), replaceOrder.getSessionID());
     }
 
     public void addLogonObserver(Observer observer) {
@@ -420,28 +369,6 @@ public class TraderApplication implements Application {
             notifyObservers(new LogonEvent(sessionID, false));
             clearChanged();
         }
-    }
-
-    static {
-        sideMap.put(OrderSide.BUY, new Side(Side.BUY));
-        sideMap.put(OrderSide.SELL, new Side(Side.SELL));
-        sideMap.put(OrderSide.SHORT_SELL, new Side(Side.SELL_SHORT));
-        sideMap.put(OrderSide.SHORT_SELL_EXEMPT, new Side(Side.SELL_SHORT_EXEMPT));
-        sideMap.put(OrderSide.CROSS, new Side(Side.CROSS));
-        sideMap.put(OrderSide.CROSS_SHORT, new Side(Side.CROSS_SHORT));
-
-        typeMap.put(OrderType.MARKET, new OrdType(OrdType.MARKET));
-        typeMap.put(OrderType.LIMIT, new OrdType(OrdType.LIMIT));
-        typeMap.put(OrderType.STOP, new OrdType(OrdType.STOP));
-        typeMap.put(OrderType.STOP_LIMIT, new OrdType(OrdType.STOP_LIMIT));
-        // CUSTOM
-        typeMap.put(OrderType.VWAP01, new OrdType(OrdType.MARKET));
-
-        tifMap.put(OrderTIF.DAY, new TimeInForce(TimeInForce.DAY));
-        tifMap.put(OrderTIF.IOC, new TimeInForce(TimeInForce.IMMEDIATE_OR_CANCEL));
-        tifMap.put(OrderTIF.OPG, new TimeInForce(TimeInForce.AT_THE_OPENING));
-        tifMap.put(OrderTIF.GTC, new TimeInForce(TimeInForce.GOOD_TILL_CANCEL));
-        tifMap.put(OrderTIF.GTX, new TimeInForce(TimeInForce.GOOD_TILL_CROSSING));
     }
 
 }

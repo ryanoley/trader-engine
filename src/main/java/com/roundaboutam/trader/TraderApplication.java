@@ -159,7 +159,6 @@ public class TraderApplication implements Application {
     }
 
     private void reverseRoute(Message message, Message reply) throws FieldNotFound {
-        // TODO: What does reverse route do??
         reply.getHeader().setString(SenderCompID.FIELD,
                 message.getHeader().getString(TargetCompID.FIELD));
         reply.getHeader().setString(TargetCompID.FIELD,
@@ -171,17 +170,9 @@ public class TraderApplication implements Application {
         ExecID execID = (ExecID) message.getField(new ExecID());
         if (alreadyProcessed(execID, sessionID)) { return; }
 
-        String orderID = message.getField(new ClOrdID()).toString();
-
-        BaseOrder order = orderBook.getOrder(orderID);
-
-        if (order == null) {
-            System.out.println("Order not found in OrderBook: ");
-        	return;
-        }
-
-        // NO IDEA WHAT THESE LOOK LIKE WHEN THEY COME BACK
         OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());
+
+        boolean acknowledged = true;
 
         if (ordStatus.valueEquals(OrdStatus.NEW)) {
         	System.out.println("Order Status - NEW");
@@ -203,56 +194,76 @@ public class TraderApplication implements Application {
         	System.out.println("Order Status - PENDING_NEW");
         }
 
-        BigDecimal fillSize;
 
         
-        OrderQty orderQty = (OrderQty) message.getField(new OrderQty());
+        
+        Order order = null;
+        String orderID = message.getString(ClOrdID.FIELD);
 
+        if (orderBook.checkCancelReplace(orderID)) {
+        	String origOrderID = message.getString(OrigClOrdID.FIELD);
+        	order = orderBook.getOrder(origOrderID);
 
-        if (message.isSetField(LastShares.FIELD)) {
-
-        	LastShares lastShares = (LastShares) message.getField(new LastShares());
-        	LeavesQty leavesQty = (LeavesQty) message.getField(new LeavesQty());
-
-            fillSize = new BigDecimal("" + lastShares.getValue());
-
-            System.out.println("LEAVES QTY: " + leavesQty);
-            System.out.println("LAST SHARES: " + lastShares);
-            System.out.println("FILL SIZE: " + fillSize);
-
+        
+        
+        
         } else {
-            // > FIX 4.1
-        	System.out.println("HERE IN ERROR?");
-            LeavesQty leavesQty = new LeavesQty();
-            message.getField(leavesQty);
-            fillSize = new BigDecimal(order.getQuantity()).subtract(new BigDecimal("" + leavesQty.getValue()));
+        	
+        
+        
+        
+        
         }
 
-        if (fillSize.compareTo(BigDecimal.ZERO) > 0) {
-            order.setOpen(order.getOpen() - (int) Double.parseDouble(fillSize.toPlainString()));
-            order.setExecuted(Integer.parseInt(message.getString(CumQty.FIELD)));
-            order.setAvgPx(Double.parseDouble(message.getString(AvgPx.FIELD)));
+        order = orderBook.getOrder(orderID);
+
+        if (order == null) {
+            System.out.println("Order not found in OrderBook: ");
+        	return;
         }
 
+        // NO IDEA WHAT THESE LOOK LIKE WHEN THEY COME BACK
 
+        // Quantities
+        int orderQty = Integer.parseInt(message.getString(OrderQty.FIELD));
+        int cumQty = Integer.parseInt(message.getString(CumQty.FIELD));
+        int leavesQty = Integer.parseInt(message.getString(LeavesQty.FIELD));
+        double avgPx = Double.parseDouble(message.getString(AvgPx.FIELD));
+        
+        int fillSize = 0;
+        if (message.isSetField(LastShares.FIELD)) {
+        	fillSize = Integer.parseInt(message.getString(LastShares.FIELD));
+        } else {
+        	fillSize = order.getQuantity() - leavesQty;
+        }
 
+        order.setExecuted(cumQty);
+        order.setAvgPx(avgPx);
+        order.setOpen(leavesQty);
+
+        // Unsure if this is needed
         try {
             order.setMessage(message.getField(new Text()).getValue());
         } catch (FieldNotFound e) {
         }
 
+
         orderTableModel.updateOrder(order, message.getField(new ClOrdID()).getValue());
+        
         observableOrder.update(order);
 
-        if (fillSize.compareTo(BigDecimal.ZERO) > 0) {
+
+        if (fillSize > 0) {
         	Execution execution = new Execution();
             execution.setExchangeID(sessionID + message.getField(new ExecID()).getValue());
 
             execution.setSymbol(message.getField(new Symbol()).getValue());
-            execution.setQuantity(fillSize.intValue());
+            execution.setQuantity(fillSize);
+
             if (message.isSetField(LastPx.FIELD)) {
                 execution.setPrice(Double.parseDouble(message.getString(LastPx.FIELD)));
             }
+
             Side side = (Side) message.getField(new Side());
             execution.setSide(FIXSideToSide(side));
             executionTableModel.addExecution(execution);
@@ -260,8 +271,8 @@ public class TraderApplication implements Application {
     }
 
     private void cancelReject(Message message, SessionID sessionID) throws FieldNotFound {
-    	String clOrdId = message.getField(new ClOrdID()).toString();
-    	orderBook.cancelRejected(clOrdId);
+    	String orderID = message.getString(ClOrdID.FIELD);
+    	orderBook.cancelRejected(orderID);
     }
 
     private boolean alreadyProcessed(ExecID execID, SessionID sessionID) {

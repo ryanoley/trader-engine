@@ -24,4 +24,5 @@ public class VwapOrder extends Order {
 	public void setParticipationRate(int participationRate) {
 		this.participationRate = participationRate;
 	}	
+
 }

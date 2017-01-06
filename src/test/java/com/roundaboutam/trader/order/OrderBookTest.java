@@ -29,12 +29,9 @@ public class OrderBookTest extends TestCase {
 
         orderBook.addReplaceOrder(replaceOrder);
 
-        assertTrue(((Order) orderBook.getOrder(order.getOrderID())).isModified());
-        assertEquals(((Order) orderBook.getOrder(order.getOrderID())).getQuantity(), 200);
-        assertEquals(((Order) orderBook.getOrder(order.getOrderID())).getLimitPrice(), 100.0);
-
-        assertEquals(((ReplaceOrder) orderBook.getOrder(replaceOrder.getOrderID())).getQuantity(), 500);
-        assertEquals(((ReplaceOrder) orderBook.getOrder(replaceOrder.getOrderID())).getLimitPrice(), 101.0);
+        assertTrue(orderBook.getOrder(order.getOrderID()).isModified());
+        assertEquals(orderBook.getOrder(order.getOrderID()).getQuantity(), 200);
+        assertEquals(orderBook.getOrder(order.getOrderID()).getLimitPrice(), 100.0);
 
 	}
 
@@ -64,8 +61,8 @@ public class OrderBookTest extends TestCase {
 
         orderBook.cancelRejected(cancelOrder.getOrderID());
 
-        assertFalse(((Order) orderBook.getOrder(order.getOrderID())).isCanceled());
-        assertEquals(((Order) orderBook.getOrder(order.getOrderID())).getMessage(), "Cancel Rejected");
+        assertFalse(orderBook.getOrder(order.getOrderID()).isCanceled());
+        assertEquals(orderBook.getOrder(order.getOrderID()).getMessage(), "Cancel Rejected");
 
 	}
 

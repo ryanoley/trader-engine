@@ -13,6 +13,7 @@ import com.roundaboutam.trader.order.ReplaceOrder;
 import java.awt.*;
 import java.awt.event.*;
 
+@SuppressWarnings("serial")
 public class CancelReplacePanel extends JPanel {
 
 	private final JLabel quantityLabel = new JLabel("Quantity");

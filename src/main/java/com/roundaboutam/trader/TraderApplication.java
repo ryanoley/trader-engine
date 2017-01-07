@@ -222,7 +222,7 @@ public class TraderApplication implements Application {
     	try {
         	Session.sendToTarget(message, sessionID);
         } catch (SessionNotFound e) {
-            System.out.println(e);
+        	System.out.println(e);
         }
     }
 

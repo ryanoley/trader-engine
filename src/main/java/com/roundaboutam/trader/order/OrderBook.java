@@ -15,7 +15,7 @@ public class OrderBook {
 	}
 
 	public void addOrder(Order order) {
-		orderMap.put(order.getOrderID(), order);		
+		orderMap.put(order.getOrderID(), order);
 	}
 
 	public void addReplaceOrder(ReplaceOrder replaceOrder) {

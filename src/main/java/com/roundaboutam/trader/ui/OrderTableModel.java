@@ -45,7 +45,10 @@ public class OrderTableModel extends AbstractTableModel {
     public void update(Order order) {
     	if (!rowToOrder.containsKey(order.getPermanentID())) {
     		addOrder(order);
+    		return;
     	}
+    	int row = idToRow.get(order.getPermanentID());
+    	fireTableRowsInserted(row, row);
     }
 
     private void addOrder(Order order) {

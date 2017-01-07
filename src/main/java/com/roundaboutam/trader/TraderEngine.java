@@ -75,13 +75,22 @@ public class TraderEngine {
     public void logout() {
         for (SessionID sessionId : initiator.getSessions()) {
         	System.out.println("Shutting down session: " + sessionId.toString());
-            Session.lookupSession(sessionId).logout("user requested");
+            Session.lookupSession(sessionId).logout("User requested");
         }
     }
 
-    public void shutdown() {
+    public void stopInitiator() {
     	logout();
-    	shutdownLatch.countDown();
+    	if(initiatorStarted)
+        	initiator.stop();
+        initiatorStarted = false;
+    }
+    
+    public void shutdown() {
+    	try {
+    		logout();
+    		shutdownLatch.countDown();
+    	} catch (Exception e) { }
     	System.exit(0);
     }
 

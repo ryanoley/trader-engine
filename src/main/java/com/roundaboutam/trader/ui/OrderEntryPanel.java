@@ -128,6 +128,7 @@ public class OrderEntryPanel extends JPanel implements Observer {
         constraints.insets = new Insets(3, 0, 0, 0);
         constraints.gridwidth = GridBagConstraints.RELATIVE;
         sessionComboBox.setName("SessionComboBox");
+        sessionComboBox.addItem(new SessionID("DEV", "DEV", "DEV"));
         add(sessionComboBox, 0, ++y);
         constraints.gridwidth = GridBagConstraints.REMAINDER;
         submitButton.setName("SubmitButton");
@@ -168,15 +169,12 @@ public class OrderEntryPanel extends JPanel implements Observer {
             OrderType item = (OrderType) typeComboBox.getSelectedItem();
             if (item == OrderType.MARKET) {
                 enableLimitPrice(false);
-                enableStopPrice(false);
                 enableTIF(true);
             } else if (item == OrderType.LIMIT) {
                 enableLimitPrice(true);
-                enableStopPrice(false);
                 enableTIF(true);
             } else {
                 enableLimitPrice(true);
-                enableStopPrice(true);
                 enableTIF(true);
             } 
             activateSubmit();
@@ -188,11 +186,6 @@ public class OrderEntryPanel extends JPanel implements Observer {
             limitPriceTextField.setEnabled(enabled);
             limitPriceTextField.setBackground(bgColor);
             limitPriceLabel.setForeground(labelColor);
-        }
-
-        private void enableStopPrice(boolean enabled) {
-            Color labelColor = enabled ? Color.black : Color.gray;
-            Color bgColor = enabled ? Color.white : Color.gray;
         }
 
         private void enableTIF(boolean enabled) {
@@ -208,10 +201,11 @@ public class OrderEntryPanel extends JPanel implements Observer {
 
     public void update(Observable o, Object arg) {
         LogonEvent logonEvent = (LogonEvent) arg;
-        if (logonEvent.isLoggedOn())
-            sessionComboBox.addItem(logonEvent.getSessionID());
-        else
+        if (logonEvent.isLoggedOn()) {
+        	sessionComboBox.addItem(logonEvent.getSessionID());
+        } else {
             sessionComboBox.removeItem(logonEvent.getSessionID());
+        }
     }
 
     private class SubmitListener implements ActionListener {

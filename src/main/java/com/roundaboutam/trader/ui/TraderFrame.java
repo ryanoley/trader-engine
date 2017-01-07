@@ -69,6 +69,14 @@ public class TraderFrame extends JFrame {
 		});
         sessionMenu.add(logoffItem);
 
+        JMenuItem stopInitiatorItem = new JMenuItem("Stop Initiator");
+        stopInitiatorItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				TraderEngine.get().stopInitiator();
+			}
+		});
+        sessionMenu.add(stopInitiatorItem);
+
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

@@ -16,16 +16,16 @@ public class Execution {
 
     private String ID = null;
     private String orderID = null;
+    private String permanentID = null;
+    private String customTag = null;
     private String exchangeID = null;
     private static int nextID = 1;
     
-    public Execution(String orderID) {
+    public Execution(String orderID, String permanentID, String customTag) {
     	ID = Integer.toString(nextID++);
     	this.orderID = orderID;
-    }
-
-    public String getID() {
-    	return ID;
+    	this.permanentID = permanentID;
+    	this.customTag = customTag;
     }
 
 	public String getSymbol() {
@@ -84,12 +84,36 @@ public class Execution {
 		this.ask = ask;
 	}
 
+	public String getID() {
+		return ID;
+	}
+
+	public void setID(String iD) {
+		ID = iD;
+	}
+
 	public String getOrderID() {
 		return orderID;
 	}
 
 	public void setOrderID(String orderID) {
 		this.orderID = orderID;
+	}
+
+	public String getPermanentID() {
+		return permanentID;
+	}
+
+	public void setPermanentID(String permanentID) {
+		this.permanentID = permanentID;
+	}
+
+	public String getCustomTag() {
+		return customTag;
+	}
+
+	public void setCustomTag(String customTag) {
+		this.customTag = customTag;
 	}
 
 	public String getExchangeID() {

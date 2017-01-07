@@ -22,5 +22,12 @@ public class OrderTest extends TestCase {
 		assertEquals(order.getSymbol(), "BRK");
 		assertEquals(order.getSuffix(), "B");
 	}
+	
+	public void testOrderPermanentID() {
+		Order order = new Order();
+		assertEquals(order.getOrderID(), order.getPermanentID());
+		order.setOrderID("1234");
+		assertFalse(order.getOrderID().equals(order.getPermanentID()));
+	}
 
 }

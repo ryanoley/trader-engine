@@ -25,7 +25,6 @@ import javax.swing.JTextField;
 import com.roundaboutam.trader.DoubleNumberTextField;
 import com.roundaboutam.trader.IntegerNumberTextField;
 import com.roundaboutam.trader.LogonEvent;
-import com.roundaboutam.trader.OrderTableModel;
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderSide;
@@ -34,12 +33,12 @@ import com.roundaboutam.trader.order.OrderType;
 
 import quickfix.SessionID;
 
+@SuppressWarnings("serial")
 public class OrderEntryPanel extends JPanel implements Observer {
 
 	private boolean symbolEntered = false;
     private boolean quantityEntered = false;
     private boolean limitEntered = false;
-    private boolean stopEntered = false;
     private boolean sessionEntered = false;
 
     private final JTextField symbolTextField = new JTextField();
@@ -50,35 +49,30 @@ public class OrderEntryPanel extends JPanel implements Observer {
     private final JComboBox tifComboBox = new JComboBox(OrderTIF.toArray());
 
     private final DoubleNumberTextField limitPriceTextField = new DoubleNumberTextField();
-    private final DoubleNumberTextField stopPriceTextField = new DoubleNumberTextField();
 
-    private final JComboBox sessionComboBox = new JComboBox();
+    private final JComboBox<SessionID> sessionComboBox = new JComboBox<SessionID>();
 
     private final JLabel limitPriceLabel = new JLabel("Limit");
-    private final JLabel stopPriceLabel = new JLabel("Stop");
     private final JLabel tifLabel = new JLabel("TIF");
 
     private final JLabel messageLabel = new JLabel(" ");
     private final JButton submitButton = new JButton("Submit");
 
-    private OrderTableModel orderTableModel = null;
     private transient TraderApplication application = null;
 
     private final GridBagConstraints constraints = new GridBagConstraints();
 
-    public OrderEntryPanel(final OrderTableModel orderTableModel,
-                final TraderApplication application) {
-        setName("OrderEntryPanel");
-        this.orderTableModel = orderTableModel;
-        this.application = application;
+    public OrderEntryPanel(final TraderApplication application) {
 
+    	setName("OrderEntryPanel");
+
+    	this.application = application;
         application.addLogonObserver(this);
 
         SubmitActivator activator = new SubmitActivator();
         symbolTextField.addKeyListener(activator);
         quantityTextField.addKeyListener(activator);
         limitPriceTextField.addKeyListener(activator);
-        stopPriceTextField.addKeyListener(activator);
         sessionComboBox.addItemListener(activator);
 
         setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
@@ -113,7 +107,6 @@ public class OrderEntryPanel extends JPanel implements Observer {
         add(new JLabel("Type"), ++x, y);
         constraints.ipadx = 30;
         add(limitPriceLabel, ++x, y);
-        add(stopPriceLabel, ++x, y);
         constraints.ipadx = 0;
         add(tifLabel, ++x, y);
         constraints.ipadx = 30;
@@ -129,8 +122,6 @@ public class OrderEntryPanel extends JPanel implements Observer {
         add(typeComboBox, ++x, y);
         limitPriceTextField.setName("LimitPriceTextField");
         add(limitPriceTextField, ++x, y);
-        stopPriceTextField.setName("StopPriceTextField");
-        add(stopPriceTextField, ++x, y);
         tifComboBox.setName("TifComboBox");
         add(tifComboBox, ++x, y);
 
@@ -145,7 +136,6 @@ public class OrderEntryPanel extends JPanel implements Observer {
         add(messageLabel, 0, ++y);
 
         typeComboBox.addItemListener(new PriceListener());
-        typeComboBox.setSelectedItem(OrderType.STOP);
         typeComboBox.setSelectedItem(OrderType.MARKET);
 
         Font font = new Font(messageLabel.getFont().getFontName(), Font.BOLD, 12);
@@ -171,13 +161,6 @@ public class OrderEntryPanel extends JPanel implements Observer {
         	submitButton.setEnabled(activate);
         else if (type == OrderType.LIMIT)
             submitButton.setEnabled(activate && limitEntered);
-        else if (type == OrderType.STOP)
-            submitButton.setEnabled(activate && stopEntered);
-        else if (type == OrderType.STOP_LIMIT)
-            submitButton.setEnabled(activate && limitEntered && stopEntered);
-        // Custom orders
-        else if (type == OrderType.VWAP01)
-        	submitButton.setEnabled(activate);
     }
 
     private class PriceListener implements ItemListener {
@@ -187,18 +170,10 @@ public class OrderEntryPanel extends JPanel implements Observer {
                 enableLimitPrice(false);
                 enableStopPrice(false);
                 enableTIF(true);
-            } else if (item == OrderType.STOP) {
-                enableLimitPrice(false);
-                enableStopPrice(true);
-                enableTIF(true);
             } else if (item == OrderType.LIMIT) {
                 enableLimitPrice(true);
                 enableStopPrice(false);
                 enableTIF(true);
-            } else if (item == OrderType.VWAP01) {
-                enableLimitPrice(false);
-                enableStopPrice(false);
-                enableTIF(false);
             } else {
                 enableLimitPrice(true);
                 enableStopPrice(true);
@@ -218,9 +193,6 @@ public class OrderEntryPanel extends JPanel implements Observer {
         private void enableStopPrice(boolean enabled) {
             Color labelColor = enabled ? Color.black : Color.gray;
             Color bgColor = enabled ? Color.white : Color.gray;
-            stopPriceTextField.setEnabled(enabled);
-            stopPriceTextField.setBackground(bgColor);
-            stopPriceLabel.setForeground(labelColor);
         }
 
         private void enableTIF(boolean enabled) {
@@ -232,7 +204,6 @@ public class OrderEntryPanel extends JPanel implements Observer {
             tifComboBox.setBackground(bgColor);
             tifLabel.setForeground(labelColor);
         }
-
     }
 
     public void update(Observable o, Object arg) {
@@ -246,24 +217,21 @@ public class OrderEntryPanel extends JPanel implements Observer {
     private class SubmitListener implements ActionListener {
 
     	public void actionPerformed(ActionEvent e) {
-            Order order = new Order();
 
-            order.setSide((OrderSide) sideComboBox.getSelectedItem());
-            order.setType((OrderType) typeComboBox.getSelectedItem());
-            order.setTIF((OrderTIF) tifComboBox.getSelectedItem());
+    		Order order = new Order();
+            order.setOrderSide((OrderSide) sideComboBox.getSelectedItem());
+            order.setOrderType((OrderType) typeComboBox.getSelectedItem());
+            order.setOrderTIF((OrderTIF) tifComboBox.getSelectedItem());
 
             order.setSymbol(symbolTextField.getText());
+
             order.setQuantity(Integer.parseInt(quantityTextField.getText()));
-            // order.setOpen(order.getQuantity());  DELETE THIS AND PUT IN ACK SECTION
 
-            OrderType type = order.getType();
-            if (type == OrderType.LIMIT || type == OrderType.STOP_LIMIT)
-                order.setLimit(limitPriceTextField.getText());
-            if (type == OrderType.STOP || type == OrderType.STOP_LIMIT)
-                order.setStop(stopPriceTextField.getText());
+            OrderType type = order.getOrderType();
+            if (type == OrderType.LIMIT)
+                order.setLimitPrice(Double.parseDouble(limitPriceTextField.getText()));
+
             order.setSessionID((SessionID) sessionComboBox.getSelectedItem());
-
-            orderTableModel.addOrder(order);
 
             application.send(order);
         }
@@ -278,8 +246,6 @@ public class OrderEntryPanel extends JPanel implements Observer {
                 quantityEntered = testField(obj);
             } else if (obj == limitPriceTextField) {
                 limitEntered = testField(obj);
-            } else if (obj == stopPriceTextField) {
-                stopEntered = testField(obj);
             }
             activateSubmit();
         }

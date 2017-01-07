@@ -5,8 +5,10 @@ import javax.swing.*;
 import com.roundaboutam.trader.DoubleNumberTextField;
 import com.roundaboutam.trader.IntegerNumberTextField;
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderType;
+import com.roundaboutam.trader.order.ReplaceOrder;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -69,7 +71,7 @@ public class CancelReplacePanel extends JPanel {
     	if (order.getOpen() > 0) {
     		enableCancelReplaceButtons(true);
     		enableQuantityField(true);
-    		if (order.getType() == OrderType.LIMIT) {
+    		if (order.getOrderType() == OrderType.LIMIT) {
     			enableLimitPriceField(true);
     		} else {
     			enableLimitPriceField(false);
@@ -113,9 +115,9 @@ public class CancelReplacePanel extends JPanel {
         quantityTextField.setText
         (Integer.toString(order.getOpen()));
 
-        Double limit = order.getLimit();
+        Double limit = order.getLimitPrice();
         if (limit != null)
-            limitPriceTextField.setText(order.getLimit().toString());
+            limitPriceTextField.setText(order.getLimitPrice().toString());
         orderSpecificFieldEnabler();
     }
 
@@ -128,22 +130,17 @@ public class CancelReplacePanel extends JPanel {
 
     private class CancelListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            application.cancel(order);
-        	System.out.println("Cancelling order: " + order);
+            CancelOrder cancelOrder = new CancelOrder(order);
+        	application.cancel(cancelOrder);
         }
     }
 
     private class ReplaceListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-        	// Clone method sets OriginalID and generates new ID
-        	Order newOrder = (Order) order.clone();
-        	newOrder.setQuantity(Integer.parseInt(quantityTextField.getText()));
-            newOrder.setLimit(Double.parseDouble(limitPriceTextField.getText()));
-            newOrder.setRejected(false);
-            newOrder.setCanceled(false);
-            newOrder.setOpen(0);
-            newOrder.setExecuted(0);  // Do we want to do this if some of VWAP already executed?
-            application.replace(order, newOrder);
+        	ReplaceOrder replaceOrder = new ReplaceOrder(order);
+        	replaceOrder.setQuantity(Integer.parseInt(quantityTextField.getText()));
+        	replaceOrder.setLimitPrice(Double.parseDouble(limitPriceTextField.getText()));
+            application.replace(replaceOrder);
         }
     }
 }

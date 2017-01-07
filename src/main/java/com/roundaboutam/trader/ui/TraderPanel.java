@@ -15,7 +15,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.roundaboutam.trader.OrderTableModel;
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
 
@@ -28,11 +27,9 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
     private final CancelReplacePanel cancelReplacePanel;
     private final OrderTableModel orderTableModel;
 
-    public TraderPanel(OrderTableModel orderTableModel,
-                TraderApplication application) {
+    public TraderPanel(TraderApplication application) {
 
         setName("TraderEnginePanel");
-        this.orderTableModel = orderTableModel;
 
         setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         setLayout(new GridBagLayout());
@@ -40,7 +37,8 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.weightx = 1;
 
-        orderEntryPanel = new OrderEntryPanel(orderTableModel, application);
+        orderTableModel = new OrderTableModel();
+        orderEntryPanel = new OrderEntryPanel(application);
         constraints.insets = new Insets(0, 0, 5, 0);
         add(orderEntryPanel, constraints);
 
@@ -66,6 +64,7 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
 
     public void update(Observable o, Object arg) {
         // OrderObserver
+    	orderTableModel.update((Order) arg);
     	cancelReplacePanel.update();
     }
 

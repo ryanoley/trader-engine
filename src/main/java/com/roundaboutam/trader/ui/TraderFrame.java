@@ -12,27 +12,19 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
-import com.roundaboutam.trader.ExecutionTableModel;
-import com.roundaboutam.trader.OrderTableModel;
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.TraderEngine;
 
 @SuppressWarnings("serial")
 public class TraderFrame extends JFrame {
 
-	public TraderFrame(OrderTableModel orderTableModel,
-            final TraderApplication application) {
-
+	public TraderFrame(final TraderApplication application) {
 		super();
 		setTitle("Trader Engine");
 		setSize(900, 700);
-
-		createMenuBar(application);
-		getContentPane().add(new TraderPanel(orderTableModel, application),
-	                BorderLayout.CENTER);
-
+		createMenuBar();
 		addWindowClosingHandler();
-
+		getContentPane().add(new TraderPanel(application), BorderLayout.CENTER);
 		setVisible(true);
 	}
 
@@ -54,7 +46,7 @@ public class TraderFrame extends JFrame {
 		TraderEngine.get().shutdown();
 	}
 
-	private void createMenuBar(final TraderApplication application) {
+	private void createMenuBar() {
 
 		JMenuBar menubar = new JMenuBar();
 

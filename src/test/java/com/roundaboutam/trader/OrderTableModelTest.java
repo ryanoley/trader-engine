@@ -1,10 +1,10 @@
 package com.roundaboutam.trader;
 
-import com.roundaboutam.trader.OrderTableModel;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderSide;
 import com.roundaboutam.trader.order.OrderTIF;
 import com.roundaboutam.trader.order.OrderType;
+import com.roundaboutam.trader.ui.OrderTableModel;
 
 import junit.framework.TestCase;
 

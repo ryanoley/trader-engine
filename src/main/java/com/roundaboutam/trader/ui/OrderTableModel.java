@@ -1,4 +1,4 @@
-package com.roundaboutam.trader;
+package com.roundaboutam.trader.ui;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -27,7 +27,8 @@ public class OrderTableModel extends AbstractTableModel {
     private final String[] headers;
 
     public OrderTableModel() {
-        rowToOrder = new HashMap<Integer, Order>();
+
+    	rowToOrder = new HashMap<Integer, Order>();
         idToRow = new HashMap<String, Integer>();
         idToOrder = new HashMap<String, Order>();
 
@@ -41,46 +42,18 @@ public class OrderTableModel extends AbstractTableModel {
         return false;
     }
 
-    public void addOrder(Order order) {
-        int row = rowToOrder.size();
+    public void update(Order order) {
+    	if (!rowToOrder.containsKey(order.getPermanentID())) {
+    		addOrder(order);
+    	}
+    }
 
+    private void addOrder(Order order) {
+    	int row = rowToOrder.size();
         rowToOrder.put(row, order);
-        idToRow.put(order.getID(), row);
-        idToOrder.put(order.getID(), order);
-
+        idToRow.put(order.getPermanentID(), row);
+        idToOrder.put(order.getPermanentID(), order);
         fireTableRowsInserted(row, row);
-    }
-
-    public void updateOrder(Order order, String id) {
-
-        if (!id.equals(order.getID())) {
-            String originalID = order.getID();
-            order.setID(id);
-            replaceOrder(order, originalID);
-            return;
-        }
-
-        Integer row = idToRow.get(order.getID());
-        if (row == null)
-            return;
-        fireTableRowsUpdated(row, row);
-    }
-
-    public void replaceOrder(Order order, String originalID) {
-
-        Integer row = idToRow.get(originalID);
-        if (row == null)
-            return;
-
-        rowToOrder.put(row, order);
-        idToRow.put(order.getID(), row);
-        idToOrder.put(order.getID(), order);
-
-        fireTableRowsUpdated(row, row);
-    }
-
-    public void addID(Order order, String newID) {
-        idToOrder.put(newID, order);
     }
 
     public Order getOrder(String id) {
@@ -121,13 +94,13 @@ public class OrderTableModel extends AbstractTableModel {
         case EXECUTED:
             return order.getExecuted();
         case SIDE:
-            return order.getSide();
+            return order.getOrderSide();
         case TYPE:
-            return order.getType();
+            return order.getOrderType();
         case LIMITPRICE:
-            return order.getLimit();
+            return order.getLimitPrice();
         case STOPPRICE:
-            return order.getStop();
+            return order.getStopPrice();
         case AVGPX:
             return order.getAvgPx();
         case TARGET:

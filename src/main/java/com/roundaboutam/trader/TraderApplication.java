@@ -55,20 +55,16 @@ public class TraderApplication implements Application {
 
     private final ObservableOrder observableOrder = new ObservableOrder();
     private final ObservableLogon observableLogon = new ObservableLogon();
+	private final OrderBook orderBook = new OrderBook();
+	private final ExecutionBook executionBook = new ExecutionBook();
 
     private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
-	private OrderBook orderBook = null;
-	private ExecutionBook executionBook = null;
 
 	static private final HashMap<SessionID, HashSet<ExecID>> execIDs = 
     		new HashMap<SessionID, HashSet<ExecID>>();
 
-	public TraderApplication(OrderBook orderBook, 
-			ExecutionBook executionBook) {
-        this.orderBook = orderBook;
-        this.executionBook = executionBook;
-	}
+	public TraderApplication() { }
 
     // Main message handler
     public void fromApp(Message message, SessionID sessionID) throws FieldNotFound,
@@ -175,10 +171,12 @@ public class TraderApplication implements Application {
         int fillSize = orderBook.processExecutionReport(orderID, orderQty, cumQty, 
         		leavesQty, avgPx, orderMessage);
 
-        observableOrder.update();
+        observableOrder.update(orderBook.getOrder(orderID));
 
         if (fillSize > 0) {
-        	Execution execution = new Execution(orderID);
+        	Execution execution = new Execution(orderID, 
+        			orderBook.getOrder(orderID).getPermanentID(),
+        			orderBook.getOrder(orderID).getCustomTag());
 
             execution.setSymbol(message.getString(Symbol.FIELD));
             if (message.isSetField(SymbolSfx.FIELD)) {
@@ -230,6 +228,7 @@ public class TraderApplication implements Application {
 
     public void send(Order order) {
     	orderBook.addOrder(order);
+    	observableOrder.update(order);
     	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
     }
 
@@ -260,9 +259,9 @@ public class TraderApplication implements Application {
     }
 
     private static class ObservableOrder extends Observable {
-        public void update() {
+        public void update(Order order) {
             setChanged();
-            notifyObservers();
+            notifyObservers(order);
             clearChanged();
         }
     }

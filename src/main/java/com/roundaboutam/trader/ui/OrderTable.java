@@ -1,10 +1,9 @@
 package com.roundaboutam.trader.ui;
 
-
 import javax.swing.table.*;
 
-import com.roundaboutam.trader.OrderTableModel;
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
 
 import javax.swing.*;
@@ -27,8 +26,8 @@ public class OrderTable extends JTable implements MouseListener {
 
         int open = order.getOpen();
         int executed = order.getExecuted();
-        boolean rejected = order.getRejected();
-        boolean canceled = order.getCanceled();
+        boolean rejected = order.isRejected();
+        boolean canceled = order.isCanceled();
 
         DefaultTableCellRenderer r = (DefaultTableCellRenderer) renderer;
         r.setForeground(Color.black);
@@ -52,7 +51,8 @@ public class OrderTable extends JTable implements MouseListener {
             return;
         int row = rowAtPoint(e.getPoint());
         Order order = ((OrderTableModel) dataModel).getOrder(row);
-        application.cancel(order);
+        CancelOrder cancelOrder = new CancelOrder(order);
+        application.cancel(cancelOrder);
     }
 
     public void mouseEntered(MouseEvent e) {}

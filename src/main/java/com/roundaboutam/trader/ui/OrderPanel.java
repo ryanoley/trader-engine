@@ -8,7 +8,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import com.roundaboutam.trader.OrderTableModel;
 import com.roundaboutam.trader.TraderApplication;
 
 public class OrderPanel extends JPanel {

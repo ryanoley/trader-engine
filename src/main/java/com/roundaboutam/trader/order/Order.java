@@ -12,6 +12,7 @@ public class Order {
     // Trading Session related fields
 	private SessionID sessionID = null;
     private String orderID = null;
+    private String permanentID = null;
 
     // Order related fields
     private OrderSide orderSide = null;
@@ -37,6 +38,7 @@ public class Order {
 
     public Order() {
         orderID = IdGenerator.makeID();
+        permanentID = orderID;
     }
 
     public int processFill(int cumQty, double avgPx, String orderMessage) {
@@ -91,6 +93,10 @@ public class Order {
 
 	public void setOrderID(String orderID) {
 		this.orderID = orderID;
+	}
+
+	public String getPermanentID() {
+		return permanentID;
 	}
 
 	public OrderSide getOrderSide() {

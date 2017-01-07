@@ -2,7 +2,7 @@ package com.roundaboutam.trader.order;
 
 import quickfix.SessionID;
 
-public class Order extends BaseOrder {
+public class Order {
 
 	// Identification fields
     private String customTag = null;
@@ -37,6 +37,16 @@ public class Order extends BaseOrder {
 
     public Order() {
         orderID = IdGenerator.makeID();
+    }
+
+    public int processFill(int cumQty, double avgPx, String orderMessage) {
+    	int fillSize = cumQty - getExecuted();
+    	setExecuted(cumQty);
+    	setAvgPx(avgPx);
+    	setOpen(getQuantity() - cumQty);
+    	setMessage(orderMessage);
+    	setAcknowledged(true);
+    	return fillSize;
     }
 
 	public String getCustomTag() {

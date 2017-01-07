@@ -15,12 +15,12 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.roundaboutam.trader.ExecutionTableModel;
 import com.roundaboutam.trader.OrderTableModel;
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
 
 
+@SuppressWarnings("serial")
 public class TraderPanel extends JPanel implements Observer, ActionListener {
 
     private final OrderEntryPanel orderEntryPanel;
@@ -29,7 +29,6 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
     private final OrderTableModel orderTableModel;
 
     public TraderPanel(OrderTableModel orderTableModel,
-                ExecutionTableModel executionTableModel,
                 TraderApplication application) {
 
         setName("TraderEnginePanel");
@@ -50,10 +49,8 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
 
         JTabbedPane tabbedPane = new JTabbedPane();
         orderPanel = new OrderPanel(orderTableModel, application);
-        ExecutionPanel executionPanel = new ExecutionPanel(executionTableModel);
 
         tabbedPane.add("Orders", orderPanel);
-        tabbedPane.add("Executions", executionPanel);
         add(tabbedPane, constraints);
 
         cancelReplacePanel = new CancelReplacePanel(application);
@@ -68,7 +65,8 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
     }
 
     public void update(Observable o, Object arg) {
-        cancelReplacePanel.update();
+        // OrderObserver
+    	cancelReplacePanel.update();
     }
 
     public void actionPerformed(ActionEvent e) {

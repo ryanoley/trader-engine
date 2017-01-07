@@ -2,7 +2,7 @@ package com.roundaboutam.trader.order;
 
 import quickfix.SessionID;
 
-public class CancelOrder extends BaseOrder {
+public class CancelOrder {
 
 	// Identification fields
 	private String symbol = null;
@@ -30,7 +30,6 @@ public class CancelOrder extends BaseOrder {
     	this.symbol = order.getSymbol();
     	this.orderSide = order.getOrderSide();
     	this.quantity = order.getQuantity();
-    	order.setCanceled(true);
     }
 
 	public String getSymbol() {

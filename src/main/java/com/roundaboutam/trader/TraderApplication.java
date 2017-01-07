@@ -1,9 +1,5 @@
 package com.roundaboutam.trader;
 
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Observable;
@@ -11,16 +7,14 @@ import java.util.Observer;
 
 import javax.swing.SwingUtilities;
 
-import com.roundaboutam.trader.execution.Execution;
-import com.roundaboutam.trader.order.BaseOrder;
-import com.roundaboutam.trader.order.CancelOrder;
-import com.roundaboutam.trader.order.FIXOrder;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderBook;
-import com.roundaboutam.trader.order.OrderSide;
-import com.roundaboutam.trader.order.OrderTIF;
-import com.roundaboutam.trader.order.OrderType;
+import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.ReplaceOrder;
+import com.roundaboutam.trader.order.FIXOrder;
+import com.roundaboutam.trader.order.OrderSide;
+import com.roundaboutam.trader.execution.Execution;
+import com.roundaboutam.trader.execution.ExecutionBook;
 
 import quickfix.Application;
 import quickfix.DefaultMessageFactory;
@@ -41,53 +35,39 @@ import quickfix.field.ClOrdID;
 import quickfix.field.CumQty;
 import quickfix.field.DeliverToCompID;
 import quickfix.field.ExecID;
-import quickfix.field.HandlInst;
 import quickfix.field.LastPx;
-import quickfix.field.LastShares;
 import quickfix.field.LeavesQty;
-import quickfix.field.LocateReqd;
 import quickfix.field.MsgSeqNum;
 import quickfix.field.MsgType;
 import quickfix.field.OrdStatus;
-import quickfix.field.OrdType;
 import quickfix.field.OrderQty;
-import quickfix.field.OrigClOrdID;
-import quickfix.field.Price;
 import quickfix.field.RefMsgType;
 import quickfix.field.RefSeqNum;
 import quickfix.field.SenderCompID;
 import quickfix.field.SessionRejectReason;
 import quickfix.field.Side;
-import quickfix.field.StopPx;
 import quickfix.field.Symbol;
+import quickfix.field.SymbolSfx;
 import quickfix.field.TargetCompID;
-import quickfix.field.TargetSubID;
 import quickfix.field.Text;
-import quickfix.field.TimeInForce;
-import quickfix.field.TransactTime;
-
-import quickfix.fix42.NewOrderSingle;
-import quickfix.fix42.OrderCancelRequest;
-import quickfix.fix42.OrderCancelReplaceRequest;
-
 
 public class TraderApplication implements Application {
 
     private final ObservableOrder observableOrder = new ObservableOrder();
     private final ObservableLogon observableLogon = new ObservableLogon();
-	
+
     private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
 	private OrderBook orderBook = null;
-	private ExecutionTableModel executionTableModel = null;
+	private ExecutionBook executionBook = null;
 
 	static private final HashMap<SessionID, HashSet<ExecID>> execIDs = 
     		new HashMap<SessionID, HashSet<ExecID>>();
 
 	public TraderApplication(OrderBook orderBook, 
-			ExecutionTableModel executionTable) {
+			ExecutionBook executionBook) {
         this.orderBook = orderBook;
-        this.executionTableModel = executionTable;
+        this.executionBook = executionBook;
 	}
 
     // Main message handler
@@ -170,103 +150,53 @@ public class TraderApplication implements Application {
         ExecID execID = (ExecID) message.getField(new ExecID());
         if (alreadyProcessed(execID, sessionID)) { return; }
 
-        OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());
-
-        boolean acknowledged = true;
-
-        if (ordStatus.valueEquals(OrdStatus.NEW)) {
-        	System.out.println("Order Status - NEW");
-        } else if (ordStatus.valueEquals(OrdStatus.PARTIALLY_FILLED)) {
-        	System.out.println("Order Status - PARTIALLY_FILLED");
-        } else if (ordStatus.valueEquals(OrdStatus.FILLED)) {
-        	System.out.println("Order Status - FILLED");
-        } else if (ordStatus.valueEquals(OrdStatus.DONE_FOR_DAY)) {
-        	System.out.println("Order Status - DONE_FOR_DAY");
-        } else if (ordStatus.valueEquals(OrdStatus.CANCELED)) {
-        	System.out.println("Order Status - CANCELED");
-        } else if (ordStatus.valueEquals(OrdStatus.REPLACED)) {
-        	System.out.println("Order Status - REPLACED");
-        } else if (ordStatus.valueEquals(OrdStatus.PENDING_CANCEL)) {
-        	System.out.println("Order Status - PENDING_CANCEL");
-        } else if (ordStatus.valueEquals(OrdStatus.REJECTED)) {
-        	System.out.println("Order Status - REJECTED");
-        } else if (ordStatus.valueEquals(OrdStatus.PENDING_NEW)) {
-        	System.out.println("Order Status - PENDING_NEW");
-        }
-
-
-        
-        
-        Order order = null;
         String orderID = message.getString(ClOrdID.FIELD);
 
-        if (orderBook.checkCancelReplace(orderID)) {
-        	String origOrderID = message.getString(OrigClOrdID.FIELD);
-        	order = orderBook.getOrder(origOrderID);
+        OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());
 
-        
-        
-        
-        } else {
-        	
-        
-        
-        
-        
-        }
-
-        order = orderBook.getOrder(orderID);
-
-        if (order == null) {
-            System.out.println("Order not found in OrderBook: ");
+        if (ordStatus.valueEquals(OrdStatus.REJECTED)) {
+        	orderBook.orderRejected(orderID);
+        	return;
+        } else if (ordStatus.valueEquals(OrdStatus.CANCELED) 
+        		|| ordStatus.valueEquals(OrdStatus.DONE_FOR_DAY)) {
+        	orderBook.orderCanceled(orderID);
         	return;
         }
-
-        // NO IDEA WHAT THESE LOOK LIKE WHEN THEY COME BACK
 
         // Quantities
         int orderQty = Integer.parseInt(message.getString(OrderQty.FIELD));
         int cumQty = Integer.parseInt(message.getString(CumQty.FIELD));
         int leavesQty = Integer.parseInt(message.getString(LeavesQty.FIELD));
         double avgPx = Double.parseDouble(message.getString(AvgPx.FIELD));
-        
-        int fillSize = 0;
-        if (message.isSetField(LastShares.FIELD)) {
-        	fillSize = Integer.parseInt(message.getString(LastShares.FIELD));
-        } else {
-        	fillSize = order.getQuantity() - leavesQty;
-        }
+        String orderMessage = message.getString(Text.FIELD);
 
-        order.setExecuted(cumQty);
-        order.setAvgPx(avgPx);
-        order.setOpen(leavesQty);
+        System.out.println("Qty: " + orderQty + "  Executed: " + cumQty + "  Leaves: " + leavesQty); // DEBUG
 
-        // Unsure if this is needed
-        try {
-            order.setMessage(message.getField(new Text()).getValue());
-        } catch (FieldNotFound e) {
-        }
+        int fillSize = orderBook.processExecutionReport(orderID, orderQty, cumQty, 
+        		leavesQty, avgPx, orderMessage);
 
-
-        orderTableModel.updateOrder(order, message.getField(new ClOrdID()).getValue());
-        
-        observableOrder.update(order);
-
+        observableOrder.update();
 
         if (fillSize > 0) {
-        	Execution execution = new Execution();
-            execution.setExchangeID(sessionID + message.getField(new ExecID()).getValue());
+        	Execution execution = new Execution(orderID);
 
-            execution.setSymbol(message.getField(new Symbol()).getValue());
+            execution.setSymbol(message.getString(Symbol.FIELD));
+            if (message.isSetField(SymbolSfx.FIELD)) {
+                execution.setSuffix(message.getString(SymbolSfx.FIELD));
+            }
             execution.setQuantity(fillSize);
-
             if (message.isSetField(LastPx.FIELD)) {
                 execution.setPrice(Double.parseDouble(message.getString(LastPx.FIELD)));
             }
+            execution.setSide(OrderSide.fromFIX((Side) message.getField(new Side())));
 
-            Side side = (Side) message.getField(new Side());
-            execution.setSide(FIXSideToSide(side));
-            executionTableModel.addExecution(execution);
+        	// TODO: Get BidAsk Prices to send with execution report
+            //execution.setBid(0);
+            //execution.setAsk(0);
+
+            execution.setExchangeID(message.getString(ExecID.FIELD));
+
+            executionBook.addExecution(execution);
         }
     }
 
@@ -330,9 +260,9 @@ public class TraderApplication implements Application {
     }
 
     private static class ObservableOrder extends Observable {
-        public void update(Order order) {
+        public void update() {
             setChanged();
-            notifyObservers(order);
+            notifyObservers();
             clearChanged();
         }
     }

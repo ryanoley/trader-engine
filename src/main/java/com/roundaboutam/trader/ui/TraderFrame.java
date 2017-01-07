@@ -20,7 +20,7 @@ import com.roundaboutam.trader.TraderEngine;
 @SuppressWarnings("serial")
 public class TraderFrame extends JFrame {
 
-	public TraderFrame(OrderTableModel orderTableModel, ExecutionTableModel executionTableModel,
+	public TraderFrame(OrderTableModel orderTableModel,
             final TraderApplication application) {
 
 		super();
@@ -28,7 +28,7 @@ public class TraderFrame extends JFrame {
 		setSize(900, 700);
 
 		createMenuBar(application);
-		getContentPane().add(new TraderPanel(orderTableModel, executionTableModel, application),
+		getContentPane().add(new TraderPanel(orderTableModel, application),
 	                BorderLayout.CENTER);
 
 		addWindowClosingHandler();

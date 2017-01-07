@@ -7,53 +7,107 @@ public class OrderBook {
 	private final HashMap<String, Order> orderMap;
 	private final HashMap<String, ReplaceOrder> replaceOrderMap;
 	private final HashMap<String, CancelOrder> cancelOrderMap;
-	private final HashMap<String, Boolean> cancelReplaceMap;
 
 	public OrderBook() {
 		orderMap = new HashMap<String, Order>();
 		replaceOrderMap = new HashMap<String, ReplaceOrder>();
 		cancelOrderMap = new HashMap<String, CancelOrder>();
-		cancelReplaceMap = new HashMap<String, Boolean>();
 	}
 
 	public void addOrder(Order order) {
-		orderMap.put(order.getOrderID(), order);
-		cancelReplaceMap.put(order.getOrderID(), false);
+		orderMap.put(order.getOrderID(), order);		
 	}
 
 	public void addReplaceOrder(ReplaceOrder replaceOrder) {
 		replaceOrderMap.put(replaceOrder.getOrderID(), replaceOrder);
-		cancelReplaceMap.put(replaceOrder.getOrderID(), true);
 	}
 
 	public void addCancelOrder(CancelOrder cancelOrder) {
 		cancelOrderMap.put(cancelOrder.getOrderID(), cancelOrder);
-		cancelReplaceMap.put(cancelOrder.getOrderID(), true);
-	}
-
-	public boolean checkCancelReplace(String orderID) {
-		return cancelReplaceMap.get(orderID);
 	}
 
 	public Order getOrder(String orderID) {
-		if (replaceOrderMap.containsKey(orderID))
-			return orderMap.get(replaceOrderMap.get(orderID).getOrigOrderID());
-		else if (replaceOrderMap.containsKey(orderID))
-			return orderMap.get(cancelOrderMap.get(orderID).getOrigOrderID());
-		else
 			return orderMap.get(orderID);
 	}
 
 	public void cancelRejected(String orderID) {
+		// TODO: Log these rejects
 		if (replaceOrderMap.containsKey(orderID)) {
 			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
-			orderMap.get(replaceOrder.getOrigOrderID()).setModified(false);
+			replaceOrder.setRejected(true);
 			orderMap.get(replaceOrder.getOrigOrderID()).setMessage("Replace Rejected");
 		} else if (cancelOrderMap.containsKey(orderID)) {
 			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
-			orderMap.get(cancelOrder.getOrigOrderID()).setCanceled(false);
+			cancelOrder.setRejected(true);
 			orderMap.get(cancelOrder.getOrigOrderID()).setMessage("Cancel Rejected");
 		}
+	}
+
+	public int processExecutionReport(String orderID, int orderQty, int cumQty, int leavesQty,
+			double avgPx, String orderMessage) {
+
+		Order order = null;
+
+		if (replaceOrderMap.containsKey(orderID)) {
+
+			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
+			// TODO: This should be logged
+			replaceOrder.setAcknowledged(true);
+
+			order = orderMap.get(replaceOrder.getOrigOrderID());
+
+			order.setQuantity(replaceOrder.getQuantity());
+			order.setLimitPrice(replaceOrder.getLimitPrice());
+			order.setStopPrice(replaceOrder.getStopPrice());
+			order.setOpen(order.getQuantity() - order.getExecuted());
+
+			orderMap.put(replaceOrder.getOrderID(), order);
+
+		} else if (cancelOrderMap.containsKey(orderID)) {
+
+			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
+			// TODO: This should be logged
+			cancelOrder.setAcknowledged(true);
+
+			order = orderMap.get(cancelOrder.getOrigOrderID());
+
+			order.setCanceled(true);
+			order.setOpen(0);
+
+			orderMap.put(cancelOrder.getOrderID(), order);
+
+		} else {
+			order = orderMap.get(orderID);
+		}
+
+		// For debugging
+		if (order.getQuantity() != orderQty) { 
+			orderMessage = "QUANTITY MISMATCH";
+			System.out.println(orderMessage);
+		}
+
+		if (order.getOpen() != leavesQty) {
+			orderMessage = "SHARES REMAINING MISMATCH";
+			System.out.println(orderMessage);			
+		}
+
+		int fillSize = order.processFill(cumQty, avgPx, orderMessage);
+
+		return fillSize;
+	}
+
+	public void orderRejected(String orderID) {
+		// TODO: Log this?
+		Order order = orderMap.get(orderID);
+		order.setRejected(true);
+		order.setOpen(0);
+	}
+
+	public void orderCanceled(String orderID) {
+		// TODO: Log this?
+		Order order = orderMap.get(orderID);
+		order.setCanceled(true);
+		order.setOpen(0);		
 	}
 
 }

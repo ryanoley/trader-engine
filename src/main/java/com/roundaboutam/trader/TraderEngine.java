@@ -8,6 +8,8 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.roundaboutam.trader.execution.ExecutionBook;
+import com.roundaboutam.trader.order.OrderBook;
 import com.roundaboutam.trader.ui.TraderFrame;
 
 import quickfix.DefaultMessageFactory;
@@ -39,10 +41,13 @@ public class TraderEngine {
         inputStream.close();
         boolean logHeartbeats = Boolean.valueOf(System.getProperty("logHeartbeats", "false"));
 
-		OrderTableModel orderTableModel = new OrderTableModel();
-        ExecutionTableModel executionTableModel = new ExecutionTableModel();
-        TraderApplication application = new TraderApplication(orderTableModel,
-    			executionTableModel);
+        OrderBook orderBook = new OrderBook();
+        ExecutionBook executionBook = new ExecutionBook();
+
+		OrderTableModel orderTableModel = new OrderTableModel(orderBook);
+
+        TraderApplication application = new TraderApplication(orderBook, executionBook);
+
         MessageStoreFactory messageStoreFactory = new FileStoreFactory(settings);
         LogFactory logFactory = new ScreenLogFactory(true, true, true, logHeartbeats);
         MessageFactory messageFactory = new DefaultMessageFactory();
@@ -53,7 +58,7 @@ public class TraderEngine {
         JmxExporter exporter = new JmxExporter();
         exporter.register(initiator);
 
-    	new TraderFrame(orderTableModel, executionTableModel, application);
+    	new TraderFrame(orderTableModel, application);
 
 	}
 	

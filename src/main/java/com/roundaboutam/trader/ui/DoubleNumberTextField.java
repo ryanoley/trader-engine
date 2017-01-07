@@ -1,4 +1,4 @@
-package com.roundaboutam.trader;
+package com.roundaboutam.trader.ui;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;

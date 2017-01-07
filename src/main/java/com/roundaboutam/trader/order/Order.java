@@ -41,6 +41,11 @@ public class Order {
         permanentID = orderID;
     }
 
+    public Order(String permanentID) {
+    	orderID = IdGenerator.makeID();
+    	this.permanentID = permanentID;
+    }
+
     public int processFill(int cumQty, double avgPx, String orderMessage) {
     	int fillSize = cumQty - getExecuted();
     	setExecuted(cumQty);

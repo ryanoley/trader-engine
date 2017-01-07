@@ -22,8 +22,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.roundaboutam.trader.DoubleNumberTextField;
-import com.roundaboutam.trader.IntegerNumberTextField;
 import com.roundaboutam.trader.LogonEvent;
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;

@@ -2,8 +2,6 @@ package com.roundaboutam.trader.ui;
 
 import javax.swing.*;
 
-import com.roundaboutam.trader.DoubleNumberTextField;
-import com.roundaboutam.trader.IntegerNumberTextField;
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
@@ -69,7 +67,7 @@ public class CancelReplacePanel extends JPanel {
     }
 
     private void orderSpecificFieldEnabler() {
-    	if (order.getOpen() > 0) {
+    	if (order.getOpen() >= 0) {
     		enableCancelReplaceButtons(true);
     		enableQuantityField(true);
     		if (order.getOrderType() == OrderType.LIMIT) {

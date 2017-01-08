@@ -107,7 +107,7 @@ public class TraderEngine {
     	traderEngine = new TraderEngine();
 
         if (!System.getProperties().containsKey("openfix")) {
-        	traderEngine.logon();
+        	//traderEngine.logon();
         }
 
         shutdownLatch.await();

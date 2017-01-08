@@ -24,6 +24,7 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
 
     private final OrderEntryPanel orderEntryPanel;
     private final OrderPanel orderPanel;
+    private final MessagesPanel messagesPanel;
     private final CancelReplacePanel cancelReplacePanel;
     private final OrderTableModel orderTableModel;
 
@@ -48,7 +49,10 @@ public class TraderPanel extends JPanel implements Observer, ActionListener {
         JTabbedPane tabbedPane = new JTabbedPane();
         orderPanel = new OrderPanel(orderTableModel, application);
 
+        messagesPanel = new MessagesPanel(application);
+
         tabbedPane.add("Orders", orderPanel);
+        tabbedPane.add("Messages", messagesPanel);
         add(tabbedPane, constraints);
 
         cancelReplacePanel = new CancelReplacePanel(application);

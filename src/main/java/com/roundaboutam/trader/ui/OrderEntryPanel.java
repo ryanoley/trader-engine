@@ -93,7 +93,8 @@ public class OrderEntryPanel extends JPanel implements Observer {
     }
 
     private void createComponents() {
-        constraints.fill = GridBagConstraints.BOTH;
+
+    	constraints.fill = GridBagConstraints.BOTH;
         constraints.weightx = 1;
 
         int x = 0;

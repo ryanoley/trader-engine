@@ -40,8 +40,8 @@ public class OrderTicket {
 	JTextField limitPriceField = new JTextField("");
 	JTextField quantityField = new JTextField("");
 	JTextField participationRateField = new JTextField("12");
-	JTextField startTimeField = new JTextField("09:32:00");
-	JTextField endTimeField = new JTextField("15:58:00");
+	JTextField startTimeField = new JTextField("14:32:00");
+	JTextField endTimeField = new JTextField("20:58:00");
 	JTextField customTagField = new JTextField("");
 	JComboBox<String> orderSideCombo = new JComboBox<String>(allowableOrderSides);
 	JComboBox<String> orderTypesCombo = new JComboBox<String>(allowableOrderTypes);

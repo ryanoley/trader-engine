@@ -172,7 +172,7 @@ class OrderTable extends JTable implements MouseListener {
     }
 
     public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() != 2)
+        if (e.getClickCount() != 3)
             return;
         int row = rowAtPoint(e.getPoint());
         System.out.println("Row: " + row);

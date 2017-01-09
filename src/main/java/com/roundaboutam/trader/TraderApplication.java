@@ -150,8 +150,14 @@ public class TraderApplication implements Application {
 
         String orderID = message.getString(ClOrdID.FIELD);
 
-        OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());
+        String orderMessage = null;  // TEMP. IS THIS NEEDED?
+        try {
+        	orderMessage = message.getString(Text.FIELD);
+        	System.out.println(orderMessage);
+        } catch (Exception e) {
+        }
 
+        OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());        
         if (ordStatus.valueEquals(OrdStatus.REJECTED)) {
         	System.out.println("TraderApplication.executionReport: Rejected");
         	orderBook.orderRejected(orderID);
@@ -159,7 +165,7 @@ public class TraderApplication implements Application {
         } else if (ordStatus.valueEquals(OrdStatus.CANCELED) 
         		|| ordStatus.valueEquals(OrdStatus.DONE_FOR_DAY)) {
         	System.out.println("TraderApplication.executionReport: Canceled");
-        	System.out.println(ordStatus);
+        	System.out.println(orderID);
         	orderBook.orderCanceled(orderID);
         	return;
         }
@@ -170,11 +176,6 @@ public class TraderApplication implements Application {
         int leavesQty = Integer.parseInt(message.getString(LeavesQty.FIELD));
         double avgPx = Double.parseDouble(message.getString(AvgPx.FIELD));
 
-        String orderMessage = null;  // TEMP. IS THIS NEEDED?
-        try {
-        	orderMessage = message.getString(Text.FIELD);
-        } catch (Exception e) {
-        }
         System.out.println("Qty: " + orderQty + "  Executed: " + cumQty + "  Leaves: " + leavesQty); // DEBUG
 
         int fillSize = orderBook.processExecutionReport(orderID, orderQty, cumQty, 

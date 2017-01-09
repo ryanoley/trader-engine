@@ -169,7 +169,8 @@ public class TraderApplication implements Application {
         int leavesQty = Integer.parseInt(message.getString(LeavesQty.FIELD));
         double avgPx = Double.parseDouble(message.getString(AvgPx.FIELD));
 
-        System.out.println("Qty: " + orderQty + "  Executed: " + cumQty + "  Leaves: " + leavesQty); // DEBUG
+        System.out.println("Qty: " + orderQty + "  Executed: " + cumQty);
+        System.out.println("Leaves: " + leavesQty + " AvgPx: " + avgPx);
 
         String orderMessage = null;  // IS THIS NEEDED?
         try {

@@ -108,7 +108,6 @@ public class TraderEngine {
     	traderEngine = new TraderEngine();
 
         if (!System.getProperties().containsKey("openfix")) {
-        	System.out.println("SHOULD LOG ON HERE");
         	traderEngine.logon();
         }
 

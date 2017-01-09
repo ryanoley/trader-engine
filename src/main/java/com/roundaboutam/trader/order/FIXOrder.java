@@ -22,17 +22,20 @@ import quickfix.fix42.OrderCancelRequest;
 public class FIXOrder {
 
 	public static Message formatNewOrder(Order order) {
-
-		NewOrderSingle fixOrder = getNewOrderSingle(order);
-		
-		fixOrder.setString(TargetSubID.FIELD, "ML_ARCA");
-
-		return fixOrder;
-
+		if (VwapOrder.class.isInstance(order)) {
+			return formatVwapOrder((VwapOrder) order);
+		} else {
+			return formatNormalOrder(order);
+		}
 	}
 
-	public static Message formatNewOrder(VwapOrder vwapOrder) {
+	private static Message formatNormalOrder(Order order) {
+		NewOrderSingle fixOrder = getNewOrderSingle(order);		
+		fixOrder.setString(TargetSubID.FIELD, "ML_ARCA");
+		return fixOrder;
+	}
 
+	private static Message formatVwapOrder(VwapOrder vwapOrder) {
 		// Force OrderType to Market
 		vwapOrder.setOrderType(OrderType.MARKET);
 

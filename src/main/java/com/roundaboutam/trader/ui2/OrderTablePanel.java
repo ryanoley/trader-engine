@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -14,22 +16,23 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
+import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
 
 
 @SuppressWarnings("serial")
 public class OrderTablePanel extends JPanel {
 
-	public OrderTablePanel() {
+	public OrderTablePanel(TraderApplication application) {
 		setLayout(new BorderLayout());
-		add(new JScrollPane(new OrderTable()));
+		add(new JScrollPane(new OrderTable(application)));
     }
 	
 }
 
 
 @SuppressWarnings("serial")
-class OrderTableModel extends AbstractTableModel {
+class OrderTableModel extends AbstractTableModel implements Observer {
 
     private final static int SYMBOL = 0;
     private final static int QUANTITY = 1;
@@ -46,31 +49,18 @@ class OrderTableModel extends AbstractTableModel {
     private final HashMap<String, Integer> idToRow;
     private final HashMap<String, Order> idToOrder;
 
-    private final String[] headers;
-
-    public OrderTableModel() {
-
+    private final String[] headers = new String[] {"Symbol", "Quantity", "Open", 
+    		"Executed", "Side", "Type", "Limit", "Stop", "AvgPx", "Target"};
+    
+    public OrderTableModel(TraderApplication application) {
+    	application.addOrderObserver(this);
     	rowToOrder = new HashMap<Integer, Order>();
         idToRow = new HashMap<String, Integer>();
         idToOrder = new HashMap<String, Order>();
-
-        headers = new String[]
-                  {"Symbol", "Quantity", "Open", "Executed",
-                   "Side", "Type", "Limit", "Stop", "AvgPx",
-                   "Target"};
     }
 
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return false;
-    }
-
-    public void update(Order order) {
-    	if (!rowToOrder.containsKey(order.getPermanentID())) {
-    		addOrder(order);
-    		return;
-    	}
-    	int row = idToRow.get(order.getPermanentID());
-    	fireTableRowsInserted(row, row);
     }
 
     private void addOrder(Order order) {
@@ -133,14 +123,25 @@ class OrderTableModel extends AbstractTableModel {
         }
         return "";
     }
+
+	public void update(Observable o, Object arg) {
+    	Order order = (Order) arg;
+    	if (!idToOrder.containsKey(order.getPermanentID())) {
+			addOrder(order);
+    		return;
+    	}
+    	int row = idToRow.get(order.getPermanentID());
+    	fireTableRowsInserted(row, row);
+	}
+
 }
 
 
 @SuppressWarnings("serial")
 class OrderTable extends JTable implements MouseListener {
 
-    public OrderTable() {
-        super(new OrderTableModel());
+    public OrderTable(TraderApplication application) {
+        super(new OrderTableModel(application));
         addMouseListener(this);
     }
 

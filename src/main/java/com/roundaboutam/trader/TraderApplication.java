@@ -55,14 +55,16 @@ public class TraderApplication implements Application {
 
     private final ObservableOrder observableOrder = new ObservableOrder();
     private final ObservableLogon observableLogon = new ObservableLogon();
-	private final OrderBook orderBook = new OrderBook();
+
+    private final OrderBook orderBook = new OrderBook();
 	private final ExecutionBook executionBook = new ExecutionBook();
 
     private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
+	static private final HashMap<SessionID, HashSet<ExecID>> execIDs =  
+			new HashMap<SessionID, HashSet<ExecID>>();
 
-	static private final HashMap<SessionID, HashSet<ExecID>> execIDs = 
-    		new HashMap<SessionID, HashSet<ExecID>>();
+	static private final HashSet<SessionID> sessionIDs = new HashSet<SessionID>();
 
 	public TraderApplication() { }
 
@@ -151,10 +153,13 @@ public class TraderApplication implements Application {
         OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());
 
         if (ordStatus.valueEquals(OrdStatus.REJECTED)) {
+        	System.out.println("TraderApplication.executionReport: Rejected");
         	orderBook.orderRejected(orderID);
         	return;
         } else if (ordStatus.valueEquals(OrdStatus.CANCELED) 
         		|| ordStatus.valueEquals(OrdStatus.DONE_FOR_DAY)) {
+        	System.out.println("TraderApplication.executionReport: Canceled");
+        	System.out.println(ordStatus);
         	orderBook.orderCanceled(orderID);
         	return;
         }
@@ -164,8 +169,12 @@ public class TraderApplication implements Application {
         int cumQty = Integer.parseInt(message.getString(CumQty.FIELD));
         int leavesQty = Integer.parseInt(message.getString(LeavesQty.FIELD));
         double avgPx = Double.parseDouble(message.getString(AvgPx.FIELD));
-        String orderMessage = message.getString(Text.FIELD);
 
+        String orderMessage = null;  // TEMP. IS THIS NEEDED?
+        try {
+        	orderMessage = message.getString(Text.FIELD);
+        } catch (Exception e) {
+        }
         System.out.println("Qty: " + orderQty + "  Executed: " + cumQty + "  Leaves: " + leavesQty); // DEBUG
 
         int fillSize = orderBook.processExecutionReport(orderID, orderQty, cumQty, 
@@ -229,6 +238,8 @@ public class TraderApplication implements Application {
     public void send(Order order) {
     	orderBook.addOrder(order);
     	observableOrder.update(order);
+    	System.out.println(order.getClass());
+    	System.out.println(order);
     	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
     }
 
@@ -240,6 +251,12 @@ public class TraderApplication implements Application {
     public void replace(ReplaceOrder replaceOrder) {
     	orderBook.addReplaceOrder(replaceOrder);
         sendToBroker(FIXOrder.formatReplaceOrder(replaceOrder), replaceOrder.getSessionID());
+    }
+
+    // Various observable and getter functionality
+
+    public HashSet<SessionID> getSessionIDs() {
+    	return sessionIDs;
     }
 
     public void addLogonObserver(Observer observer) {
@@ -287,10 +304,12 @@ public class TraderApplication implements Application {
     public void onCreate(SessionID sessionID) { }
 
     public void onLogon(SessionID sessionID) {
+    	sessionIDs.add(sessionID);
         observableLogon.logon(sessionID);
     }
 
     public void onLogout(SessionID sessionID) {
+    	sessionIDs.remove(sessionID);
     	observableLogon.logoff(sessionID);
     }
 

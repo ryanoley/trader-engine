@@ -86,12 +86,12 @@ public class OrderBook {
 			System.out.println(orderMessage);
 		}
 
+		int fillSize = order.processFill(cumQty, avgPx, orderMessage);
+
 		if (order.getOpen() != leavesQty) {
 			orderMessage = "SHARES REMAINING MISMATCH";
 			System.out.println(orderMessage);			
 		}
-
-		int fillSize = order.processFill(cumQty, avgPx, orderMessage);
 
 		return fillSize;
 	}

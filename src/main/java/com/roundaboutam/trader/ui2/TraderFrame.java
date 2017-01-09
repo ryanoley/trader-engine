@@ -107,7 +107,7 @@ public class TraderFrame extends JFrame {
 		
 		JPanel messagesPanel = new JPanel();
 
-		tabbedPane.add("Orders", new OrderTablePanel());
+		tabbedPane.add("Orders", new OrderTablePanel(this.application));
         tabbedPane.add("Messages", messagesPanel);
 
         panel.add(tabbedPane);

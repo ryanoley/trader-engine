@@ -109,7 +109,7 @@ public class TraderEngine {
 
         if (!System.getProperties().containsKey("openfix")) {
         	System.out.println("SHOULD LOG ON HERE");
-        	//traderEngine.logon();
+        	traderEngine.logon();
         }
 
         shutdownLatch.await();

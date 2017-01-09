@@ -1,17 +1,13 @@
 package com.roundaboutam.trader.ui2;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -19,10 +15,15 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.EtchedBorder;
 
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
+import com.roundaboutam.trader.order.OrderSide;
+import com.roundaboutam.trader.order.OrderTIF;
+import com.roundaboutam.trader.order.OrderType;
+import com.roundaboutam.trader.order.VwapOrder;
+
+import quickfix.SessionID;
 
 public class OrderTicket {
 
@@ -41,16 +42,16 @@ public class OrderTicket {
 	JTextField participationRateField = new JTextField("12");
 	JTextField startTimeField = new JTextField("09:32:00");
 	JTextField endTimeField = new JTextField("15:58:00");
+	JTextField customTagField = new JTextField("");
 	JComboBox<String> orderSideCombo = new JComboBox<String>(allowableOrderSides);
 	JComboBox<String> orderTypesCombo = new JComboBox<String>(allowableOrderTypes);
+	JComboBox<SessionID> sessionIDCombo = new JComboBox<SessionID>();
 
 	public static OrderTicket getInstance(TraderApplication application) {
 		if (instance == null) {
-			System.out.println("MAKING NEW ORDER TICKET");
 			instance = new OrderTicket(application);
 			return instance;
 		}
-		System.out.println("Returning instance");
 		if (!frame.isVisible())
 			frame.setVisible(true);
 		return instance;
@@ -73,8 +74,6 @@ public class OrderTicket {
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.PAGE_START;
-		//c.insets = new Insets(20, 4, 0, 4);
-		//c.ipady = 8;
 
 		c.gridx = 0;
 		c.gridy = 0;
@@ -135,29 +134,43 @@ public class OrderTicket {
 
 	    c.gridx = 0;
 	    c.gridy = 16;
-	    JButton btnOrderTicket = new JButton("Order Ticket");
-	    btnOrderTicket.addActionListener(new ActionListener() {
+	    panel.add(new JLabel("Custom Tag:"), c);
+	    c.gridx = 0;
+	    c.gridy = 17;
+	    panel.add(customTagField, c);
+
+	    c.gridx = 0;
+	    c.gridy = 18;
+	    JButton btnSubmit = new JButton("Submit");
+	    btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				makeTransmitOrder();
 			}
 		});
-	    panel.add(btnOrderTicket, c);
+	    panel.add(btnSubmit, c);
+
+	    c.gridx = 0;
+	    c.gridy = 19;
+	    JButton btnCancel = new JButton("Cancel");
+	    btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				instance = null;
+				frame.dispose();
+			}
+		});
+	    panel.add(btnCancel, c);
+
+	    c.gridx = 0;
+	    c.gridy = 20;
+	    panel.add(new JLabel("Session ID:"), c);
+	    c.gridx = 0;
+	    c.gridy = 21;
+	    panel.add(sessionIDCombo, c);
 
 	    checkFields();
 
 	    frame.add(panel);	    
 	    frame.setVisible(true);
-	}
-		
-	public Order makeTransmitOrder() {
-
-        String ticker = tickerField.getText();
-        String orderType = (String) orderTypesCombo.getSelectedItem();
-        String orderSide = (String) orderSideCombo.getSelectedItem();
-        String limitPrice = limitPriceField.getText();
-
-        //application.send(order);
-		return null;
 	}
 
 	private class OrderTypeListener implements ItemListener {
@@ -167,6 +180,11 @@ public class OrderTicket {
 	}
 	
 	private void checkFields() {
+		// Populate SessionID
+		sessionIDCombo.removeAllItems();
+		for (SessionID s : application.getSessionIDs())
+			sessionIDCombo.addItem(s);
+		// Enable certain fields dependent on OrderType
         String item = (String) orderTypesCombo.getSelectedItem();
         if (item == "MARKET") {
             enableTextField(limitPriceField, false);
@@ -200,6 +218,75 @@ public class OrderTicket {
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (choice != JOptionPane.YES_OPTION)
 			return;
+	}
+	
+	private void makeTransmitOrder() {
+
+		SessionID sessionID = (SessionID) sessionIDCombo.getSelectedItem();
+        String ticker = tickerField.getText();
+        int quantity = Integer.parseInt(quantityField.getText());
+        String customTag = customTagField.getText();
+
+        String orderSideText = (String) orderSideCombo.getSelectedItem();
+        OrderSide orderSide = null;
+        if (orderSideText == "SHORT") {
+        	orderSide = OrderSide.SHORT_SELL;
+        } else if (orderSideText == "SELL") {
+        	orderSide = OrderSide.SELL;
+        } else {
+        	orderSide = OrderSide.BUY;
+        }
+
+        String orderTypeText = (String) orderTypesCombo.getSelectedItem();
+
+        if (orderTypeText == "VWAP") {
+
+        	VwapOrder order = new VwapOrder();
+
+            order.setSymbol(ticker);
+            order.setQuantity(quantity);
+            order.setOrderType(OrderType.MARKET);
+            order.setOrderSide(orderSide);
+            order.setStartTime(startTimeField.getText());
+            order.setEndTime(endTimeField.getText());
+            order.setParticipationRate(Integer.parseInt(participationRateField.getText()));
+            order.setCustomTag(customTag);
+            order.setOrderTIF(OrderTIF.DAY);
+            order.setSessionID(sessionID);
+            application.send(order);
+
+        } else if (orderTypeText == "LIMIT") {
+
+        	Order order = new Order();
+
+            order.setSymbol(ticker);
+            order.setQuantity(quantity);
+            order.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
+            order.setOrderType(OrderType.LIMIT);
+            order.setOrderSide(orderSide);
+            order.setCustomTag(customTag);
+            order.setOrderTIF(OrderTIF.DAY);
+            order.setSessionID(sessionID);
+            application.send(order);
+
+        } else if (orderTypeText == "MARKET") {
+
+        	Order order = new Order();
+
+            order.setSymbol(ticker);
+            order.setQuantity(quantity);
+            order.setOrderType(OrderType.MARKET);
+            order.setOrderSide(orderSide);
+            order.setCustomTag(customTag);
+            order.setOrderTIF(OrderTIF.DAY);
+            order.setSessionID(sessionID);
+            application.send(order);
+
+        }
+
+        instance = null;
+        frame.dispose();
+        
 	}
 
 }

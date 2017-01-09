@@ -59,7 +59,7 @@ public class TraderFrame extends JFrame {
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (choice != JOptionPane.YES_OPTION)
 			return;
-		//TraderEngine.get().shutdown();
+		TraderEngine.get().shutdown();
 	}
 
 	public void addPanels() {
@@ -128,7 +128,7 @@ public class TraderFrame extends JFrame {
 		JButton btnOrderTicket = new JButton("Order Ticket");
 		btnOrderTicket.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Order order = new OrderTicket().makeOrder();
+				OrderTicket.getInstance(application);
 			}
 		});
 		c.gridx = 0;
@@ -151,6 +151,11 @@ public class TraderFrame extends JFrame {
 		panel.add(btnFIX, c);
 
 		JButton btnExit = new JButton("Exit");
+		btnExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				callExitDialogueBoxAndShutdown();
+			}
+		});
 		c.gridx = 0;
 		c.gridy = 4;
 		panel.add(btnExit, c);

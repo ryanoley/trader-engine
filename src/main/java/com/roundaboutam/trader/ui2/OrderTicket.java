@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
+import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
 
 public class OrderTicket {
@@ -31,6 +32,9 @@ public class OrderTicket {
 	private static JFrame frame;
 	private static JPanel panel;
 
+	private static OrderTicket instance = null;
+	private transient TraderApplication application = null;
+
 	JTextField tickerField = new JTextField();
 	JTextField limitPriceField = new JTextField("");
 	JTextField quantityField = new JTextField("");
@@ -40,101 +44,119 @@ public class OrderTicket {
 	JComboBox<String> orderSideCombo = new JComboBox<String>(allowableOrderSides);
 	JComboBox<String> orderTypesCombo = new JComboBox<String>(allowableOrderTypes);
 
-	public OrderTicket() {
+	public static OrderTicket getInstance(TraderApplication application) {
+		if (instance == null) {
+			System.out.println("MAKING NEW ORDER TICKET");
+			instance = new OrderTicket(application);
+			return instance;
+		}
+		System.out.println("Returning instance");
+		if (!frame.isVisible())
+			frame.setVisible(true);
+		return instance;
+	}
+
+	private OrderTicket(TraderApplication application) {
+		this.application = application;
+		makeOrderTicketFrame();
+	}
+
+	private void makeOrderTicketFrame() {
 
 		frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Order Ticket");
-		frame.setSize(300, 400);
+		frame.setSize(400, 600);
+		frame.setResizable(false);
 
 		panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.FIRST_LINE_START;
+		c.anchor = GridBagConstraints.PAGE_START;
 		//c.insets = new Insets(20, 4, 0, 4);
 		//c.ipady = 8;
 
-		c.gridy = 0;
 		c.gridx = 0;
+		c.gridy = 0;
 		panel.add(new JLabel("Ticker:"), c);
+		c.gridx = 0;
 		c.gridy = 1;
-		panel.add(tickerField);
+		panel.add(tickerField, c);
 
 	    orderTypesCombo.addItemListener(new OrderTypeListener());
-		c.gridy = 2;
-	    panel.add(new JLabel("Order Type:"));
-		c.gridy = 3;
-	    panel.add(orderTypesCombo);
+	    c.gridx = 0;
+	    c.gridy = 2;
+	    panel.add(new JLabel("Order Type:"), c);
+	    c.gridx = 0;
+	    c.gridy = 3;
+	    panel.add(orderTypesCombo, c);
 
-		c.gridy = 4;
-	    panel.add(new JLabel("Order Side:"));
-		c.gridy = 5;
-	    panel.add(orderSideCombo);
+	    c.gridx = 0;
+	    c.gridy = 4;
+	    panel.add(new JLabel("Order Side:"), c);
+	    c.gridx = 0;
+	    c.gridy = 5;
+	    panel.add(orderSideCombo, c);
 
+	    c.gridx = 0;
 	    c.gridy = 6;
-	    panel.add(new JLabel("Quantity:"));
+	    panel.add(new JLabel("Quantity:"), c);
+	    c.gridx = 0;
 	    c.gridy = 7;
-	    panel.add(quantityField);
+	    panel.add(quantityField, c);
 
+	    c.gridx = 0;
 	    c.gridy = 8;
-	    panel.add(new JLabel("Limit Price:"));
+	    panel.add(new JLabel("Limit Price:"), c);
+	    c.gridx = 0;
 	    c.gridy = 9;
-	    panel.add(limitPriceField);
+	    panel.add(limitPriceField, c);
 	    
+	    c.gridx = 0;
 	    c.gridy = 10;
-	    panel.add(new JLabel("Participation Rate:"));
+	    panel.add(new JLabel("Participation Rate:"), c);
+	    c.gridx = 0;
 	    c.gridy = 11;
-	    panel.add(participationRateField);
+	    panel.add(participationRateField, c);
 
+	    c.gridx = 0;
 	    c.gridy = 12;
-	    panel.add(new JLabel("Start Time:"));
+	    panel.add(new JLabel("Start Time:"), c);
+	    c.gridx = 0;
 	    c.gridy = 13;
-	    panel.add(startTimeField);
+	    panel.add(startTimeField, c);
 
+	    c.gridx = 0;
 	    c.gridy = 14;
-	    panel.add(new JLabel("End Time:"));
+	    panel.add(new JLabel("End Time:"), c);
+	    c.gridx = 0;
 	    c.gridy = 15;
-	    panel.add(endTimeField);
+	    panel.add(endTimeField, c);
 
+	    c.gridx = 0;
 	    c.gridy = 16;
 	    JButton btnOrderTicket = new JButton("Order Ticket");
-		panel.add(btnOrderTicket, c);
-
-	    frame.add(panel);
+	    btnOrderTicket.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				makeTransmitOrder();
+			}
+		});
+	    panel.add(btnOrderTicket, c);
 
 	    checkFields();
 
+	    frame.add(panel);	    
+	    frame.setVisible(true);
 	}
 		
-	public Order makeOrder() {
+	public Order makeTransmitOrder() {
 
-		frame.setVisible(true);
+        String ticker = tickerField.getText();
+        String orderType = (String) orderTypesCombo.getSelectedItem();
+        String orderSide = (String) orderSideCombo.getSelectedItem();
+        String limitPrice = limitPriceField.getText();
 
-		/*
-		int result = JOptionPane.showOptionDialog(null, 
-                panel, 
-                "Order Ticket", 
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE, 
-                null,
-                new String[]{"Submit", "Cancel"},
-                "Cancel");
-
-        if (result == JOptionPane.OK_OPTION) {
-        	if (tickerField.getText().length() == 0) {
-        		System.out.println("JUNK TICKER");
-        	} else {
-            	confirmSubmit();
-            	// Make order here
-            	System.out.println();
-                System.out.println(orderTypesCombo.getSelectedItem());
-                System.out.println(orderSideCombo.getSelectedItem());
-                System.out.println(limitPriceField.getText());        		
-        	}
-        } else {
-            System.out.println("Cancelled");
-        }
-        */
+        //application.send(order);
 		return null;
 	}
 

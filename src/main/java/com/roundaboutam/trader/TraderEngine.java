@@ -50,12 +50,13 @@ public class TraderEngine {
 
         JmxExporter exporter = new JmxExporter();
         exporter.register(initiator);
-        // UI
-    	new TraderFrame(application);
+
+        new TraderFrame(application);
 	}
-	
+
     public synchronized void logon() {
-        if (!initiatorStarted) {
+    	System.out.println("TraderEngine.logon() invoked");
+    	if (!initiatorStarted) {
             try {
                 initiator.start();
                 initiatorStarted = true;
@@ -70,13 +71,15 @@ public class TraderEngine {
     }
 
     public void logout() {
-        for (SessionID sessionId : initiator.getSessions()) {
+    	System.out.println("TraderEngine.logout() invoked");
+    	for (SessionID sessionId : initiator.getSessions()) {
         	System.out.println("Shutting down session: " + sessionId.toString());
             Session.lookupSession(sessionId).logout("User requested");
         }
     }
 
     public void stopInitiator() {
+    	System.out.println("TraderEngine.stopInitiator() invoked");
     	logout();
     	if(initiatorStarted)
         	initiator.stop();
@@ -84,6 +87,7 @@ public class TraderEngine {
     }
     
     public void shutdown() {
+    	System.out.println("TraderEngine.shutdown() invoked");
     	try {
     		logout();
     		shutdownLatch.countDown();
@@ -104,6 +108,7 @@ public class TraderEngine {
     	traderEngine = new TraderEngine();
 
         if (!System.getProperties().containsKey("openfix")) {
+        	System.out.println("SHOULD LOG ON HERE");
         	//traderEngine.logon();
         }
 

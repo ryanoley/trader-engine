@@ -8,10 +8,7 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.roundaboutam.trader.execution.ExecutionBook;
-import com.roundaboutam.trader.order.OrderBook;
-import com.roundaboutam.trader.ui.OrderTableModel;
-import com.roundaboutam.trader.ui.TraderFrame;
+import com.roundaboutam.trader.ui2.TraderFrame;
 
 import quickfix.DefaultMessageFactory;
 import quickfix.FileStoreFactory;

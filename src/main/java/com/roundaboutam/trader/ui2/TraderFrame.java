@@ -25,17 +25,17 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.border.EtchedBorder;
 
+import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.TraderEngine;
 import com.roundaboutam.trader.order.Order;
 
 public class TraderFrame extends JFrame {
 
-	public static void main(String[] args) {
-		new TraderFrame();
-	}
+	private transient TraderApplication application = null;
 	
-	public TraderFrame() {
+	public TraderFrame(TraderApplication application) {
 		super();
+		this.application = application;
 		setTitle("Trader Engine");
 		setSize(900, 700);
 		addWindowClosingHandler();

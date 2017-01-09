@@ -150,13 +150,6 @@ public class TraderApplication implements Application {
 
         String orderID = message.getString(ClOrdID.FIELD);
 
-        String orderMessage = null;  // TEMP. IS THIS NEEDED?
-        try {
-        	orderMessage = message.getString(Text.FIELD);
-        	System.out.println(orderMessage);
-        } catch (Exception e) {
-        }
-
         OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());        
         if (ordStatus.valueEquals(OrdStatus.REJECTED)) {
         	System.out.println("TraderApplication.executionReport: Rejected");
@@ -177,6 +170,13 @@ public class TraderApplication implements Application {
         double avgPx = Double.parseDouble(message.getString(AvgPx.FIELD));
 
         System.out.println("Qty: " + orderQty + "  Executed: " + cumQty + "  Leaves: " + leavesQty); // DEBUG
+
+        String orderMessage = null;  // IS THIS NEEDED?
+        try {
+        	orderMessage = message.getString(Text.FIELD);
+        	System.out.println(orderMessage);
+        } catch (Exception e) {
+        }
 
         int fillSize = orderBook.processExecutionReport(orderID, orderQty, cumQty, 
         		leavesQty, avgPx, orderMessage);
@@ -239,8 +239,6 @@ public class TraderApplication implements Application {
     public void send(Order order) {
     	orderBook.addOrder(order);
     	observableOrder.update(order);
-    	System.out.println(order.getClass());
-    	System.out.println(order);
     	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
     }
 

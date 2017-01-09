@@ -140,8 +140,11 @@ class OrderTableModel extends AbstractTableModel implements Observer {
 @SuppressWarnings("serial")
 class OrderTable extends JTable implements MouseListener {
 
+	private transient TraderApplication application;
+
     public OrderTable(TraderApplication application) {
         super(new OrderTableModel(application));
+        this.application = application;
         addMouseListener(this);
     }
 
@@ -172,9 +175,11 @@ class OrderTable extends JTable implements MouseListener {
     }
 
     public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() != 3)
+        if (e.getClickCount() != 2)
             return;
         int row = rowAtPoint(e.getPoint());
+        Order order = ((OrderTableModel) dataModel).getOrder(row);
+        OrderModificationFrame.getInstance(application, order);
         System.out.println("Row: " + row);
         // This should have pop-up menu that has populated ReplaceOrder ticket
     }

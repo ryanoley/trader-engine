@@ -86,6 +86,10 @@ public class TraderEngine {
         initiatorStarted = false;
     }
     
+    public boolean getInitiatorState() {
+    	return initiatorStarted;
+    }
+
     public void shutdown() {
     	System.out.println("TraderEngine.shutdown() invoked");
     	try {
@@ -106,10 +110,6 @@ public class TraderEngine {
             log.info(e.getMessage(), e);
         }
     	traderEngine = new TraderEngine();
-
-        if (!System.getProperties().containsKey("openfix")) {
-        	traderEngine.logon();
-        }
 
         shutdownLatch.await();
     }

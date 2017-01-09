@@ -25,7 +25,7 @@ import com.roundaboutam.trader.order.VwapOrder;
 
 import quickfix.SessionID;
 
-public class OrderTicket {
+public class OrderTicketFrame {
 
 	private static String[] allowableOrderSides = {"BUY", "SELL", "SHORT"};
 	private static String[] allowableOrderTypes = {"LIMIT", "VWAP", "MARKET"};
@@ -33,7 +33,7 @@ public class OrderTicket {
 	private static JFrame frame;
 	private static JPanel panel;
 
-	private static OrderTicket instance = null;
+	private static OrderTicketFrame instance = null;
 	private transient TraderApplication application = null;
 
 	JTextField tickerField = new JTextField();
@@ -47,9 +47,9 @@ public class OrderTicket {
 	JComboBox<String> orderTypesCombo = new JComboBox<String>(allowableOrderTypes);
 	JComboBox<SessionID> sessionIDCombo = new JComboBox<SessionID>();
 
-	public static OrderTicket getInstance(TraderApplication application) {
+	public static OrderTicketFrame getInstance(TraderApplication application) {
 		if (instance == null) {
-			instance = new OrderTicket(application);
+			instance = new OrderTicketFrame(application);
 			return instance;
 		}
 		if (!frame.isVisible())
@@ -57,7 +57,7 @@ public class OrderTicket {
 		return instance;
 	}
 
-	private OrderTicket(TraderApplication application) {
+	private OrderTicketFrame(TraderApplication application) {
 		this.application = application;
 		makeOrderTicketFrame();
 	}
@@ -151,14 +151,14 @@ public class OrderTicket {
 
 	    c.gridx = 0;
 	    c.gridy = 19;
-	    JButton btnCancel = new JButton("Cancel");
-	    btnCancel.addActionListener(new ActionListener() {
+	    JButton btnClose = new JButton("Close");
+	    btnClose.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				instance = null;
 				frame.dispose();
 			}
 		});
-	    panel.add(btnCancel, c);
+	    panel.add(btnClose, c);
 
 	    c.gridx = 0;
 	    c.gridy = 20;
@@ -219,7 +219,7 @@ public class OrderTicket {
 		if (choice != JOptionPane.YES_OPTION)
 			return;
 	}
-	
+
 	private void makeTransmitOrder() {
 
 		SessionID sessionID = (SessionID) sessionIDCombo.getSelectedItem();

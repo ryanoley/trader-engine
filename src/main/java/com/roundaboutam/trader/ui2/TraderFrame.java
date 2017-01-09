@@ -114,6 +114,8 @@ public class TraderFrame extends JFrame {
 		return panel;
 	}
 
+	private JButton btnFIX;
+
 	private JPanel makeButtonPanel() {
 		
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -122,32 +124,22 @@ public class TraderFrame extends JFrame {
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.FIRST_LINE_START;
-		c.insets = new Insets(20, 4, 0, 4);
 		c.ipady = 12;
 
-		JButton btnOrderTicket = new JButton("Order Ticket");
-		btnOrderTicket.addActionListener(new ActionListener() {
+		btnFIX = new JButton("Start FIX");
+		btnFIX.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				OrderTicket.getInstance(application);
+				if (TraderEngine.get().getInitiatorState()){
+					TraderEngine.get().logout();
+					btnFIX.setText("Start FIX");
+				} else {
+					TraderEngine.get().logon();
+					btnFIX.setText("Stop FIX");
+				}
 			}
 		});
 		c.gridx = 0;
 		c.gridy = 0;
-		panel.add(btnOrderTicket, c);
-
-		JButton btnImportBasket = new JButton("Import Basket");
-		c.gridx = 0;
-		c.gridy = 1;
-		panel.add(btnImportBasket, c);
-
-		JButton btnZmqListener = new JButton("ZMQ Listener");
-		c.gridx = 0;
-		c.gridy = 2;
-		panel.add(btnZmqListener, c);
-
-		JButton btnFIX = new JButton("FIX");
-		c.gridx = 0;
-		c.gridy = 3;
 		panel.add(btnFIX, c);
 
 		JButton btnExit = new JButton("Exit");
@@ -156,13 +148,36 @@ public class TraderFrame extends JFrame {
 				callExitDialogueBoxAndShutdown();
 			}
 		});
-		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 1;
+		c.insets = new Insets(20, 4, 40, 4);
 		panel.add(btnExit, c);
 
+		JButton btnOrderTicket = new JButton("Order Ticket");
+		btnOrderTicket.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				OrderTicketFrame.getInstance(application);
+			}
+		});
+		c.gridy = 2;
+		c.insets = new Insets(20, 4, 0, 4);
+		panel.add(btnOrderTicket, c);
+
+		JButton btnImportBasket = new JButton("Import Basket");
+		c.gridy = 3;
+		panel.add(btnImportBasket, c);
+
+		JButton btnZmq = new JButton("ZMQ");
+		btnZmq.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				ZMQFrame.getInstance();
+			}
+		});
+		c.gridy = 4;
+		panel.add(btnZmq, c);
+
 		JButton btnCancelAllTrades = new JButton("Cancel All Trades");
-		c.gridx = 0;
 		c.gridy = 5;
+		c.insets = new Insets(60, 4, 00, 4);
 		panel.add(btnCancelAllTrades, c);
 
 		return panel;

@@ -7,6 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.StringJoiner;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -36,7 +39,7 @@ public class OrderTicketFrame {
 	private static OrderTicketFrame instance = null;
 	private transient TraderApplication application = null;
 
-	JTextField tickerField = new JTextField();
+	JTextField symbolField = new JTextField();
 	JTextField limitPriceField = new JTextField("");
 	JTextField quantityField = new JTextField("");
 	JTextField participationRateField = new JTextField("12");
@@ -46,6 +49,13 @@ public class OrderTicketFrame {
 	JComboBox<String> orderSideCombo = new JComboBox<String>(allowableOrderSides);
 	JComboBox<String> orderTypesCombo = new JComboBox<String>(allowableOrderTypes);
 	JComboBox<SessionID> sessionIDCombo = new JComboBox<SessionID>();
+
+    private boolean symbolEntered = false;
+    private boolean quantityEntered = false;
+    private boolean limitEntered = false;
+    private boolean sessionEntered = false;
+    
+    JButton submitButton;
 
 	public static OrderTicketFrame getInstance(TraderApplication application) {
 		if (instance == null) {
@@ -80,7 +90,7 @@ public class OrderTicketFrame {
 		panel.add(new JLabel("Ticker:"), c);
 		c.gridx = 0;
 		c.gridy = 1;
-		panel.add(tickerField, c);
+		panel.add(symbolField, c);
 
 	    orderTypesCombo.addItemListener(new OrderTypeListener());
 	    c.gridx = 0;
@@ -141,13 +151,14 @@ public class OrderTicketFrame {
 
 	    c.gridx = 0;
 	    c.gridy = 18;
-	    JButton btnSubmit = new JButton("Submit");
-	    btnSubmit.addActionListener(new ActionListener() {
+	    submitButton = new JButton("Submit");
+	    submitButton.setEnabled(false);
+	    submitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				makeTransmitOrder();
 			}
 		});
-	    panel.add(btnSubmit, c);
+	    panel.add(submitButton, c);
 
 	    c.gridx = 0;
 	    c.gridy = 19;
@@ -169,16 +180,24 @@ public class OrderTicketFrame {
 
 	    checkFields();
 
-	    frame.add(panel);	    
+        SubmitActivator activator = new SubmitActivator();
+        symbolField.addKeyListener(activator);
+        quantityField.addKeyListener(activator);
+        limitPriceField.addKeyListener(activator);
+        sessionIDCombo.addItemListener(activator);
+
+        frame.add(panel);	    
 	    frame.setVisible(true);
+
 	}
 
 	private class OrderTypeListener implements ItemListener {
         public void itemStateChanged(ItemEvent e) {
         	checkFields();
+        	activateSubmit();
         }
 	}
-	
+
 	private void checkFields() {
 		// Populate SessionID
 		sessionIDCombo.removeAllItems();
@@ -213,17 +232,65 @@ public class OrderTicketFrame {
         field.setForeground(labelColor);
     }
 
-	private void confirmSubmit() {
-		int choice = JOptionPane.showOptionDialog(null,"Press enter to send", "Confirm?", 
+	private void confirmAndSubmit(Order order) {
+		StringJoiner joiner = new StringJoiner(" ");
+		joiner.add(order.getOrderSide().toString().toUpperCase()).add(
+				"("+order.getOrderType().toString().toUpperCase()+")").add(
+				Integer.toString(order.getQuantity())).add("units of").add(
+				order.getSymbol()).add("?");
+		int choice = JOptionPane.showOptionDialog(null, joiner.toString(), "Confirm?", 
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if (choice != JOptionPane.YES_OPTION)
-			return;
+		if (choice == JOptionPane.YES_OPTION) {
+            application.send(order);
+			instance = null;
+			frame.dispose();
+		}
 	}
+
+    private void activateSubmit() {
+        String orderType = (String) orderTypesCombo.getSelectedItem();
+        boolean activate = symbolEntered && quantityEntered && sessionEntered;
+        if (orderType == "MARKET")
+            submitButton.setEnabled(activate);
+        else if (orderType == "LIMIT")
+            submitButton.setEnabled(activate && limitEntered);
+        else if (orderType == "VWAP")
+            submitButton.setEnabled(activate);
+    }
+	
+    private class SubmitActivator implements KeyListener, ItemListener {
+        public void keyReleased(KeyEvent e) {
+            Object obj = e.getSource();
+            if (obj == symbolField) {
+                symbolEntered = testField(obj);
+            } else if (obj == quantityField) {
+                quantityEntered = testField(obj);
+            } else if (obj == limitPriceField) {
+                limitEntered = testField(obj);
+            }
+            activateSubmit();
+        }
+
+        public void itemStateChanged(ItemEvent e) {
+            sessionEntered = sessionIDCombo.getSelectedItem() != null;
+            activateSubmit();
+        }
+
+        private boolean testField(Object o) {
+            String value = ((JTextField) o).getText();
+            value = value.trim();
+            return value.length() > 0;
+        }
+
+        public void keyTyped(KeyEvent e) {}
+
+        public void keyPressed(KeyEvent e) {}
+    }
 
 	private void makeTransmitOrder() {
 
 		SessionID sessionID = (SessionID) sessionIDCombo.getSelectedItem();
-        String ticker = tickerField.getText();
+        String ticker = symbolField.getText();
         int quantity = Integer.parseInt(quantityField.getText());
         String customTag = customTagField.getText();
 
@@ -253,7 +320,7 @@ public class OrderTicketFrame {
             order.setCustomTag(customTag);
             order.setOrderTIF(OrderTIF.DAY);
             order.setSessionID(sessionID);
-            application.send(order);
+            confirmAndSubmit(order);
 
         } else if (orderTypeText == "LIMIT") {
 
@@ -267,7 +334,7 @@ public class OrderTicketFrame {
             order.setCustomTag(customTag);
             order.setOrderTIF(OrderTIF.DAY);
             order.setSessionID(sessionID);
-            application.send(order);
+            confirmAndSubmit(order);
 
         } else if (orderTypeText == "MARKET") {
 
@@ -280,12 +347,9 @@ public class OrderTicketFrame {
             order.setCustomTag(customTag);
             order.setOrderTIF(OrderTIF.DAY);
             order.setSessionID(sessionID);
-            application.send(order);
+            confirmAndSubmit(order);
 
         }
-
-        instance = null;
-        frame.dispose();
         
 	}
 

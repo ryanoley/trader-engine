@@ -1,4 +1,4 @@
-package com.roundaboutam.trader.ui2;
+package com.roundaboutam.trader.ui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

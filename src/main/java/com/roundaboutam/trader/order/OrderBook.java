@@ -1,5 +1,6 @@
 package com.roundaboutam.trader.order;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class OrderBook {
@@ -43,8 +44,8 @@ public class OrderBook {
 		}
 	}
 
-	public int processExecutionReport(String orderID, int orderQty, int cumQty, int leavesQty,
-			double avgPx, String FIXMessage) {
+	public int processExecutionReport(String orderID, String symbol, int orderQty, int cumQty, 
+			int leavesQty, double avgPx, String FIXMessage) {
 
 		Order order = null;
 
@@ -65,7 +66,7 @@ public class OrderBook {
 			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
 			// TODO: This should be logged
 			cancelOrder.setAcknowledged(true);
-		
+
 			order = orderMap.get(cancelOrder.getOrigOrderID());
 			order.setCanceled(true);
 			orderMap.put(cancelOrder.getOrderID(), order);
@@ -75,6 +76,7 @@ public class OrderBook {
 
 		} else {
 			order = new Order(orderID);
+			order.setSymbol(symbol);
 			order.setOrderID(orderID);
 			order.setMessage("Order from old session");
 			addOrder(order);
@@ -88,6 +90,15 @@ public class OrderBook {
 		Order order = orderMap.get(orderID);
 		order.setRejected(true);
 		order.setLeavesQty(0);
+	}
+
+	public ArrayList<Order> getAllOpenOrders() {
+		ArrayList<Order> openOrders = new ArrayList<Order>();
+		for (Order o : orderMap.values()) {
+			if (o.getLeavesQty() > 0)
+				openOrders.add(o);
+		}	
+		return openOrders;
 	}
 
 }

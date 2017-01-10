@@ -17,8 +17,10 @@ import com.roundaboutam.trader.execution.Execution;
 import com.roundaboutam.trader.execution.ExecutionBook;
 
 import quickfix.Application;
+import quickfix.ConfigError;
 import quickfix.DefaultMessageFactory;
 import quickfix.DoNotSend;
+import quickfix.FieldConvertError;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
 import quickfix.IncorrectTagValue;
@@ -27,6 +29,7 @@ import quickfix.RejectLogon;
 import quickfix.Session;
 import quickfix.SessionID;
 import quickfix.SessionNotFound;
+import quickfix.SessionSettings;
 import quickfix.UnsupportedMessageType;
 import quickfix.field.AvgPx;
 import quickfix.field.BeginString;
@@ -50,14 +53,15 @@ import quickfix.field.Symbol;
 import quickfix.field.SymbolSfx;
 import quickfix.field.TargetCompID;
 import quickfix.field.Text;
+import quickfix.field.TransactTime;
 
 public class TraderApplication implements Application {
 
     private final ObservableOrder observableOrder = new ObservableOrder();
     private final ObservableLogon observableLogon = new ObservableLogon();
 
-    private final OrderBook orderBook = new OrderBook();
-	private final ExecutionBook executionBook = new ExecutionBook();
+    private final OrderBook orderBook;
+	private final ExecutionBook executionBook;
 
     private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
@@ -66,7 +70,10 @@ public class TraderApplication implements Application {
 
 	static private final HashSet<SessionID> sessionIDs = new HashSet<SessionID>();
 
-	public TraderApplication() { }
+	public TraderApplication(SessionSettings settings) throws ConfigError, FieldConvertError {
+		orderBook = new OrderBook();
+		executionBook = new ExecutionBook(settings.getString("CustomLogPath"));
+	}
 
     // Main message handler
     public void fromApp(Message message, SessionID sessionID) throws FieldNotFound,
@@ -163,52 +170,49 @@ public class TraderApplication implements Application {
         	System.out.println("TraderApplication.executionReport: Canceled");
         }
 
-        // Required values for Execution Report
-        int orderQty = Integer.parseInt(message.getString(OrderQty.FIELD));
-        int cumQty = Integer.parseInt(message.getString(CumQty.FIELD));
-        int leavesQty = Integer.parseInt(message.getString(LeavesQty.FIELD));
-        double avgPx = Double.parseDouble(message.getString(AvgPx.FIELD));
-
-        String orderMessage = null;  // IS THIS NEEDED?
+        String orderMessage = null;
         try {
         	orderMessage = message.getString(Text.FIELD);
         	System.out.println(orderMessage);
         } catch (Exception e) {
         }
 
-        int fillSize = orderBook.processExecutionReport(orderID, orderQty, cumQty, 
-        		leavesQty, avgPx, orderMessage);
+        int fillSize = orderBook.processExecutionReport(
+        		orderID,
+        		message.getString(Symbol.FIELD),
+        		Integer.parseInt(message.getString(OrderQty.FIELD)), 
+        		Integer.parseInt(message.getString(CumQty.FIELD)), 
+        		Integer.parseInt(message.getString(LeavesQty.FIELD)), 
+        		Double.parseDouble(message.getString(AvgPx.FIELD)), 
+        		orderMessage);
 
         observableOrder.update(orderBook.getOrder(orderID));
 
         if (fillSize > 0) {
-        	Execution execution = new Execution(orderID, 
+        	Execution execution = new Execution(
+        			orderID,
         			orderBook.getOrder(orderID).getPermanentID(),
-        			orderBook.getOrder(orderID).getCustomTag());
+        			message.getString(Symbol.FIELD),
+        			message.getString(TransactTime.FIELD),
+        			message.getString(ExecID.FIELD),
+        			OrderSide.fromFIX((Side) message.getField(new Side())),
+        			fillSize,
+        			Double.parseDouble(message.getString(LastPx.FIELD))
+        			);
 
-            execution.setSymbol(message.getString(Symbol.FIELD));
             if (message.isSetField(SymbolSfx.FIELD)) {
                 execution.setSuffix(message.getString(SymbolSfx.FIELD));
             }
-            execution.setQuantity(fillSize);
-            if (message.isSetField(LastPx.FIELD)) {
-                execution.setPrice(Double.parseDouble(message.getString(LastPx.FIELD)));
-            }
-            execution.setSide(OrderSide.fromFIX((Side) message.getField(new Side())));
-
-        	// TODO: Get BidAsk Prices to send with execution report
+            execution.setCustomTag(orderBook.getOrder(orderID).getCustomTag());
+            // TODO: Market data used here to capture BidAsk
             //execution.setBid(0);
             //execution.setAsk(0);
-
-            execution.setExchangeID(message.getString(ExecID.FIELD));
-
             executionBook.addExecution(execution);
         }
     }
 
     private void cancelReject(Message message, SessionID sessionID) throws FieldNotFound {
-    	String orderID = message.getString(ClOrdID.FIELD);
-    	orderBook.cancelRejected(orderID);
+    	orderBook.cancelRejected(message.getString(ClOrdID.FIELD));
     }
 
     private boolean alreadyProcessed(ExecID execID, SessionID sessionID) {
@@ -248,6 +252,12 @@ public class TraderApplication implements Application {
     public void replace(ReplaceOrder replaceOrder) {
     	orderBook.addReplaceOrder(replaceOrder);
         sendToBroker(FIXOrder.formatReplaceOrder(replaceOrder), replaceOrder.getSessionID());
+    }
+
+    public void cancelAllOpenOrders() {
+    	for (Order o : orderBook.getAllOpenOrders()) {
+    		sendToBroker(FIXOrder.formatCancelOrder(new CancelOrder(o)), o.getSessionID());
+    	}
     }
 
     // Various observable and getter functionality

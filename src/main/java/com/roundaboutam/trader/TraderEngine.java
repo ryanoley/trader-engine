@@ -8,7 +8,7 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.roundaboutam.trader.ui2.TraderFrame;
+import com.roundaboutam.trader.ui.TraderFrame;
 
 import quickfix.DefaultMessageFactory;
 import quickfix.FileStoreFactory;
@@ -37,9 +37,16 @@ public class TraderEngine {
 		InputStream inputStream = TraderEngine.class.getResourceAsStream("FIXConfig.cfg");
         SessionSettings settings = new SessionSettings(inputStream);
         inputStream.close();
+
         boolean logHeartbeats = Boolean.valueOf(System.getProperty("logHeartbeats", "false"));
 
-        TraderApplication application = new TraderApplication();
+        // Workaround for env variables
+        String rootpath = System.getenv("DATA") + "\\trader-engine\\LOGS";
+        settings.setString("FileStorePath", rootpath + "\\fileStore");
+        settings.setString("FileLogPath", rootpath + "\\logs");
+        settings.setString("CustomLogPath", rootpath + "\\custom");
+
+        TraderApplication application = new TraderApplication(settings);
 
         MessageStoreFactory messageStoreFactory = new FileStoreFactory(settings);
         LogFactory logFactory = new ScreenLogFactory(true, true, true, logHeartbeats);

@@ -1,4 +1,4 @@
-package com.roundaboutam.trader.ui2;
+package com.roundaboutam.trader.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

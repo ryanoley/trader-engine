@@ -1,39 +1,57 @@
 package com.roundaboutam.trader.execution;
 
+import java.util.StringJoiner;
+
 import com.roundaboutam.trader.order.OrderSide;
 
 public class Execution {
 
+    private String ID = null;
     private String symbol = null;
     private String suffix = null;
+    private String orderID = null;
+    private String permanentID = null;
+    private String customTag = null;
 
-    private OrderSide side = null;
-    
+    private String exchangeID = null;
+    private String transactTime;
+    private OrderSide orderSide = null;
     private int quantity = 0;
     private double price;
     private double bid;
     private double ask;
 
-    private String ID = null;
-    private String orderID = null;
-    private String permanentID = null;
-    private String customTag = null;
-    private String exchangeID = null;
     private static int nextID = 1;
-    
-    public Execution(String orderID, String permanentID, String customTag) {
+
+    public Execution(String orderID, String permanentID, String symbol,
+    		String transactTime, String exchangeID, OrderSide orderSide,
+    		int quantity, double price) {
     	ID = Integer.toString(nextID++);
     	this.orderID = orderID;
     	this.permanentID = permanentID;
-    	this.customTag = customTag;
+    	this.symbol = symbol;
+    	this.transactTime = transactTime;
+    	this.exchangeID = exchangeID;
+    	this.orderSide = orderSide;
+    	this.quantity = quantity;
+    	this.price = price;
+    }
+
+    public String getLogEntry() {
+    	// Updated symbol if suffix
+    	String outSymbol = symbol;
+    	if (suffix != null) {
+            outSymbol = outSymbol + "/" + suffix;
+        }
+    	StringJoiner joiner = new StringJoiner(",");
+    	joiner.add(ID).add(orderID).add(permanentID).add(outSymbol).add(transactTime).add(
+    			exchangeID).add(orderSide.toString()).add(Integer.toString(quantity)).add(
+    			Double.toString(price)).add(Double.toString(bid)).add(Double.toString(ask)).add(customTag);
+    	return joiner.toString();
     }
 
 	public String getSymbol() {
 		return symbol;
-	}
-
-	public void setSymbol(String symbol) {
-		this.symbol = symbol;
 	}
 
 	public String getSuffix() {
@@ -44,28 +62,20 @@ public class Execution {
 		this.suffix = suffix;
 	}
 
-	public OrderSide getSide() {
-		return side;
+	public String getTransactTime() {
+		return transactTime;
 	}
-
-	public void setSide(OrderSide side) {
-		this.side = side;
+	
+	public OrderSide getSide() {
+		return orderSide;
 	}
 
 	public int getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
-
 	public double getPrice() {
 		return price;
-	}
-
-	public void setPrice(double price) {
-		this.price = price;
 	}
 
 	public double getBid() {
@@ -88,24 +98,12 @@ public class Execution {
 		return ID;
 	}
 
-	public void setID(String iD) {
-		ID = iD;
-	}
-
 	public String getOrderID() {
 		return orderID;
 	}
 
-	public void setOrderID(String orderID) {
-		this.orderID = orderID;
-	}
-
 	public String getPermanentID() {
 		return permanentID;
-	}
-
-	public void setPermanentID(String permanentID) {
-		this.permanentID = permanentID;
 	}
 
 	public String getCustomTag() {
@@ -118,10 +116,6 @@ public class Execution {
 
 	public String getExchangeID() {
 		return exchangeID;
-	}
-
-	public void setExchangeID(String exchangeID) {
-		this.exchangeID = exchangeID;
 	}
 
 }

@@ -130,7 +130,7 @@ public class TraderFrame extends JFrame {
 		btnFIX.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (TraderEngine.get().getInitiatorState()){
-					TraderEngine.get().logout();
+					TraderEngine.get().stopInitiator();
 					btnFIX.setText("Start FIX");
 				} else {
 					TraderEngine.get().logon();

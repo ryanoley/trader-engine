@@ -43,15 +43,15 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     private final static int LIMITPRICE = 6;
     private final static int STOPPRICE = 7;
     private final static int AVGPX = 8;
-    private final static int TARGET = 9;
+    private final static int MESSAGE = 9;
 
     private final HashMap<Integer, Order> rowToOrder;
     private final HashMap<String, Integer> idToRow;
     private final HashMap<String, Order> idToOrder;
 
     private final String[] headers = new String[] {"Symbol", "Quantity", "Open", 
-    		"Executed", "Side", "Type", "Limit", "Stop", "AvgPx", "Target"};
-    
+    		"Executed", "Side", "Type", "Limit", "Stop", "AvgPx", "Message"};
+
     public OrderTableModel(TraderApplication application) {
     	application.addOrderObserver(this);
     	rowToOrder = new HashMap<Integer, Order>();
@@ -105,9 +105,9 @@ class OrderTableModel extends AbstractTableModel implements Observer {
         case QUANTITY:
             return order.getQuantity();
         case OPEN:
-            return order.getOpen();
+            return order.getLeavesQty();
         case EXECUTED:
-            return order.getExecuted();
+            return order.getCumQty();
         case SIDE:
             return order.getOrderSide();
         case TYPE:
@@ -118,8 +118,8 @@ class OrderTableModel extends AbstractTableModel implements Observer {
             return order.getStopPrice();
         case AVGPX:
             return order.getAvgPx();
-        case TARGET:
-        	return order.getSessionID().getTargetCompID();
+        case MESSAGE:
+        	return order.getMessage();
         }
         return "";
     }
@@ -152,7 +152,7 @@ class OrderTable extends JTable implements MouseListener {
 
     	Order order = ((OrderTableModel) dataModel).getOrder(row);
 
-        int open = order.getOpen();
+        int open = order.getLeavesQty();
         boolean rejected = order.isRejected();
         boolean canceled = order.isCanceled();
         boolean acknowledged = order.isAcknowledged();

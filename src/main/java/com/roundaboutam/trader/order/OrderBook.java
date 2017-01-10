@@ -44,12 +44,11 @@ public class OrderBook {
 	}
 
 	public int processExecutionReport(String orderID, int orderQty, int cumQty, int leavesQty,
-			double avgPx, String orderMessage) {
+			double avgPx, String FIXMessage) {
 
 		Order order = null;
 
 		if (replaceOrderMap.containsKey(orderID)) {
-
 			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
 			// TODO: This should be logged
 			replaceOrder.setAcknowledged(true);
@@ -59,55 +58,36 @@ public class OrderBook {
 			order.setQuantity(replaceOrder.getQuantity());
 			order.setLimitPrice(replaceOrder.getLimitPrice());
 			order.setStopPrice(replaceOrder.getStopPrice());
-			order.setOpen(order.getQuantity() - order.getExecuted());
 
 			orderMap.put(replaceOrder.getOrderID(), order);
 
 		} else if (cancelOrderMap.containsKey(orderID)) {
-
 			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
 			// TODO: This should be logged
 			cancelOrder.setAcknowledged(true);
-
+		
 			order = orderMap.get(cancelOrder.getOrigOrderID());
-
 			order.setCanceled(true);
-			order.setOpen(0);
-
 			orderMap.put(cancelOrder.getOrderID(), order);
 
-		} else {
+		} else if (orderMap.containsKey(orderID)) {
 			order = orderMap.get(orderID);
+
+		} else {
+			order = new Order(orderID);
+			order.setOrderID(orderID);
+			order.setMessage("Order from old session");
+			addOrder(order);
 		}
 
-		// For debugging
-		if (order.getQuantity() != orderQty) { 
-			orderMessage = "QUANTITY MISMATCH";
-			System.out.println(orderMessage);
-		}
-
-		int fillSize = order.processFill(cumQty, avgPx, orderMessage);
-
-		if (order.getOpen() != leavesQty) {
-			orderMessage = "SHARES REMAINING MISMATCH";
-			System.out.println(orderMessage);			
-		}
-
-		return fillSize;
+		return order.processFill(cumQty, leavesQty, avgPx, orderQty, FIXMessage);
 	}
 
 	public void orderRejected(String orderID) {
 		// TODO: Log this?
 		Order order = orderMap.get(orderID);
 		order.setRejected(true);
-		order.setOpen(0);
-	}
-
-	public void orderCanceled(String orderID) {
-		// TODO: Log this?
-		Order order = orderMap.get(orderID);
-		order.setCanceled(true);
-		order.setOpen(0);		
+		order.setLeavesQty(0);
 	}
 
 }

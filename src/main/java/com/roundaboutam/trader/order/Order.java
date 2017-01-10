@@ -24,16 +24,18 @@ public class Order {
     private Double limitPrice = null;
     private Double stopPrice = null;
 
-    // Execution related fields
-    private int open = 0;
-    private int executed = 0;
+    // Execution related fields - Same names as FIX fields
+    private int leavesQty = 0;
+    private int cumQty = 0;
     private double avgPx = 0.0;
+    private int orderQty = 0;
 
     private boolean rejected = false;
     private boolean canceled = false;
     private boolean modified = false;
     private boolean acknowledged = false;
 
+    private String FIXMessage = null;
     private String message = null;
 
     public Order() {
@@ -46,14 +48,24 @@ public class Order {
     	this.permanentID = permanentID;
     }
 
-    public int processFill(int cumQty, double avgPx, String orderMessage) {
-    	int fillSize = cumQty - getExecuted();
-    	setExecuted(cumQty);
+    public int processFill(int cumQty, int leavesQty, double avgPx, 
+    		int orderQty, String FIXMessage) {
+    	int fillSize = cumQty - getCumQty();
+    	setCumQty(cumQty);
     	setAvgPx(avgPx);
-    	setOpen(getQuantity() - cumQty);
-    	setMessage(orderMessage);
+    	setLeavesQty(leavesQty);
+    	setOrderQty(orderQty);
+    	setFIXMessage(FIXMessage);
     	setAcknowledged(true);
+    	checkExecution();
     	return fillSize;
+    }
+
+    private void checkExecution() {
+    	if (quantity != orderQty) {
+    		this.message = "Quantity Mismatch";
+    		System.out.println("Quantity Mismatch: " + symbol);
+    	}
     }
 
 	public String getCustomTag() {
@@ -152,20 +164,20 @@ public class Order {
 		this.stopPrice = stopPrice;
 	}
 
-	public int getOpen() {
-		return open;
+	public int getLeavesQty() {
+		return leavesQty;
 	}
 
-	public void setOpen(int open) {
-		this.open = open;
+	public void setLeavesQty(int leavesQty) {
+		this.leavesQty = leavesQty;
 	}
 
-	public int getExecuted() {
-		return executed;
+	public int getCumQty() {
+		return cumQty;
 	}
 
-	public void setExecuted(int executed) {
-		this.executed = executed;
+	public void setCumQty(int cumQty) {
+		this.cumQty = cumQty;
 	}
 
 	public double getAvgPx() {
@@ -174,6 +186,14 @@ public class Order {
 
 	public void setAvgPx(double avgPx) {
 		this.avgPx = avgPx;
+	}
+
+	public double getOrderQty() {
+		return orderQty;
+	}
+
+	public void setOrderQty(int orderQty) {
+		this.orderQty = orderQty;
 	}
 
 	public boolean isRejected() {
@@ -214,6 +234,14 @@ public class Order {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getFIXMessage() {
+		return FIXMessage;
+	}
+
+	public void setFIXMessage(String FIXMessage) {
+		this.FIXMessage = FIXMessage;
 	}
 
 }

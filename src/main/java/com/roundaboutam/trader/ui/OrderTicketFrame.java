@@ -248,6 +248,7 @@ public class OrderTicketFrame {
 	}
 
     private void activateSubmit() {
+        sessionEntered = sessionIDCombo.getSelectedItem() != null;
         String orderType = (String) orderTypesCombo.getSelectedItem();
         boolean activate = symbolEntered && quantityEntered && sessionEntered;
         if (orderType == "MARKET")
@@ -272,7 +273,6 @@ public class OrderTicketFrame {
         }
 
         public void itemStateChanged(ItemEvent e) {
-            sessionEntered = sessionIDCombo.getSelectedItem() != null;
             activateSubmit();
         }
 

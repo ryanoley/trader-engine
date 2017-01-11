@@ -160,7 +160,9 @@ public class TraderApplication implements Application {
         OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());        
         if (ordStatus.valueEquals(OrdStatus.REJECTED)) {
         	System.out.println("TraderApplication.executionReport: Rejected");
-        	// Rejects come here when there are errors in order. Replicate with BRK/B order. Wrong suffix
+        	// 1. Rejects come here when there are errors in order. Replicate with BRK/B order. Wrong suffix
+        	// 2. Also, I am getting here when cancelling Unacknowledged orders. The broker message is: Cancelled by Exchange
+        	// which seems like a normal message. Is the OrdStatus then just from the original order?
         	orderBook.orderRejected(orderID);
         	return;
         } else if (ordStatus.valueEquals(OrdStatus.CANCELED) 

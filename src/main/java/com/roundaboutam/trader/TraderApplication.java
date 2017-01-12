@@ -13,6 +13,7 @@ import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.ReplaceOrder;
 import com.roundaboutam.trader.order.FIXOrder;
 import com.roundaboutam.trader.order.OrderSide;
+import com.roundaboutam.trader.order.OrderType;
 import com.roundaboutam.trader.execution.Execution;
 import com.roundaboutam.trader.execution.ExecutionBook;
 
@@ -43,6 +44,7 @@ import quickfix.field.LeavesQty;
 import quickfix.field.MsgSeqNum;
 import quickfix.field.MsgType;
 import quickfix.field.OrdStatus;
+import quickfix.field.OrdType;
 import quickfix.field.OrderQty;
 import quickfix.field.RefMsgType;
 import quickfix.field.RefSeqNum;
@@ -185,8 +187,10 @@ public class TraderApplication implements Application {
         		Integer.parseInt(message.getString(OrderQty.FIELD)), 
         		Integer.parseInt(message.getString(CumQty.FIELD)), 
         		Integer.parseInt(message.getString(LeavesQty.FIELD)), 
-        		Double.parseDouble(message.getString(AvgPx.FIELD)), 
-        		orderMessage);
+        		Double.parseDouble(message.getString(AvgPx.FIELD)),
+        		OrderSide.fromFIX((Side) message.getField(new Side())),
+        		OrderType.fromFIX((OrdType) message.getField(new OrdType())),
+        		sessionID, orderMessage);
 
         observableOrder.update(orderBook.getOrder(orderID));
 

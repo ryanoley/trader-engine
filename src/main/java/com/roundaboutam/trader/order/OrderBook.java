@@ -3,6 +3,8 @@ package com.roundaboutam.trader.order;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import quickfix.SessionID;
+
 public class OrderBook {
 
 	private final HashMap<String, Order> orderMap;
@@ -45,7 +47,8 @@ public class OrderBook {
 	}
 
 	public int processExecutionReport(String orderID, String symbol, int orderQty, int cumQty, 
-			int leavesQty, double avgPx, String FIXMessage) {
+			int leavesQty, double avgPx, OrderSide orderSide, OrderType orderType, 
+			SessionID sessionID, String FIXMessage) {
 
 		Order order = null;
 
@@ -78,6 +81,10 @@ public class OrderBook {
 			order = new Order(orderID);
 			order.setSymbol(symbol);
 			order.setOrderID(orderID);
+			order.setOrderSide(orderSide);
+			order.setQuantity(orderQty);
+			order.setOrderType(orderType);
+			order.setSessionID(sessionID);
 			order.setMessage("Order from old session");
 			addOrder(order);
 		}

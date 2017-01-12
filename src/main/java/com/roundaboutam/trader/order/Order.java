@@ -43,9 +43,9 @@ public class Order {
         permanentID = orderID;
     }
 
-    public Order(String permanentID) {
-    	orderID = IdGenerator.makeID();
-    	this.permanentID = permanentID;
+    public Order(String newID) {
+    	orderID = newID;
+    	permanentID = newID;
     }
 
     public int processFill(int cumQty, int leavesQty, double avgPx, 

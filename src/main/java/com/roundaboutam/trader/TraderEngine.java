@@ -72,6 +72,7 @@ public class TraderEngine {
             try {
                 initiator.start();
                 initiatorStarted = true;
+                System.out.println("TraderEngine Log On Successfull");
             } catch (Exception e) {
                 log.error("Logon failed", e);
             }
@@ -103,8 +104,8 @@ public class TraderEngine {
     public void shutdown() {
     	System.out.println("TraderEngine.shutdown() invoked");
     	System.out.println(application.getSessionIDs().size());
-    	logout();
-        initiator.stop();
+    	if (initiatorStarted)
+    		stopInitiator();
         while (application.getSessionIDs().size() > 0) {
         	try { Thread.sleep(1000); } catch (InterruptedException e) { }
         }

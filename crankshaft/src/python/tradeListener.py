@@ -11,9 +11,9 @@ import zmq
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
 
-socket.connect("tcp://192.168.0.101:5558")
+socket.connect("tcp://127.0.0.1:5558")
 
-socket.setsockopt_string(zmq.SUBSCRIBE, "")
+socket.setsockopt(zmq.SUBSCRIBE, "")
 
 # Process 5 updates
 total_temp = 0
@@ -23,4 +23,3 @@ while True:
     print(string)
     count = count + 1
     print(count)
-

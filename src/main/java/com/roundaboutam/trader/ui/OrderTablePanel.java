@@ -180,8 +180,6 @@ class OrderTable extends JTable implements MouseListener {
         int row = rowAtPoint(e.getPoint());
         Order order = ((OrderTableModel) dataModel).getOrder(row);
         OrderModificationFrame.getInstance(application, order);
-        System.out.println("Row: " + row);
-        // This should have pop-up menu that has populated ReplaceOrder ticket
     }
 
     public void mouseEntered(MouseEvent e) {}

@@ -121,13 +121,10 @@ public class TraderFrame extends JFrame {
 	private JPanel makeOrderTablePanel() {
 
 		JPanel panel = new JPanel(new BorderLayout());
-
 		JTabbedPane tabbedPane = new JTabbedPane();
-		
-		JPanel messagesPanel = new JPanel();
 
 		tabbedPane.add("Orders", new OrderTablePanel(this.application));
-        tabbedPane.add("Messages", messagesPanel);
+        tabbedPane.add("Messages", new MessageTablePanel(this.application));
 
         panel.add(tabbedPane);
 		return panel;

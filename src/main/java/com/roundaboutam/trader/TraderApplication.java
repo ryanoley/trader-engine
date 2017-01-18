@@ -60,6 +60,7 @@ import quickfix.field.TransactTime;
 public class TraderApplication implements Application {
 
     private final ObservableOrder observableOrder = new ObservableOrder();
+    private final ObservableMessage observableMessage = new ObservableMessage();
     private final ObservableLogon observableLogon = new ObservableLogon();
 
     private final OrderBook orderBook;
@@ -110,6 +111,7 @@ public class TraderApplication implements Application {
                 	sendBusinessReject(message, BusinessRejectReason.UNSUPPORTED_MESSAGE_TYPE,
                 			"Unsupported Message Type");
                 }
+                observableMessage.update(message);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -287,6 +289,22 @@ public class TraderApplication implements Application {
         observableOrder.deleteObserver(observer);
     }
 
+    public void addMessageObserver(Observer observer) {
+        observableMessage.addObserver(observer);
+    }
+
+    public void deleteMessageObserver(Observer observer) {
+    	observableMessage.deleteObserver(observer);
+    }
+
+    private static class ObservableMessage extends Observable {
+        public void update(Message message) {
+            setChanged();
+            notifyObservers(message);
+            clearChanged();
+        }
+    }
+    
     private static class ObservableOrder extends Observable {
         public void update(Order order) {
             setChanged();

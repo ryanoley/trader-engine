@@ -30,6 +30,7 @@ public class CancelOrder {
     	this.symbol = order.getSymbol();
     	this.orderSide = order.getOrderSide();
     	this.quantity = order.getQuantity();
+    	order.setCanceled(true);
     }
 
 	public String getSymbol() {

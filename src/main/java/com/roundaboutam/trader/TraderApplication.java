@@ -106,7 +106,7 @@ public class TraderApplication implements Application {
                 } else if (message.getHeader().getField(msgType).valueEquals("8")) {
                 	executionReport(message, sessionID);
                 } else if (message.getHeader().getField(msgType).valueEquals("9")) {
-                	cancelReject(message, sessionID);
+                	cancelReplaceRejected(message, sessionID);
                 } else {
                 	sendBusinessReject(message, BusinessRejectReason.UNSUPPORTED_MESSAGE_TYPE,
                 			"Unsupported Message Type");
@@ -218,8 +218,8 @@ public class TraderApplication implements Application {
         }
     }
 
-    private void cancelReject(Message message, SessionID sessionID) throws FieldNotFound {
-    	orderBook.cancelRejected(message.getString(ClOrdID.FIELD));
+    private void cancelReplaceRejected(Message message, SessionID sessionID) throws FieldNotFound {
+    	orderBook.cancelReplaceRejected(message.getString(ClOrdID.FIELD));
     }
 
     private boolean alreadyProcessed(ExecID execID, SessionID sessionID) {

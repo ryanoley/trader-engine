@@ -19,7 +19,7 @@ public class FIXOrderTest extends TestCase {
         order.setSessionID(new SessionID("FIX.4.2", "SENDER", "SENDERSUB", "SENDERLOC",
                 "TARGET", "TARGETSUB", "TARGETLOC", "QUALIFIER"));
 
-        System.out.println(FIXOrder.formatNewOrder(order));
+        //System.out.println(FIXOrder.formatNewOrder(order));
 
 	}
 
@@ -35,7 +35,7 @@ public class FIXOrderTest extends TestCase {
         order.setSessionID(new SessionID("FIX.4.2", "SENDER", "SENDERSUB", "SENDERLOC",
                 "TARGET", "TARGETSUB", "TARGETLOC", "QUALIFIER"));
 
-        System.out.println(FIXOrder.formatNewOrder(order));
+        //System.out.println(FIXOrder.formatNewOrder(order));
 
 	}
 	

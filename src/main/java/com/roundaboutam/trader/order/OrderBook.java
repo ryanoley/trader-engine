@@ -33,16 +33,18 @@ public class OrderBook {
 			return orderMap.get(orderID);
 	}
 
-	public void cancelRejected(String orderID) {
+	public void cancelReplaceRejected(String orderID) {
 		// TODO: Log these rejects
 		if (replaceOrderMap.containsKey(orderID)) {
 			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
 			replaceOrder.setRejected(true);
 			orderMap.get(replaceOrder.getOrigOrderID()).setMessage("Replace Rejected");
+			orderMap.get(replaceOrder.getOrigOrderID()).setModified(false);
 		} else if (cancelOrderMap.containsKey(orderID)) {
 			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
 			cancelOrder.setRejected(true);
 			orderMap.get(cancelOrder.getOrigOrderID()).setMessage("Cancel Rejected");
+			orderMap.get(cancelOrder.getOrigOrderID()).setCanceled(false);
 		}
 	}
 

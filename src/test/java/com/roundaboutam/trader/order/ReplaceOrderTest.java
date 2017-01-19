@@ -35,5 +35,5 @@ public class ReplaceOrderTest extends TestCase {
         assertFalse(replaceOrder.getQuantity() == order.getQuantity());
 
 	}
-	
+
 }

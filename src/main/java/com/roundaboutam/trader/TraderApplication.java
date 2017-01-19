@@ -240,6 +240,7 @@ public class TraderApplication implements Application {
     private void sendToBroker(Message message, SessionID sessionID) {        
     	try {
         	Session.sendToTarget(message, sessionID);
+        	observableMessage.update(message);
         } catch (SessionNotFound e) {
         	System.out.println(e);
         }

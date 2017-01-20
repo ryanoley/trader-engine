@@ -21,13 +21,10 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.MessageContainer;
 
-import quickfix.FieldNotFound;
 import quickfix.Message;
-import quickfix.field.MsgType;
-import quickfix.field.OrderID;
-import quickfix.field.OrdStatus;
-import quickfix.field.Symbol;
+
 
 
 
@@ -46,21 +43,22 @@ public class MessageTablePanel extends JPanel {
 @SuppressWarnings("serial")
 class MessageTableModel extends AbstractTableModel implements Observer {
 
-    private final static int TIMESTAMP = 0;
+    private final static int TIME = 0;
     private final static int MSGTYPE = 1;
-    private final static int SYMBOL = 2;
-    private final static int ORDID = 3;
-    private final static int ORDSTATUS = 4;
-    private final static int MESSAGE = 5;
-    protected final HashMap<Integer, Message> rowToMessage;
+    private final static int ORDID = 2;
+    private final static int SYMBOL = 3;
+    private final static int STATUS = 4;
+    private final static int ORDQTY = 5;
+    private final static int MESSAGE = 6;
+    protected final HashMap<Integer, MessageContainer> rowToMessage;
     protected final HashMap<Integer, Date> rowToTimeStamp;
 
-    public final String[] headers = new String[] {"TimeStamp", "Type", "Sym",
-    		"OrdID", "Status", "Message"};
+    public final String[] headers = new String[] {"Time", "Type","OrdID", 
+    		"Sym", "Status", "OrdQty", "Message"};
 
     public MessageTableModel(TraderApplication application) {
     	application.addMessageObserver(this);
-    	rowToMessage = new HashMap<Integer, Message>();
+    	rowToMessage = new HashMap<Integer, MessageContainer>();
     	rowToTimeStamp = new HashMap<Integer, Date>();
     }
 
@@ -70,7 +68,8 @@ class MessageTableModel extends AbstractTableModel implements Observer {
 
     private void addMessage(Message message) {
     	int row = rowToMessage.size();
-    	rowToMessage.put(row, message);
+    	MessageContainer messageContainer = new MessageContainer(message);
+    	rowToMessage.put(row, messageContainer);
     	rowToTimeStamp.put(row, new Date(System.currentTimeMillis()));
         fireTableRowsInserted(row, row);
     }
@@ -94,23 +93,25 @@ class MessageTableModel extends AbstractTableModel implements Observer {
     }
 
     public Object getValueAt(int rowIndex, int columnIndex) {
-    	Message message = rowToMessage.get(rowIndex);
+    	MessageContainer messageContainer = rowToMessage.get(rowIndex);
     	Date timeStamp = rowToTimeStamp.get(rowIndex);
  
     	switch (columnIndex) {
-        case TIMESTAMP:
+        case TIME:
         	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");  
         	return sdf.format(timeStamp);
         case MSGTYPE:
-        	return resolveMsgType(message);
+        	return messageContainer.getMsgType();
         case SYMBOL:
-        	return resolveSymbol(message);
+        	return messageContainer.getSymbol();
         case ORDID:
-        	return resolveOrdId(message);
-        case ORDSTATUS:
-        	return resolveOrdStatus(message);
+        	return messageContainer.getOrderID();
+        case ORDQTY:
+        	return messageContainer.getMsgQty();
+        case STATUS:
+        	return messageContainer.getStatus();
         case MESSAGE:
-            return message.toString();
+            return messageContainer.getMessage().toString();
         }
         return "#NA";
     }
@@ -120,70 +121,9 @@ class MessageTableModel extends AbstractTableModel implements Observer {
         addMessage(message);
 	}
 
-	private String resolveOrdId(Message message) {
-        try {
-			return message.getString(OrderID.FIELD);
-		} catch (FieldNotFound e) {
-			return "#NA";
-		}
-	}
-
-	private String resolveSymbol(Message message) {
-        try {
-			return message.getString(Symbol.FIELD);
-		} catch (FieldNotFound e) {
-			return "#NA";
-		}
-	}
-
-	private String resolveMsgType(Message message) {
-        try {
-        	String msgTypeVal = message.getHeader().getString(MsgType.FIELD);
-        	switch (msgTypeVal) {
-        	case MsgType.EXECUTION_REPORT:
-        		return "ExecRept";
-        	case MsgType.ORDER_CANCEL_REJECT:
-        		return "CancelOrReject";	
-        	case MsgType.ORDER_SINGLE:
-        		return "NewOrder";	
-        	case MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-        		return "ReplaceOrder";	
-        	case MsgType.ORDER_CANCEL_REQUEST:
-        		return "CancelOrder";
-        	}
-        	return msgTypeVal;
-		} catch (FieldNotFound e) {
-			return "#NA";
-		}
-	}
-
-	private String resolveOrdStatus(Message message) {
-        try {
-        	char ordStatusVal = message.getChar(OrdStatus.FIELD);
-        	switch (ordStatusVal) {
-        	case OrdStatus.NEW:
-        		return "New";
-        	case OrdStatus.PARTIALLY_FILLED:
-        		return "PartialFill";	
-        	case OrdStatus.FILLED:
-        		return "Filled";	
-        	case OrdStatus.DONE_FOR_DAY:
-        		return "DoneForDay";
-        	case OrdStatus.CANCELED:
-        		return "Canceled";
-        	case OrdStatus.REPLACED:
-        		return "Replaced";
-        	case OrdStatus.REJECTED:
-        		return "Rejected";
-        	case OrdStatus.PENDING_REPLACE:
-        		return "PendingReplace";
-        	}
-        	return String.valueOf(ordStatusVal);
-		} catch (FieldNotFound e) {
-			return "#NA";
-		}
-	}
 }
+
+
 
 
 @SuppressWarnings("serial")
@@ -202,12 +142,14 @@ class MessageTable extends JTable implements MouseListener {
         column = model.getColumn(1);
         column.setPreferredWidth((int) (50));
         column = model.getColumn(2);
-        column.setPreferredWidth((int) (50));
+        column.setPreferredWidth((int) (80));
         column = model.getColumn(3);
-        column.setPreferredWidth((int) (75));
+        column.setPreferredWidth((int) (50));
         column = model.getColumn(4);
         column.setPreferredWidth((int) (50));
         column = model.getColumn(5);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(6);
         column.setPreferredWidth((int) (300));
 	}
 

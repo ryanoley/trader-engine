@@ -21,6 +21,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.MessageContainer;
 
 import quickfix.Message;
@@ -74,8 +75,6 @@ class MessageTableModel extends AbstractTableModel implements Observer {
         fireTableRowsInserted(row, row);
     }
   
-    public void setValueAt(Object value, int rowIndex, int columnIndex) { }
-
     public Class<String> getColumnClass(int columnIndex) {
         return String.class;
     }
@@ -88,17 +87,21 @@ class MessageTableModel extends AbstractTableModel implements Observer {
         return headers.length;
     }
 
+    public MessageContainer getMessage(int row) {
+        return rowToMessage.get(row);
+    }
+    
     public String getColumnName(int columnIndex) {
         return headers[columnIndex];
     }
 
     public Object getValueAt(int rowIndex, int columnIndex) {
-    	MessageContainer messageContainer = rowToMessage.get(rowIndex);
+    	MessageContainer messageContainer = getMessage(rowIndex);
     	Date timeStamp = rowToTimeStamp.get(rowIndex);
  
     	switch (columnIndex) {
         case TIME:
-        	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");  
+        	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.S");  
         	return sdf.format(timeStamp);
         case MSGTYPE:
         	return messageContainer.getMsgType();
@@ -133,37 +136,48 @@ class MessageTable extends JTable implements MouseListener {
         super(new MessageTableModel(application));
         initColumnWidths();
         addMouseListener(this);
+        this.setAutoCreateRowSorter(true);
     }
  
 	private void initColumnWidths() {
 		TableColumnModel model = this.getColumnModel();
         TableColumn column = model.getColumn(0);
-        column.setPreferredWidth((int) (50));
+        column.setPreferredWidth((int) (80));
         column = model.getColumn(1);
-        column.setPreferredWidth((int) (50));
+        column.setPreferredWidth((int) (60));
         column = model.getColumn(2);
         column.setPreferredWidth((int) (80));
         column = model.getColumn(3);
-        column.setPreferredWidth((int) (50));
+        column.setPreferredWidth((int) (40));
         column = model.getColumn(4);
         column.setPreferredWidth((int) (50));
         column = model.getColumn(5);
-        column.setPreferredWidth((int) (50));
+        column.setPreferredWidth((int) (30));
         column = model.getColumn(6);
         column.setPreferredWidth((int) (300));
 	}
 
-	public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+
+        int viewIdx = row;
+        int modelIdx = convertRowIndexToModel(viewIdx);
+
+    	MessageContainer messaingeContainer = ((MessageTableModel) getModel()).getMessage(modelIdx);
+        String direction = messaingeContainer.getDirection();
         DefaultTableCellRenderer r = (DefaultTableCellRenderer) renderer;
-        r.setBackground(Color.white);
+
+        if ("Outbound".equals(direction))
+        	r.setForeground(Color.blue);
+        else
+        	r.setForeground(Color.black);
+
         return super.prepareRenderer(renderer, row, column);
     }
 
     public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() != 2)
             return;
-        int row = rowAtPoint(e.getPoint());
-        System.out.println(row);
+        //int row = rowAtPoint(e.getPoint());
     }
 
     public void mouseEntered(MouseEvent e) {}

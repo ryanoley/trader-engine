@@ -11,16 +11,18 @@ public class MessageContainer {
 
 	private final Message message;
 	private final String MsgType;
-	private String Direction;
-	private Message.Header Header;
-	private String ClOrdID;
-	private String OrderID;
-	private String Symbol;
-	private String Side;
-	private String OrderQty;
-	private String OrdStatus;
-	private String ExecType;
-	private String LastShares;
+	private final String Direction;
+	private final Message.Header Header;
+	private final String ClOrdID;
+	private final String OrigClOrdID;
+	private final String OrdType;
+	private final String OrderID;
+	private final String Symbol;
+	private final String Side;
+	private final String OrderQty;
+	private final String OrdStatus;
+	private final String ExecType;
+	private final String LastShares;
 	public HashMap<String, String> rawValues;
 
 
@@ -31,6 +33,8 @@ public class MessageContainer {
 		MsgType = resolveMsgType(message);
 		Direction = resolveDirection();
 		ClOrdID = resolveClOrdID(message);
+		OrigClOrdID = resolveOrigClOrdID(message);
+		OrdType = resolveOrdType(message);
 		OrderID = resolveOrderID(message);
 		Symbol = resolveSymbol(message);
 		Side = resolveSide(message);
@@ -41,9 +45,21 @@ public class MessageContainer {
     }
 
 
+	public String getPermID() {
+		// THIS DOES NOT WORK IN ALL CASES, I.E DOUBLE REPLACE
+    	String msgTypeVal = (String) rawValues.get("MsgType");
+    	if(quickfix.field.MsgType.ORDER_SINGLE.equals(msgTypeVal)) {
+    		return ClOrdID;
+    	}
+    	else if("#NA".equals(OrigClOrdID)) {
+    		return ClOrdID;
+    	}
+    	return OrigClOrdID;
+    }
+
 	public String getMsgQty() {
     	String execTypeVal = (String) rawValues.get("ExecType");
-    	if(execTypeVal == String.valueOf(quickfix.field.ExecType.PARTIAL_FILL)) {
+    	if(String.valueOf(quickfix.field.ExecType.PARTIAL_FILL).equals(execTypeVal)) {
     		return LastShares;
     	}
     	return OrderQty;
@@ -103,9 +119,9 @@ public class MessageContainer {
         	case quickfix.field.ExecType.DONE_FOR_DAY:
         		return "DoneForDay";
         	case quickfix.field.ExecType.CANCELED:
-        		return "Canceled";
+        		return "CancelAck";
         	case quickfix.field.ExecType.REPLACE:
-        		return "Replaced";
+        		return "ReplaceAck";
         	case quickfix.field.ExecType.STOPPED:
         		return "Stopped";
         	case quickfix.field.ExecType.SUSPENDED:
@@ -237,6 +253,28 @@ public class MessageContainer {
 		}
 	}
 
+	private String resolveOrigClOrdID(Message message) {
+        try {
+        	String origClOrdIDVal = message.getString(quickfix.field.OrigClOrdID.FIELD);
+        	rawValues.put("OrigClOrdID", origClOrdIDVal);
+        	return origClOrdIDVal;
+		} catch (FieldNotFound e) {
+			rawValues.put("OrigClOrdID", "#NA");
+			return "#NA";
+		}
+	}
+
+	private String resolveOrdType(Message message) {
+        try {
+        	String ordTypeVal = message.getString(quickfix.field.OrdType.FIELD);
+        	rawValues.put("OrdType", ordTypeVal);
+        	return ordTypeVal;
+		} catch (FieldNotFound e) {
+			rawValues.put("OrdType", "#NA");
+			return "#NA";
+		}
+	}
+
 	private String resolveDirection() {
 		switch (MsgType) {
         	case "ExecRept":
@@ -273,6 +311,10 @@ public class MessageContainer {
     	return ClOrdID;
     }
 
+    public String getOrigClOrdID() {
+    	return OrigClOrdID;
+    }
+
     public String getOrderID() {
     	return OrderID;
     }
@@ -299,6 +341,10 @@ public class MessageContainer {
 
     public String getLastShares() {
     	return LastShares;
+    }
+
+    public String getOrdType() {
+    	return OrdType;
     }
 
 }

@@ -18,10 +18,8 @@ import com.roundaboutam.trader.execution.Execution;
 import com.roundaboutam.trader.execution.ExecutionBook;
 
 import quickfix.Application;
-import quickfix.ConfigError;
 import quickfix.DefaultMessageFactory;
 import quickfix.DoNotSend;
-import quickfix.FieldConvertError;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
 import quickfix.IncorrectTagValue;
@@ -37,7 +35,6 @@ import quickfix.field.BeginString;
 import quickfix.field.BusinessRejectReason;
 import quickfix.field.ClOrdID;
 import quickfix.field.CumQty;
-import quickfix.field.DeliverToCompID;
 import quickfix.field.ExecID;
 import quickfix.field.LastPx;
 import quickfix.field.LeavesQty;
@@ -49,7 +46,6 @@ import quickfix.field.OrderQty;
 import quickfix.field.RefMsgType;
 import quickfix.field.RefSeqNum;
 import quickfix.field.SenderCompID;
-import quickfix.field.SessionRejectReason;
 import quickfix.field.Side;
 import quickfix.field.Symbol;
 import quickfix.field.SymbolSfx;
@@ -73,11 +69,11 @@ public class TraderApplication implements Application {
 
 	static private final HashSet<SessionID> sessionIDs = new HashSet<SessionID>();
 
-	public TraderApplication(SessionSettings settings) throws ConfigError, FieldConvertError {
+	public TraderApplication(SessionSettings settings) {
 		orderBook = new OrderBook();
-		executionBook = new ExecutionBook(settings.getString("CustomLogPath"));
+		executionBook = new ExecutionBook(settings);
 	}
-
+	
     // Main message handler
     public void fromApp(Message message, SessionID sessionID) throws FieldNotFound,
     	IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
@@ -101,9 +97,7 @@ public class TraderApplication implements Application {
         public void run() {
             try {
                 MsgType msgType = new MsgType();
-                if (message.getHeader().isSetField(DeliverToCompID.FIELD)) {
-                	sendSessionReject(message, SessionRejectReason.COMPID_PROBLEM);
-                } else if (message.getHeader().getField(msgType).valueEquals("8")) {
+                if (message.getHeader().getField(msgType).valueEquals("8")) {
                 	executionReport(message, sessionID);
                 } else if (message.getHeader().getField(msgType).valueEquals("9")) {
                 	cancelReplaceRejected(message, sessionID);
@@ -111,23 +105,11 @@ public class TraderApplication implements Application {
                 	sendBusinessReject(message, BusinessRejectReason.UNSUPPORTED_MESSAGE_TYPE,
                 			"Unsupported Message Type");
                 }
-                observableMessage.update(message);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            observableMessage.update(message);
         }
-    }
-
-    private void sendSessionReject(Message message, int rejectReason) throws FieldNotFound,
-    		SessionNotFound {
-    	Message reply = createMessage(message, MsgType.REJECT);
-    	reverseRoute(message, reply);
-    	String refSeqNum = message.getHeader().getString(MsgSeqNum.FIELD);
-    	reply.setString(RefSeqNum.FIELD, refSeqNum);
-    	reply.setString(RefMsgType.FIELD, message.getHeader().getString(MsgType.FIELD));
-    	reply.setInt(SessionRejectReason.FIELD, rejectReason);
-    	Session.sendToTarget(reply);
-    	System.out.println("sendSessionReject: " + reply.toString());  // Debugging
     }
 
     private void sendBusinessReject(Message message, int rejectReason, String rejectText)
@@ -158,31 +140,27 @@ public class TraderApplication implements Application {
 
         ExecID execID = (ExecID) message.getField(new ExecID());
         if (alreadyProcessed(execID, sessionID)) { return; }
+        
+        MessageContainer messageContainer = new MessageContainer(message);
+        String orderID = messageContainer.getClOrdID();
+        String orderMessage = messageContainer.getText();
 
-        String orderID = message.getString(ClOrdID.FIELD);
-
-        String orderMessage = null;
-        try {
-        	orderMessage = message.getString(Text.FIELD);
-        } catch (Exception e) {
-        }
-
-        OrdStatus ordStatus = (OrdStatus) message.getField(new OrdStatus());        
-        if (ordStatus.valueEquals(OrdStatus.REJECTED)) {
+        char ordStatus = message.getChar(OrdStatus.FIELD);
+       
+        if (ordStatus == OrdStatus.REJECTED) {
         	System.out.println("TraderApplication.executionReport - Rejected: " + orderMessage);
         	// 1. Rejects come here when there are errors in order. Replicate with BRK/B order. Wrong suffix
-        	// 2. Also, I am getting here when cancelling Unacknowledged orders. The broker message is: Cancelled by Exchange
+        	// 2. Also, I am getting here when canceling Unacknowledged orders. The broker message is: Cancelled by Exchange
         	// which seems like a normal message. Is the OrdStatus then just from the original order?
         	orderBook.orderRejected(orderID);
         	return;
-        } else if (ordStatus.valueEquals(OrdStatus.CANCELED) 
-        		|| ordStatus.valueEquals(OrdStatus.DONE_FOR_DAY)) {
+        } else if (ordStatus ==OrdStatus.CANCELED || ordStatus == OrdStatus.DONE_FOR_DAY) {
         	// Seems like rejects coming here as well. Replicate with large market orders
         	// Cancels generated by me come here as well
         	System.out.println("TraderApplication.executionReport - Canceled: " + orderMessage);
         }
 
-        int fillSize = orderBook.processExecutionReport(
+        int fillSize = orderBook.processExecutionReport( 
         		orderID,
         		message.getString(Symbol.FIELD),
         		Integer.parseInt(message.getString(OrderQty.FIELD)), 
@@ -215,6 +193,7 @@ public class TraderApplication implements Application {
             execution.setBid(0);
             execution.setAsk(0);
             executionBook.addExecution(execution);
+            //System.out.println(execution.getLogEntry());
         }
     }
 
@@ -337,11 +316,13 @@ public class TraderApplication implements Application {
     public void onLogon(SessionID sessionID) {
     	sessionIDs.add(sessionID);
         observableLogon.logon(sessionID);
+		executionBook.setExecutionLog(sessionID);
     }
 
     public void onLogout(SessionID sessionID) {
     	sessionIDs.remove(sessionID);
     	observableLogon.logoff(sessionID);
+    	executionBook.closeExecutionLog(sessionID);
     }
 
     public void toAdmin(Message message, SessionID sessionID) { }

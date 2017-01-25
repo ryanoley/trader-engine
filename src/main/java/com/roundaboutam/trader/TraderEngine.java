@@ -35,9 +35,7 @@ public class TraderEngine {
 	private TraderApplication application;
 
 	public TraderEngine() throws Exception {
-
 		SessionSettings settings = getSettings();
-
 		application = new TraderApplication(settings);
 
         initiator = new SocketInitiator(
@@ -49,7 +47,6 @@ public class TraderEngine {
 
         JmxExporter exporter = new JmxExporter();
         exporter.register(initiator);
-
         new TraderFrame(application);
 	}
 
@@ -77,9 +74,7 @@ public class TraderEngine {
                 log.error("Logon failed", e);
             }
         } else {
-	        for (SessionID sessionId : initiator.getSessions()) {
-	        	Session.lookupSession(sessionId).logon();
-	        }
+        	System.out.println("TraderEngine - Log on attempt with Initiator Started");
         }
     }
 

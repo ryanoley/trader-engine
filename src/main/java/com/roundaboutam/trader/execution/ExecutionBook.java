@@ -7,15 +7,32 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import quickfix.ConfigError;
+import quickfix.FieldConvertError;
+import quickfix.SessionID;
+import quickfix.SessionSettings;
+
 public class ExecutionBook {
 
-	BufferedWriter logFile;
-	boolean logFlag = false;
+	private BufferedWriter logFile;
+	private boolean logFlag = false;
+	private String logFilePath;
 
-	public ExecutionBook(String logPath) {
-		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
+	public ExecutionBook(SessionSettings settings){
+		try {
+			logFilePath = settings.getString("CustomLogPath");
+		} catch (ConfigError | FieldConvertError e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setExecutionLog(SessionID sessionID) {
+		String senderCompID = sessionID.getSenderCompID();
+		String targetCompID = sessionID.getTargetCompID();
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		Date date = new Date();
-		String filePath = logPath + "\\executions\\" + dateFormat.format(date) + ".txt";
+		String filePath = logFilePath + "\\executions\\" + senderCompID + "_" + targetCompID + 
+				"_" + dateFormat.format(date) + ".txt";
 		try {
 			logFile = new BufferedWriter(new FileWriter(filePath, true));
 		} catch (IOException e) {
@@ -32,5 +49,17 @@ public class ExecutionBook {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public void closeExecutionLog(SessionID sessionID) {
+		try {
+			if (logFlag) {
+				logFile.write("Hello World");
+				logFile.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		logFlag = false;
 	}
 }

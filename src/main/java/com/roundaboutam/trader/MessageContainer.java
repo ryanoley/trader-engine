@@ -4,6 +4,9 @@ import java.util.HashMap;
 
 import quickfix.FieldNotFound;
 import quickfix.Message;
+import quickfix.field.AvgPx;
+import quickfix.field.CumQty;
+import quickfix.field.LeavesQty;
 
 
 
@@ -23,6 +26,10 @@ public class MessageContainer {
 	private final String OrdStatus;
 	private final String ExecType;
 	private final String LastShares;
+	private final String Text;
+	private final String CumQty;
+	private final String LeavesQty;
+	private final String AvgPx;
 	public HashMap<String, String> rawValues;
 
 
@@ -42,31 +49,44 @@ public class MessageContainer {
 		ExecType = resolveExecType(message);
 		OrderQty = resolveOrderQty(message);
 		LastShares = resolveLastShares(message);
+		Text = resolveText(message);
+		CumQty = resolveCumQty(message);
+		LeavesQty = resolveLeavesQty(message);
+		AvgPx = resolveAvgPx(message);
     }
 
 
-	public String getPermID() {
-		// THIS DOES NOT WORK IN ALL CASES, I.E DOUBLE REPLACE
-    	String msgTypeVal = (String) rawValues.get("MsgType");
-    	if(quickfix.field.MsgType.ORDER_SINGLE.equals(msgTypeVal)) {
-    		return ClOrdID;
+	public String getDisplayID() {
+    	String msgTypeVal = rawValues.get("MsgType");
+    	switch(msgTypeVal) {
+		case quickfix.field.MsgType.EXECUTION_REPORT:
+			return OrderID;
+		case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
+			return OrderID;
+		case quickfix.field.MsgType.ORDER_SINGLE:
+			return "-";
+		case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
+			return "-";
+		case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
+			return "-";	
     	}
-    	else if("#NA".equals(OrigClOrdID)) {
-    		return ClOrdID;
-    	}
-    	return OrigClOrdID;
+    	return OrderID;
     }
 
 	public String getMsgQty() {
-    	String execTypeVal = (String) rawValues.get("ExecType");
-    	if(String.valueOf(quickfix.field.ExecType.PARTIAL_FILL).equals(execTypeVal)) {
+    	String execTypeVal = rawValues.get("ExecType");
+    	char execTypeChar = execTypeVal.charAt(0);
+    	switch(execTypeChar) {
+    	case quickfix.field.ExecType.PARTIAL_FILL:
+    		return LastShares;
+    	case quickfix.field.ExecType.FILL:
     		return LastShares;
     	}
     	return OrderQty;
     }
-	
+
     public String getStatus() {
-    	String msgTypeVal = (String) rawValues.get("MsgType");
+    	String msgTypeVal = rawValues.get("MsgType");
     	switch(msgTypeVal) {
     	case quickfix.field.MsgType.EXECUTION_REPORT:
     		return ExecType;
@@ -79,7 +99,7 @@ public class MessageContainer {
     	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
     		return Side;	
     	}
-    	return "#NA";
+    	return "FieldNotFound";
     }
 
 	private String resolveMsgType(Message message) {
@@ -100,8 +120,8 @@ public class MessageContainer {
         	}
         	return msgTypeVal;
 		} catch (FieldNotFound e) {
-			rawValues.put("MsgTpye", "#NA");
-			return "#NA";
+			rawValues.put("MsgTpye", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -139,8 +159,8 @@ public class MessageContainer {
         	}
         	return String.valueOf(execTypeVal);
 		} catch (FieldNotFound e) {
-			rawValues.put("ExecType", "#NA");
-			return "#NA";
+			rawValues.put("ExecType", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -172,8 +192,8 @@ public class MessageContainer {
         	}
         	return String.valueOf(ordStatusVal);
 		} catch (FieldNotFound e) {
-			rawValues.put("OrdStatus", "#NA");
-			return "#NA";
+			rawValues.put("OrdStatus", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -193,8 +213,8 @@ public class MessageContainer {
         	}
         	return String.valueOf(sideVal);
 		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "#NA");
-			return "#NA";
+        	rawValues.put("Symbol", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -204,8 +224,8 @@ public class MessageContainer {
         	rawValues.put("Symbol", symbolVal);
         	return symbolVal;
 		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "#NA");
-			return "#NA";
+        	rawValues.put("Symbol", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -215,8 +235,8 @@ public class MessageContainer {
         	rawValues.put("OrderQty", orderQtyVal);
         	return orderQtyVal;
 		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "#NA");
-			return "#NA";
+        	rawValues.put("Symbol", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -226,8 +246,8 @@ public class MessageContainer {
         	rawValues.put("LastShares", lastSharesVal);
         	return lastSharesVal;
 		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "#NA");
-			return "#NA";
+        	rawValues.put("Symbol", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -237,8 +257,8 @@ public class MessageContainer {
         	rawValues.put("OrderID", orderIDVal);
         	return orderIDVal;
 		} catch (FieldNotFound e) {
-			rawValues.put("OrderID", "#NA");
-			return "#NA";
+			rawValues.put("OrderID", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -248,8 +268,8 @@ public class MessageContainer {
         	rawValues.put("ClOrdID", clOrdIDVal);
         	return clOrdIDVal;
 		} catch (FieldNotFound e) {
-			rawValues.put("ClOrdID", "#NA");
-			return "#NA";
+			rawValues.put("ClOrdID", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -259,8 +279,8 @@ public class MessageContainer {
         	rawValues.put("OrigClOrdID", origClOrdIDVal);
         	return origClOrdIDVal;
 		} catch (FieldNotFound e) {
-			rawValues.put("OrigClOrdID", "#NA");
-			return "#NA";
+			rawValues.put("OrigClOrdID", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
@@ -270,25 +290,70 @@ public class MessageContainer {
         	rawValues.put("OrdType", ordTypeVal);
         	return ordTypeVal;
 		} catch (FieldNotFound e) {
-			rawValues.put("OrdType", "#NA");
-			return "#NA";
+			rawValues.put("OrdType", "FieldNotFound");
+			return "FieldNotFound";
+		}
+	}
+
+	private String resolveText(Message message) {
+        try {
+        	String textVal = message.getString(quickfix.field.Text.FIELD);
+        	rawValues.put("Text", textVal);
+        	return textVal;
+		} catch (FieldNotFound e) {
+			rawValues.put("Text", "FieldNotFound");
+			return "FieldNotFound";
+		}
+	}
+
+	private String resolveCumQty(Message message) {
+        try {
+        	String cumQtyVal = message.getString(quickfix.field.CumQty.FIELD);
+        	rawValues.put("CumQty", cumQtyVal);
+        	return cumQtyVal;
+		} catch (FieldNotFound e) {
+			rawValues.put("CumQty", "FieldNotFound");
+			return "FieldNotFound";
+		}
+	}
+
+	private String resolveLeavesQty(Message message) {
+        try {
+        	String leavesQtyVal = message.getString(quickfix.field.LeavesQty.FIELD);
+        	rawValues.put("LeavesQty", leavesQtyVal);
+        	return leavesQtyVal;
+		} catch (FieldNotFound e) {
+			rawValues.put("LeavesQty", "FieldNotFound");
+			return "FieldNotFound";
+		}
+	}
+
+	private String resolveAvgPx(Message message) {
+        try {
+        	String avgPxVal = message.getString(quickfix.field.AvgPx.FIELD);
+        	rawValues.put("AvgPx", avgPxVal);
+        	return avgPxVal;
+		} catch (FieldNotFound e) {
+			rawValues.put("AvgPx", "FieldNotFound");
+			return "FieldNotFound";
 		}
 	}
 
 	private String resolveDirection() {
-		switch (MsgType) {
-        	case "ExecRept":
-        		return "Inbound";
-        	case "CancelOrReject":
-        		return "Inbound";
-        	case "NewOrder":
-        		return "Outbound";
-        	case "ReplaceOrder":
-        		return "Outbound";
-        	case "CancelOrder":
-        		return "Outbound";
-        	}
-			return "#NA";
+    	String msgTypeVal = (String) rawValues.get("MsgType");
+    	switch(msgTypeVal) {
+    	case quickfix.field.MsgType.EXECUTION_REPORT:
+    		return "Inbound";
+    	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
+    		return "Inbound";
+    	case quickfix.field.MsgType.ORDER_SINGLE:
+    		return "Outbound";
+    	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
+    		return "Outbound";
+    	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
+    		return "Outbound";	
+    	}
+    	return "FieldNotFound";
 	}
 
     public Message getMessage() {
@@ -345,6 +410,22 @@ public class MessageContainer {
 
     public String getOrdType() {
     	return OrdType;
+    }
+
+    public String getText() {
+    	return Text;
+    }
+
+    public String getCumQty() {
+    	return CumQty;
+    }
+
+    public String getLeavesQty() {
+    	return LeavesQty;
+    }
+
+    public String getAvgPx() {
+    	return AvgPx;
     }
 
 }

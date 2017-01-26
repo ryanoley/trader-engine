@@ -108,7 +108,7 @@ class MessageTableModel extends AbstractTableModel implements Observer {
         case SYMBOL:
         	return messageContainer.getSymbol();
         case ORDID:
-        	return messageContainer.getOrderID();
+        	return messageContainer.getDisplayID();
         case ORDQTY:
         	return messageContainer.getMsgQty();
         case STATUS:

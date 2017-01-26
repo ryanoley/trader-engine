@@ -24,14 +24,13 @@ public class Execution {
     private static int nextID = 1;
 
     public Execution(String orderID, String permanentID, String symbol,
-    		String transactTime, String exchangeID, OrderSide orderSide,
+    		String transactTime, OrderSide orderSide,
     		int quantity, double price) {
     	ID = Integer.toString(nextID++);
     	this.orderID = orderID;
     	this.permanentID = permanentID;
     	this.symbol = symbol;
     	this.transactTime = transactTime;
-    	this.exchangeID = exchangeID;
     	this.orderSide = orderSide;
     	this.quantity = quantity;
     	this.price = price;
@@ -44,9 +43,8 @@ public class Execution {
             outSymbol = outSymbol + "/" + suffix;
         }
     	StringJoiner joiner = new StringJoiner(",");
-    	joiner.add(ID).add(orderID).add(permanentID).add(outSymbol).add(transactTime).add(
-    			exchangeID).add(orderSide.toString()).add(Integer.toString(quantity)).add(
-    			Double.toString(price)).add(Double.toString(bid)).add(Double.toString(ask)).add(customTag);
+    	joiner.add(ID).add(orderID).add(permanentID).add(outSymbol).add(transactTime).add(orderSide.toString()).add(
+    			Integer.toString(quantity)).add(Double.toString(price)).add(Double.toString(bid)).add(Double.toString(ask)).add(customTag);
     	return joiner.toString();
     }
 

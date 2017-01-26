@@ -44,7 +44,7 @@ public class ExecutionBook {
 	public void addExecution(Execution execution) {
 		if (logFlag) {
 			try {
-				logFile.write(execution.getLogEntry());
+				logFile.write(execution.getLogEntry() + "\n");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -54,7 +54,6 @@ public class ExecutionBook {
 	public void closeExecutionLog(SessionID sessionID) {
 		try {
 			if (logFlag) {
-				logFile.write("Hello World");
 				logFile.close();
 			}
 		} catch (IOException e) {

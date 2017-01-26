@@ -125,15 +125,15 @@ public class TraderApplication implements Application {
         System.out.println("sendBusinessReject: " + reply.toString());  // Debugging
     }
 
-    private Message createMessage(Message message, String msgType) throws FieldNotFound {
-        return messageFactory.create(message.getHeader().getString(BeginString.FIELD), msgType);
-    }
-
     private void reverseRoute(Message message, Message reply) throws FieldNotFound {
         reply.getHeader().setString(SenderCompID.FIELD,
                 message.getHeader().getString(TargetCompID.FIELD));
         reply.getHeader().setString(TargetCompID.FIELD,
                 message.getHeader().getString(SenderCompID.FIELD));
+    }
+
+    private Message createMessage(Message message, String msgType) throws FieldNotFound {
+        return messageFactory.create(message.getHeader().getString(BeginString.FIELD), msgType);
     }
 
     private void executionReport(Message message, SessionID sessionID) throws FieldNotFound {
@@ -179,7 +179,6 @@ public class TraderApplication implements Application {
         			orderBook.getOrder(orderID).getPermanentID(),
         			message.getString(Symbol.FIELD),
         			message.getString(TransactTime.FIELD),
-        			message.getString(ExecID.FIELD),
         			OrderSide.fromFIX((Side) message.getField(new Side())),
         			fillSize,
         			Double.parseDouble(message.getString(LastPx.FIELD))
@@ -193,7 +192,6 @@ public class TraderApplication implements Application {
             execution.setBid(0);
             execution.setAsk(0);
             executionBook.addExecution(execution);
-            //System.out.println(execution.getLogEntry());
         }
     }
 
@@ -248,7 +246,6 @@ public class TraderApplication implements Application {
     }
 
     // Various observable and getter functionality
-
     public HashSet<SessionID> getSessionIDs() {
     	return sessionIDs;
     }
@@ -330,6 +327,8 @@ public class TraderApplication implements Application {
     public void toApp(Message message, SessionID sessionID) throws DoNotSend { }
 
     public void fromAdmin(Message message, SessionID sessionID) throws FieldNotFound,
-    	IncorrectDataFormat, IncorrectTagValue, RejectLogon { }
+    	IncorrectDataFormat, IncorrectTagValue, RejectLogon {
+    	//System.out.println(message.toString());
+    }
 
 }

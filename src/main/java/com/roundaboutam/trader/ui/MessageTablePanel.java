@@ -50,12 +50,13 @@ class MessageTableModel extends AbstractTableModel implements Observer {
     private final static int SYMBOL = 3;
     private final static int STATUS = 4;
     private final static int ORDQTY = 5;
-    private final static int MESSAGE = 6;
+    private final static int TEXT = 6;
+    private final static int MESSAGE = 7;
     protected final HashMap<Integer, MessageContainer> rowToMessage;
     protected final HashMap<Integer, Date> rowToTimeStamp;
 
     public final String[] headers = new String[] {"Time", "Type","OrdID", 
-    		"Sym", "Status", "OrdQty", "Message"};
+    		"Sym", "Status", "OrdQty", "Text",  "Message"};
 
     public MessageTableModel(TraderApplication application) {
     	application.addMessageObserver(this);
@@ -113,6 +114,8 @@ class MessageTableModel extends AbstractTableModel implements Observer {
         	return messageContainer.getMsgQty();
         case STATUS:
         	return messageContainer.getStatus();
+        case TEXT:
+        	return messageContainer.getText();
         case MESSAGE:
             return messageContainer.getMessage().toString();
         }
@@ -154,7 +157,9 @@ class MessageTable extends JTable implements MouseListener {
         column = model.getColumn(5);
         column.setPreferredWidth((int) (30));
         column = model.getColumn(6);
-        column.setPreferredWidth((int) (300));
+        column.setPreferredWidth((int) (30));
+        column = model.getColumn(7);
+        column.setPreferredWidth((int) (200));
 	}
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {

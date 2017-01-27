@@ -73,6 +73,7 @@ public class MessageContainer {
     	return OrderID;
     }
 
+
 	public String getMsgQty() {
     	String execTypeVal = rawValues.get("ExecType");
     	char execTypeChar = execTypeVal.charAt(0);
@@ -413,7 +414,10 @@ public class MessageContainer {
     }
 
     public String getText() {
-    	return Text;
+    	if ("FieldNotFound".equals(Text))
+    		return "-";
+    	else
+    		return Text;
     }
 
     public String getCumQty() {

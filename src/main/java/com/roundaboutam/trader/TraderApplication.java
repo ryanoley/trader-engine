@@ -241,7 +241,7 @@ public class TraderApplication implements Application {
 
     public void cancelAllOpenOrders() {
     	for (Order o : orderBook.getAllOpenOrders()) {
-    		sendToBroker(FIXOrder.formatCancelOrder(new CancelOrder(o)), o.getSessionID());
+            cancel(new CancelOrder(o));
     	}
     }
 

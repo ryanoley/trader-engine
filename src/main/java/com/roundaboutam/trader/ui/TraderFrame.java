@@ -60,7 +60,10 @@ public class TraderFrame extends JFrame {
 	public void addPanels() {
 		getContentPane().add(makeBanner(), BorderLayout.NORTH);
 		getContentPane().add(makeMainPanel(), BorderLayout.CENTER);
-		getContentPane().add(makeControlBanner(), BorderLayout.SOUTH);
+		FIXMonitor fixMonitor = new FIXMonitor(application);
+		Thread t = new Thread(fixMonitor);
+		t.start();
+		getContentPane().add(fixMonitor, BorderLayout.SOUTH);
 	}
 
 	private JPanel makeBanner() {
@@ -84,7 +87,7 @@ public class TraderFrame extends JFrame {
 			            area.setText(formatter.format(new Date()) + " (UTC)");
 			            Thread.sleep(1000);
 			         }
-			      }  
+			      }
 			      catch (Exception e) { }
 			}
 		}
@@ -95,15 +98,6 @@ public class TraderFrame extends JFrame {
 		panel.add(clockArea, BorderLayout.LINE_END);
 
 		return panel;
-	}
-
-	private JPanel makeControlBanner() {
-		JPanel panel = new JPanel();
-		panel.setBackground(Color.LIGHT_GRAY);
-		JTextArea area = new JTextArea("Show ZMQ, FIX status");
-		area.setBackground(Color.LIGHT_GRAY);
-		panel.add(area);
-		return panel;		
 	}
 
 	private JPanel makeMainPanel() {

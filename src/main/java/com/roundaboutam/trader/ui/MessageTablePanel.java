@@ -21,7 +21,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
-import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.MessageContainer;
 
 import quickfix.Message;
@@ -71,9 +70,11 @@ class MessageTableModel extends AbstractTableModel implements Observer {
     private void addMessage(Message message) {
     	int row = rowToMessage.size();
     	MessageContainer messageContainer = new MessageContainer(message);
-    	rowToMessage.put(row, messageContainer);
-    	rowToTimeStamp.put(row, new Date(System.currentTimeMillis()));
-        fireTableRowsInserted(row, row);
+    	if (!"Heartbeat".equals(messageContainer.getMsgType())) {
+	    	rowToMessage.put(row, messageContainer);
+	    	rowToTimeStamp.put(row, new Date(System.currentTimeMillis()));
+	        fireTableRowsInserted(row, row);
+    	}
     }
   
     public Class<String> getColumnClass(int columnIndex) {

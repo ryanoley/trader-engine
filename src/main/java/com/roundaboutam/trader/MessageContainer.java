@@ -13,9 +13,12 @@ import quickfix.field.LeavesQty;
 public class MessageContainer {
 
 	private final Message message;
-	private final String MsgType;
-	private final String Direction;
 	private final Message.Header Header;
+	public HashMap<String, String> rawValues;
+	private final String MsgType;
+	private final String SenderCompID;
+	private final String TargetCompID;
+	private final String Direction;
 	private final String ClOrdID;
 	private final String OrigClOrdID;
 	private final String OrdType;
@@ -30,7 +33,7 @@ public class MessageContainer {
 	private final String CumQty;
 	private final String LeavesQty;
 	private final String AvgPx;
-	public HashMap<String, String> rawValues;
+	private final String MsgSeqNum;
 
 
 	public MessageContainer(Message message) {
@@ -38,6 +41,9 @@ public class MessageContainer {
 		Header = message.getHeader();
 		rawValues = new HashMap<String, String>();
 		MsgType = resolveMsgType(message);
+		SenderCompID = resolveSenderCompID(message);
+		TargetCompID = resolveTargetCompID(message);
+		MsgSeqNum = resolveMsgSeqNum(message);
 		Direction = resolveDirection();
 		ClOrdID = resolveClOrdID(message);
 		OrigClOrdID = resolveOrigClOrdID(message);
@@ -68,6 +74,10 @@ public class MessageContainer {
 		case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
 			return "-";
 		case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
+			return "-";
+		case quickfix.field.MsgType.HEARTBEAT:
+			return "-";
+		case quickfix.field.MsgType.LOGON:
 			return "-";	
     	}
     	return OrderID;
@@ -118,6 +128,10 @@ public class MessageContainer {
         		return "ReplaceOrder";
         	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
         		return "CancelOrder";
+        	case quickfix.field.MsgType.LOGON:
+        		return "Logon";
+        	case quickfix.field.MsgType.HEARTBEAT:
+        		return "Heartbeat";
         	}
         	return msgTypeVal;
 		} catch (FieldNotFound e) {
@@ -219,6 +233,39 @@ public class MessageContainer {
 		}
 	}
 
+	private String resolveSenderCompID(Message message) {
+        try {
+        	String senderCompIDVal = message.getHeader().getString(quickfix.field.SenderCompID.FIELD);
+        	rawValues.put("SenderCompID", senderCompIDVal);
+        	return senderCompIDVal;
+		} catch (FieldNotFound e) {
+			rawValues.put("SenderCompID", "FieldNotFound");
+			return "FieldNotFound";
+		}
+	}
+
+	private String resolveTargetCompID(Message message) {
+        try {
+        	String tenderCompIDVal = message.getHeader().getString(quickfix.field.TargetCompID.FIELD);
+        	rawValues.put("TenderCompID", tenderCompIDVal);
+        	return tenderCompIDVal;
+		} catch (FieldNotFound e) {
+			rawValues.put("TenderCompID", "FieldNotFound");
+			return "FieldNotFound";
+		}
+	}
+
+	private String resolveMsgSeqNum(Message message) {
+        try {
+        	String msgSeqNumVal = message.getHeader().getString(quickfix.field.MsgSeqNum.FIELD);
+        	rawValues.put("MsgSeqNum", msgSeqNumVal);
+        	return msgSeqNumVal;
+		} catch (FieldNotFound e) {
+			rawValues.put("MsgSeqNum", "FieldNotFound");
+			return "FieldNotFound";
+		}
+	}
+	
 	private String resolveSymbol(Message message) {
         try {
         	String symbolVal = message.getString(quickfix.field.Symbol.FIELD);
@@ -343,6 +390,10 @@ public class MessageContainer {
 	private String resolveDirection() {
     	String msgTypeVal = (String) rawValues.get("MsgType");
     	switch(msgTypeVal) {
+    	case quickfix.field.MsgType.LOGON:
+    		return "Inbound";
+    	case quickfix.field.MsgType.HEARTBEAT:
+    		return "Inbound";
     	case quickfix.field.MsgType.EXECUTION_REPORT:
     		return "Inbound";
     	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
@@ -354,7 +405,7 @@ public class MessageContainer {
     	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
     		return "Outbound";	
     	}
-    	return "FieldNotFound";
+    	return "Inbound";
 	}
 
     public Message getMessage() {
@@ -432,5 +483,16 @@ public class MessageContainer {
     	return AvgPx;
     }
 
+    public String getSenderCompID() {
+    	return SenderCompID;
+    }
+
+    public String getTargetCompID() {
+    	return TargetCompID;
+    }
+    
+    public String getMsgSeqNum() {
+    	return MsgSeqNum;
+    }
 }
 

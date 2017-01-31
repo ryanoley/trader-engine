@@ -329,6 +329,7 @@ public class TraderApplication implements Application {
     public void fromAdmin(Message message, SessionID sessionID) throws FieldNotFound,
     	IncorrectDataFormat, IncorrectTagValue, RejectLogon {
     	//System.out.println(message.toString());
+    	observableMessage.update(message);
     }
 
 }

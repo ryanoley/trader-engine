@@ -53,15 +53,20 @@ public class TraderEngine {
 
 	private SessionSettings getSettings(String launchEnv) throws ConfigError, IOException {
 		InputStream inputStream;
-		if (launchEnv.equals("prod"))
+		String rootpath;
+		if (launchEnv.equals("prod")){
 			inputStream = TraderEngine.class.getResourceAsStream("FIXConfigPROD.cfg");
-		else
+			rootpath = "C:\\FIX\\LOGS";
+		}
+		else {
 			inputStream = TraderEngine.class.getResourceAsStream("FIXConfig.cfg");
+			rootpath = System.getenv("DATA") + "\\trader-engine\\LOGS";
+		}
+
         SessionSettings settings = new SessionSettings(inputStream);
         inputStream.close();
 
         // Workaround for env variables
-        String rootpath = System.getenv("DATA") + "\\trader-engine\\LOGS";
         settings.setString("FileStorePath", rootpath + "\\fileStore");
         settings.setString("FileLogPath", rootpath + "\\logs");
         settings.setString("CustomLogPath", rootpath + "\\custom");

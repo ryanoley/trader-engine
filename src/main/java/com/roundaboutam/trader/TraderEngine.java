@@ -34,8 +34,9 @@ public class TraderEngine {
 	private static Initiator initiator;
 	private TraderApplication application;
 
-	public TraderEngine() throws Exception {
-		SessionSettings settings = getSettings();
+	public TraderEngine(String launchEnv) throws Exception {
+		System.out.println(launchEnv);
+		SessionSettings settings = getSettings(launchEnv);
 		application = new TraderApplication(settings);
 
         initiator = new SocketInitiator(
@@ -50,8 +51,12 @@ public class TraderEngine {
         new TraderFrame(application);
 	}
 
-	private SessionSettings getSettings() throws ConfigError, IOException {
-		InputStream inputStream = TraderEngine.class.getResourceAsStream("FIXConfig.cfg");
+	private SessionSettings getSettings(String launchEnv) throws ConfigError, IOException {
+		InputStream inputStream;
+		if (launchEnv.equals("prod"))
+			inputStream = TraderEngine.class.getResourceAsStream("FIXConfigPROD.cfg");
+		else
+			inputStream = TraderEngine.class.getResourceAsStream("FIXConfig.cfg");
         SessionSettings settings = new SessionSettings(inputStream);
         inputStream.close();
 
@@ -98,7 +103,6 @@ public class TraderEngine {
 
     public void shutdown() {
     	System.out.println("TraderEngine.shutdown() invoked");
-    	System.out.println(application.getSessionIDs().size());
     	if (initiatorStarted)
     		stopInitiator();
         while (application.getSessionIDs().size() > 0) {
@@ -118,7 +122,14 @@ public class TraderEngine {
         } catch (Exception e) {
             log.info(e.getMessage(), e);
         }
-    	traderEngine = new TraderEngine();
+        String launchArg;
+        if (args.length == 0)
+        	launchArg = "uat";
+        else if (args[0].equals("PROD"))
+        	launchArg = "prod";
+        else
+        	launchArg = "uat";
+    	traderEngine = new TraderEngine(launchArg);
         shutdownLatch.await();
     }
 

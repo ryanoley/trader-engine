@@ -56,7 +56,6 @@ public class Order {
     	setLeavesQty(leavesQty);
     	setOrderQty(orderQty);
     	setFIXMessage(FIXMessage);
-    	setAcknowledged(true);
     	checkExecution();
     	return fillSize;
     }
@@ -202,6 +201,7 @@ public class Order {
 
 	public void setRejected(boolean rejected) {
 		this.rejected = rejected;
+		this.message = "RejectedA";
 	}
 
 	public boolean isCanceled() {
@@ -210,6 +210,7 @@ public class Order {
 
 	public void setCanceled(boolean canceled) {
 		this.canceled = canceled;
+		this.message = "CanceledA";
 	}
 
 	public boolean isModified() {
@@ -218,6 +219,7 @@ public class Order {
 
 	public void setModified(boolean modified) {
 		this.modified = modified;
+		this.message = "ModifiedA";
 	}
 
 	public boolean isAcknowledged() {
@@ -226,6 +228,7 @@ public class Order {
 
 	public void setAcknowledged(boolean acknowledged) {
 		this.acknowledged = acknowledged;
+		this.message = "AckedA";
 	}
 
 	public String getMessage() {

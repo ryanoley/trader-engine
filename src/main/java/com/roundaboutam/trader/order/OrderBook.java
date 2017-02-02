@@ -52,7 +52,7 @@ public class OrderBook {
 			int leavesQty, double avgPx, OrderSide orderSide, OrderType orderType, 
 			SessionID sessionID, String FIXMessage) {
 
-		Order order = null;
+		Order order;
 
 		if (replaceOrderMap.containsKey(orderID)) {
 			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
@@ -71,13 +71,13 @@ public class OrderBook {
 			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
 			// TODO: This should be logged
 			cancelOrder.setAcknowledged(true);
-
 			order = orderMap.get(cancelOrder.getOrigOrderID());
 			order.setCanceled(true);
 			orderMap.put(cancelOrder.getOrderID(), order);
 
 		} else if (orderMap.containsKey(orderID)) {
 			order = orderMap.get(orderID);
+			order.setAcknowledged(true);
 
 		} else {
 			order = new Order(orderID);

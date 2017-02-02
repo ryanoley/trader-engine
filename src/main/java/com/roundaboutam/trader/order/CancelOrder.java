@@ -29,8 +29,7 @@ public class CancelOrder {
     	this.origOrderID = order.getOrderID();
     	this.symbol = order.getSymbol();
     	this.orderSide = order.getOrderSide();
-    	this.quantity = order.getQuantity();
-    	order.setCanceled(true);
+    	this.quantity = order.getQuantity();	
     }
 
 	public String getSymbol() {

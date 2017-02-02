@@ -146,12 +146,15 @@ class OrderTable extends JTable implements MouseListener {
         super(new OrderTableModel(application));
         this.application = application;
         addMouseListener(this);
+        this.setAutoCreateRowSorter(true);
     }
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
-    	Order order = ((OrderTableModel) dataModel).getOrder(row);
-
+        int viewIdx = row;
+        int modelIdx = convertRowIndexToModel(viewIdx);
+        
+    	Order order = ((OrderTableModel) dataModel).getOrder(modelIdx);
         int open = order.getLeavesQty();
         boolean rejected = order.isRejected();
         boolean canceled = order.isCanceled();
@@ -163,13 +166,13 @@ class OrderTable extends JTable implements MouseListener {
         if (rejected)
             r.setBackground(Color.red);
         else if (canceled)
-            r.setBackground(Color.white);
+            r.setBackground(Color.lightGray);
         else if (!acknowledged)
             r.setBackground(Color.yellow);
         else if (open > 0)
-            r.setBackground(Color.green);
-        else if (open == 0)
             r.setBackground(Color.white);
+        else if (open == 0)
+            r.setBackground(Color.lightGray);
 
         return super.prepareRenderer(renderer, row, column);
     }

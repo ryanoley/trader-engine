@@ -4,9 +4,6 @@ import java.util.HashMap;
 
 import quickfix.FieldNotFound;
 import quickfix.Message;
-import quickfix.field.AvgPx;
-import quickfix.field.CumQty;
-import quickfix.field.LeavesQty;
 
 
 
@@ -66,18 +63,14 @@ public class MessageContainer {
     	String msgTypeVal = rawValues.get("MsgType");
     	switch(msgTypeVal) {
 		case quickfix.field.MsgType.EXECUTION_REPORT:
-			return OrderID;
 		case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
 			return OrderID;
 		case quickfix.field.MsgType.ORDER_SINGLE:
-			return "-";
 		case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-			return "-";
 		case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
-			return "-";
 		case quickfix.field.MsgType.HEARTBEAT:
-			return "-";
 		case quickfix.field.MsgType.LOGON:
+		case quickfix.field.MsgType.SEQUENCE_RESET:
 			return "-";	
     	}
     	return OrderID;
@@ -104,9 +97,7 @@ public class MessageContainer {
     	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
     		return OrdStatus;
     	case quickfix.field.MsgType.ORDER_SINGLE:
-    		return Side;
     	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-    		return Side;
     	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
     		return Side;	
     	}
@@ -132,6 +123,8 @@ public class MessageContainer {
         		return "Logon";
         	case quickfix.field.MsgType.HEARTBEAT:
         		return "Heartbeat";
+        	case quickfix.field.MsgType.SEQUENCE_RESET:
+        		return "SequenceReset";
         	}
         	return msgTypeVal;
 		} catch (FieldNotFound e) {
@@ -390,20 +383,15 @@ public class MessageContainer {
 	private String resolveDirection() {
     	String msgTypeVal = (String) rawValues.get("MsgType");
     	switch(msgTypeVal) {
-    	case quickfix.field.MsgType.LOGON:
-    		return "Inbound";
+    	case quickfix.field.MsgType.LOGON:;
     	case quickfix.field.MsgType.HEARTBEAT:
-    		return "Inbound";
     	case quickfix.field.MsgType.EXECUTION_REPORT:
-    		return "Inbound";
     	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
     		return "Inbound";
     	case quickfix.field.MsgType.ORDER_SINGLE:
-    		return "Outbound";
     	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-    		return "Outbound";
     	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
-    		return "Outbound";	
+    		return "Outbound";
     	}
     	return "Inbound";
 	}

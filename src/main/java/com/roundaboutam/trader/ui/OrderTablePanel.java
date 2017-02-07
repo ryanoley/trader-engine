@@ -92,7 +92,8 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     public int getColumnCount() {
         return headers.length;
     }
-
+    
+    @Override
     public String getColumnName(int columnIndex) {
         return headers[columnIndex];
     }
@@ -101,29 +102,38 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     	Order order = rowToOrder.get(rowIndex);
     	switch (columnIndex) {
         case SYMBOL:
-            return order.getSymbol();
+        	return replaceNull(order.getSymbol());
         case QUANTITY:
-            return order.getQuantity();
+        	return replaceNull(String.valueOf(order.getQuantity()));
         case OPEN:
-            return order.getLeavesQty();
+        	return replaceNull(String.valueOf(order.getLeavesQty()));
         case EXECUTED:
-            return order.getCumQty();
+        	return replaceNull(String.valueOf(order.getCumQty()));
         case SIDE:
-            return order.getOrderSide();
+        	return replaceNull(order.getOrderSide().toString());
         case TYPE:
-            return order.getOrderType();
+        	return replaceNull(order.getOrderType().toString());
         case LIMITPRICE:
-            return order.getLimitPrice();
+        	return replaceNull(String.valueOf(order.getLimitPrice()));
         case STOPPRICE:
-            return order.getStopPrice();
+        	return replaceNull(String.valueOf(order.getStopPrice()));
         case AVGPX:
-            return order.getAvgPx();
+        	return replaceNull(String.valueOf(order.getAvgPx()));
         case MESSAGE:
-        	return order.getMessage();
+        	return replaceNull(order.getMessage());
         }
-        return "";
+    	return "-";
     }
 
+    private static String replaceNull(String input) {
+    	if (input == null)
+    		return "-";
+    	else if (input.isEmpty())
+    		return "-";
+    	else
+    		return input.equals("null") ? "-" : input;
+    	}
+    
 	public void update(Observable o, Object arg) {
     	Order order = (Order) arg;
     	if (!idToOrder.containsKey(order.getPermanentID())) {
@@ -131,7 +141,7 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     		return;
     	}
     	int row = idToRow.get(order.getPermanentID());
-    	fireTableRowsInserted(row, row);
+    	fireTableRowsUpdated(row, row);
 	}
 
 }
@@ -139,7 +149,7 @@ class OrderTableModel extends AbstractTableModel implements Observer {
 
 @SuppressWarnings("serial")
 class OrderTable extends JTable implements MouseListener {
-
+	
 	private transient TraderApplication application;
 
     public OrderTable(TraderApplication application) {
@@ -181,7 +191,8 @@ class OrderTable extends JTable implements MouseListener {
         if (e.getClickCount() != 2)
             return;
         int row = rowAtPoint(e.getPoint());
-        Order order = ((OrderTableModel) dataModel).getOrder(row);
+        int modelIdx = convertRowIndexToModel(row);
+        Order order = ((OrderTableModel) dataModel).getOrder(modelIdx);
         OrderModificationFrame.getInstance(application, order);
     }
 

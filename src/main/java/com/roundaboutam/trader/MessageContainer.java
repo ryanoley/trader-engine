@@ -71,6 +71,7 @@ public class MessageContainer {
 		case quickfix.field.MsgType.HEARTBEAT:
 		case quickfix.field.MsgType.LOGON:
 		case quickfix.field.MsgType.SEQUENCE_RESET:
+		case quickfix.field.MsgType.RESEND_REQUEST:
 			return "-";	
     	}
     	return OrderID;
@@ -99,7 +100,12 @@ public class MessageContainer {
     	case quickfix.field.MsgType.ORDER_SINGLE:
     	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
     	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
-    		return Side;	
+    		return Side;
+		case quickfix.field.MsgType.HEARTBEAT:
+		case quickfix.field.MsgType.LOGON:
+		case quickfix.field.MsgType.SEQUENCE_RESET:
+		case quickfix.field.MsgType.RESEND_REQUEST:
+			return "-";	
     	}
     	return "FieldNotFound";
     }
@@ -125,6 +131,8 @@ public class MessageContainer {
         		return "Heartbeat";
         	case quickfix.field.MsgType.SEQUENCE_RESET:
         		return "SequenceReset";
+        	case quickfix.field.MsgType.RESEND_REQUEST:
+        		return "ResendRequest";
         	}
         	return msgTypeVal;
 		} catch (FieldNotFound e) {

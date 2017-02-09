@@ -7,6 +7,7 @@ import java.util.Date;
 import quickfix.field.ClOrdID;
 import quickfix.field.HandlInst;
 import quickfix.field.LocateReqd;
+import quickfix.field.OpenClose;
 import quickfix.field.OrderQty;
 import quickfix.field.OrigClOrdID;
 import quickfix.field.Price;
@@ -75,8 +76,8 @@ public class FIXOrder {
     	}
 
     	fixOrder.setField(new OrderQty(order.getQuantity()));
-
     	fixOrder.setField(OrderTIF.toFIX(order.getOrderTIF()));
+    	fixOrder.setField(new OpenClose(order.getOpenClose()));
 
         if (order.getOrderSide() == OrderSide.SHORT_SELL) {
         	fixOrder.setField(new LocateReqd(false));

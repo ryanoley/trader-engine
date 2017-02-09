@@ -30,7 +30,7 @@ import quickfix.SessionID;
 
 public class OrderTicketFrame {
 
-	private static String[] allowableOrderSides = {"BUY", "SELL", "SHORT"};
+	private static String[] allowableOrderSides = {"BUY", "BUYTOCOVER", "SELL", "SHORT"};
 	private static String[] allowableOrderTypes = {"LIMIT", "VWAP", "MARKET"};
 
 	private static JFrame frame;
@@ -234,10 +234,11 @@ public class OrderTicketFrame {
 
 	private void confirmAndSubmit(Order order) {
 		StringJoiner joiner = new StringJoiner(" ");
-		joiner.add(order.getOrderSide().toString().toUpperCase()).add(
-				"("+order.getOrderType().toString().toUpperCase()+")").add(
-				Integer.toString(order.getQuantity())).add("units of").add(
-				order.getSymbol()).add("?");
+		joiner.add(order.getOrderSide().toString().toUpperCase());
+		joiner.add("(" + order.getOpenClose() + ")");
+		joiner.add(order.getOrderType().toString().toUpperCase());
+		joiner.add(Integer.toString(order.getQuantity()));
+		joiner.add(order.getSymbol() +"?");
 		int choice = JOptionPane.showOptionDialog(null, joiner.toString(), "Confirm?", 
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (choice == JOptionPane.YES_OPTION) {
@@ -296,60 +297,62 @@ public class OrderTicketFrame {
 
         String orderSideText = (String) orderSideCombo.getSelectedItem();
         OrderSide orderSide = null;
+        char openClose;
         if (orderSideText == "SHORT") {
         	orderSide = OrderSide.SHORT_SELL;
+        	openClose = quickfix.field.OpenClose.OPEN;
         } else if (orderSideText == "SELL") {
         	orderSide = OrderSide.SELL;
+        	openClose = quickfix.field.OpenClose.CLOSE;
+        } else if (orderSideText == "BUYTOCOVER") {
+        	orderSide = OrderSide.BUY;
+        	openClose = quickfix.field.OpenClose.CLOSE;
         } else {
         	orderSide = OrderSide.BUY;
+        	openClose = quickfix.field.OpenClose.OPEN;
         }
 
         String orderTypeText = (String) orderTypesCombo.getSelectedItem();
 
         if (orderTypeText == "VWAP") {
-
         	VwapOrder order = new VwapOrder();
-
-            order.setSymbol(ticker);
-            order.setQuantity(quantity);
             order.setOrderType(OrderType.MARKET);
-            order.setOrderSide(orderSide);
             order.setStartTime(startTimeField.getText());
             order.setEndTime(endTimeField.getText());
             order.setParticipationRate(Integer.parseInt(participationRateField.getText()));
+            order.setSymbol(ticker);
+            order.setQuantity(quantity);
+            order.setOrderSide(orderSide);
             order.setCustomTag(customTag);
             order.setOrderTIF(OrderTIF.DAY);
             order.setSessionID(sessionID);
+            order.setOpenClose(openClose);
             confirmAndSubmit(order);
-
         } else if (orderTypeText == "LIMIT") {
-
         	Order order = new Order();
-
-            order.setSymbol(ticker);
-            order.setQuantity(quantity);
             order.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
             order.setOrderType(OrderType.LIMIT);
-            order.setOrderSide(orderSide);
-            order.setCustomTag(customTag);
-            order.setOrderTIF(OrderTIF.DAY);
-            order.setSessionID(sessionID);
-            confirmAndSubmit(order);
-
-        } else if (orderTypeText == "MARKET") {
-
-        	Order order = new Order();
-
             order.setSymbol(ticker);
             order.setQuantity(quantity);
-            order.setOrderType(OrderType.MARKET);
             order.setOrderSide(orderSide);
             order.setCustomTag(customTag);
             order.setOrderTIF(OrderTIF.DAY);
             order.setSessionID(sessionID);
+            order.setOpenClose(openClose);
             confirmAndSubmit(order);
-
+        } else if (orderTypeText == "MARKET") {
+        	Order order = new Order();
+            order.setOrderType(OrderType.MARKET);
+            order.setSymbol(ticker);
+            order.setQuantity(quantity);
+            order.setOrderSide(orderSide);
+            order.setCustomTag(customTag);
+            order.setOrderTIF(OrderTIF.DAY);
+            order.setSessionID(sessionID);
+            order.setOpenClose(openClose);
+            confirmAndSubmit(order);
         }
+
         
 	}
 

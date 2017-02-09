@@ -202,7 +202,6 @@ public class Order {
 
 	public void setRejected(boolean rejected) {
 		this.rejected = rejected;
-		this.message = "Rejected";
 	}
 
 	public boolean isCanceled() {
@@ -211,7 +210,6 @@ public class Order {
 
 	public void setCanceled(boolean canceled) {
 		this.canceled = canceled;
-		this.message = "Canceled";
 	}
 
 	public boolean isModified() {
@@ -220,7 +218,6 @@ public class Order {
 
 	public void setModified(boolean modified) {
 		this.modified = modified;
-		this.message = "Modified";
 	}
 
 	public boolean isAcknowledged() {
@@ -229,7 +226,6 @@ public class Order {
 
 	public void setAcknowledged(boolean acknowledged) {
 		this.acknowledged = acknowledged;
-		this.message = "Acked";
 	}
 
 	public String getMessage() {

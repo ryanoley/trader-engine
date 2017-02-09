@@ -224,7 +224,6 @@ public class TraderApplication implements Application {
 
     public void send(Order order) {
     	orderBook.addOrder(order);
-    	observableOrder.update(order);
     	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
     }
 

@@ -58,13 +58,11 @@ public class OrderBook {
 			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
 			// TODO: This should be logged
 			replaceOrder.setAcknowledged(true);
-
 			order = orderMap.get(replaceOrder.getOrigOrderID());
-
 			order.setQuantity(replaceOrder.getQuantity());
 			order.setLimitPrice(replaceOrder.getLimitPrice());
 			order.setStopPrice(replaceOrder.getStopPrice());
-
+			order.setModified(true);
 			orderMap.put(replaceOrder.getOrderID(), order);
 
 		} else if (cancelOrderMap.containsKey(orderID)) {

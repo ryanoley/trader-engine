@@ -9,9 +9,11 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.MatteBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
@@ -157,6 +159,7 @@ class OrderTable extends JTable implements MouseListener {
         this.application = application;
         addMouseListener(this);
         this.setAutoCreateRowSorter(true);
+        this.setRowSelectionAllowed(false);
     }
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
@@ -183,8 +186,18 @@ class OrderTable extends JTable implements MouseListener {
             r.setBackground(Color.white);
         else if (open == 0)
             r.setBackground(Color.lightGray);
+        
+        Component c = super.prepareRenderer(renderer, row, column);    
+        JComponent jc = (JComponent) c;
+        if (isRowSelected(row)){
+          int left = column == 0 ? 1:0;
+          int right = column == getColumnCount() - 1 ? 1:0;
+          jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 
+        }
+        else
+          jc.setBorder(null);
 
-        return super.prepareRenderer(renderer, row, column);
+        return c;
     }
 
     public void mouseClicked(MouseEvent e) {

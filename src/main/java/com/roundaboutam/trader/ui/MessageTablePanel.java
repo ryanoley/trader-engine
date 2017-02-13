@@ -143,7 +143,6 @@ class MessageTable extends JTable implements MouseListener {
         initColumnWidths();
         addMouseListener(this);
         this.setAutoCreateRowSorter(true);
-        this.setRowSelectionAllowed(false);
     }
  
 	private void initColumnWidths() {
@@ -168,21 +167,19 @@ class MessageTable extends JTable implements MouseListener {
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
-        int viewIdx = row;
-        int modelIdx = convertRowIndexToModel(viewIdx);
-
+        int modelIdx = convertRowIndexToModel(row);
     	MessageContainer messaingeContainer = ((MessageTableModel) getModel()).getMessage(modelIdx);
         String direction = messaingeContainer.getDirection();
-        DefaultTableCellRenderer r = (DefaultTableCellRenderer) renderer;
+        Component c = super.prepareRenderer(renderer, row, column); 
 
         if ("Outbound".equals(direction))
-        	r.setForeground(Color.blue);
+        	c.setForeground(Color.blue);
         else
-        	r.setForeground(Color.black);
- 
-        Component c = super.prepareRenderer(renderer, row, column);    
+        	c.setForeground(Color.black);
+    
         JComponent jc = (JComponent) c;
         if (isRowSelected(row)){
+          c.setBackground(Color.white);
           int left = column == 0 ? 1:0;
           int right = column == getColumnCount() - 1 ? 1:0;
           jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 

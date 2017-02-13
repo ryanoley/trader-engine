@@ -164,8 +164,7 @@ class OrderTable extends JTable implements MouseListener {
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
-        int viewIdx = row;
-        int modelIdx = convertRowIndexToModel(viewIdx);
+        int modelIdx = convertRowIndexToModel(row);
         
     	Order order = ((OrderTableModel) dataModel).getOrder(modelIdx);
         int open = order.getLeavesQty();
@@ -173,23 +172,22 @@ class OrderTable extends JTable implements MouseListener {
         boolean canceled = order.isCanceled();
         boolean acknowledged = order.isAcknowledged();
 
-        DefaultTableCellRenderer r = (DefaultTableCellRenderer) renderer;
-        r.setForeground(Color.black);
-
+        Component c = super.prepareRenderer(renderer, row, column); 
+        c.setForeground(Color.black);
         if (rejected)
-            r.setBackground(Color.red);
+            c.setBackground(Color.red);
         else if (canceled)
-            r.setBackground(Color.lightGray);
+            c.setBackground(Color.lightGray);
         else if (!acknowledged)
-            r.setBackground(Color.yellow);
+            c.setBackground(Color.yellow);
         else if (open > 0)
-            r.setBackground(Color.white);
+            c.setBackground(Color.white);
         else if (open == 0)
-            r.setBackground(Color.lightGray);
+            c.setBackground(Color.lightGray);
         
-        Component c = super.prepareRenderer(renderer, row, column);    
         JComponent jc = (JComponent) c;
         if (isRowSelected(row)){
+          c.setBackground(Color.white);
           int left = column == 0 ? 1:0;
           int right = column == getColumnCount() - 1 ? 1:0;
           jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 

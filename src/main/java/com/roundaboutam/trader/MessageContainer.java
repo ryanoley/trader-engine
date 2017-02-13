@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import quickfix.FieldNotFound;
 import quickfix.Message;
+import quickfix.Message.Header;
 
 
 
@@ -20,7 +21,9 @@ public class MessageContainer {
 	private final String OrigClOrdID;
 	private final String OrdType;
 	private final String OrderID;
+	private final String OpenClose;
 	private final String Symbol;
+	private final String SymbolSfx;
 	private final String Side;
 	private final String OrderQty;
 	private final String OrdStatus;
@@ -30,7 +33,10 @@ public class MessageContainer {
 	private final String CumQty;
 	private final String LeavesQty;
 	private final String AvgPx;
+	private final String LastPx;
+	private final String TransactTime;
 	private final String MsgSeqNum;
+
 
 
 	public MessageContainer(Message message) {
@@ -38,77 +44,53 @@ public class MessageContainer {
 		Header = message.getHeader();
 		rawValues = new HashMap<String, String>();
 		MsgType = resolveMsgType(message);
-		SenderCompID = resolveSenderCompID(message);
-		TargetCompID = resolveTargetCompID(message);
-		MsgSeqNum = resolveMsgSeqNum(message);
 		Direction = resolveDirection();
-		ClOrdID = resolveClOrdID(message);
-		OrigClOrdID = resolveOrigClOrdID(message);
-		OrdType = resolveOrdType(message);
-		OrderID = resolveOrderID(message);
-		Symbol = resolveSymbol(message);
 		Side = resolveSide(message);
 		OrdStatus = resolveOrdStatus(message);
 		ExecType = resolveExecType(message);
-		OrderQty = resolveOrderQty(message);
-		LastShares = resolveLastShares(message);
-		Text = resolveText(message);
-		CumQty = resolveCumQty(message);
-		LeavesQty = resolveLeavesQty(message);
-		AvgPx = resolveAvgPx(message);
+
+		SenderCompID = resolveHeaderField(message.getHeader(), quickfix.field.SenderCompID.FIELD, "SenderCompID");
+		TargetCompID = resolveHeaderField(message.getHeader(), quickfix.field.TargetCompID.FIELD, "TargetCompID");
+		MsgSeqNum = resolveHeaderField(message.getHeader(), quickfix.field.MsgSeqNum.FIELD, "MsgSeqNum");
+	
+		OrderID = resolveMessageField(message, quickfix.field.OrderID.FIELD, "OrderID");
+		ClOrdID = resolveMessageField(message, quickfix.field.ClOrdID.FIELD, "ClOrdID");
+		OrigClOrdID = resolveMessageField(message, quickfix.field.OrigClOrdID.FIELD, "OrigClOrdID");
+		OrdType = resolveMessageField(message, quickfix.field.OrdType.FIELD, "OrdType");
+		OpenClose = resolveMessageField(message, quickfix.field.OpenClose.FIELD, "OpenClose");
+		Symbol = resolveMessageField(message, quickfix.field.Symbol.FIELD, "Symbol");
+		SymbolSfx = resolveMessageField(message, quickfix.field.SymbolSfx.FIELD, "SymbolSfx");
+		OrderQty = resolveMessageField(message, quickfix.field.OrderQty.FIELD, "OrderQty");
+		LastShares = resolveMessageField(message, quickfix.field.LastShares.FIELD, "LastShares");
+		CumQty = resolveMessageField(message, quickfix.field.CumQty.FIELD, "CumQty");
+		LeavesQty = resolveMessageField(message, quickfix.field.LeavesQty.FIELD, "LeavesQty");
+		AvgPx = resolveMessageField(message, quickfix.field.AvgPx.FIELD, "AvgPx");
+		LastPx = resolveMessageField(message, quickfix.field.LastPx.FIELD, "LastPx");
+		Text = resolveMessageField(message, quickfix.field.Text.FIELD, "Text");
+		TransactTime = resolveMessageField(message, quickfix.field.TransactTime.FIELD, "TransactTime");
     }
 
+	private String resolveHeaderField(Header header, int fieldInt, String dictKey) {
+        try {
+        	String fieldVal = header.getString(fieldInt);
+        	rawValues.put(dictKey, fieldVal);
+        	return fieldVal;
+		} catch (FieldNotFound e) {
+			rawValues.put(dictKey, "FieldNotFound");
+			return "FieldNotFound";
+		}
+	}	
 
-	public String getDisplayID() {
-    	String msgTypeVal = rawValues.get("MsgType");
-    	switch(msgTypeVal) {
-		case quickfix.field.MsgType.EXECUTION_REPORT:
-		case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
-			return OrderID;
-		case quickfix.field.MsgType.ORDER_SINGLE:
-		case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-		case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
-		case quickfix.field.MsgType.HEARTBEAT:
-		case quickfix.field.MsgType.LOGON:
-		case quickfix.field.MsgType.SEQUENCE_RESET:
-		case quickfix.field.MsgType.RESEND_REQUEST:
-			return "-";	
-    	}
-    	return OrderID;
-    }
-
-
-	public String getMsgQty() {
-    	String execTypeVal = rawValues.get("ExecType");
-    	char execTypeChar = execTypeVal.charAt(0);
-    	switch(execTypeChar) {
-    	case quickfix.field.ExecType.PARTIAL_FILL:
-    		return LastShares;
-    	case quickfix.field.ExecType.FILL:
-    		return LastShares;
-    	}
-    	return OrderQty;
-    }
-
-    public String getStatus() {
-    	String msgTypeVal = rawValues.get("MsgType");
-    	switch(msgTypeVal) {
-    	case quickfix.field.MsgType.EXECUTION_REPORT:
-    		return ExecType;
-    	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
-    		return OrdStatus;
-    	case quickfix.field.MsgType.ORDER_SINGLE:
-    	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-    	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
-    		return Side;
-		case quickfix.field.MsgType.HEARTBEAT:
-		case quickfix.field.MsgType.LOGON:
-		case quickfix.field.MsgType.SEQUENCE_RESET:
-		case quickfix.field.MsgType.RESEND_REQUEST:
-			return "-";	
-    	}
-    	return "FieldNotFound";
-    }
+	private String resolveMessageField(Message message, int fieldInt, String dictKey) {
+        try {
+        	String fieldVal = message.getString(fieldInt);
+        	rawValues.put(dictKey, fieldVal);
+        	return fieldVal;
+		} catch (FieldNotFound e) {
+			rawValues.put(dictKey, "FieldNotFound");
+			return "FieldNotFound";
+		}
+	}
 
 	private String resolveMsgType(Message message) {
         try {
@@ -234,160 +216,6 @@ public class MessageContainer {
 		}
 	}
 
-	private String resolveSenderCompID(Message message) {
-        try {
-        	String senderCompIDVal = message.getHeader().getString(quickfix.field.SenderCompID.FIELD);
-        	rawValues.put("SenderCompID", senderCompIDVal);
-        	return senderCompIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("SenderCompID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveTargetCompID(Message message) {
-        try {
-        	String tenderCompIDVal = message.getHeader().getString(quickfix.field.TargetCompID.FIELD);
-        	rawValues.put("TenderCompID", tenderCompIDVal);
-        	return tenderCompIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("TenderCompID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveMsgSeqNum(Message message) {
-        try {
-        	String msgSeqNumVal = message.getHeader().getString(quickfix.field.MsgSeqNum.FIELD);
-        	rawValues.put("MsgSeqNum", msgSeqNumVal);
-        	return msgSeqNumVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("MsgSeqNum", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-	
-	private String resolveSymbol(Message message) {
-        try {
-        	String symbolVal = message.getString(quickfix.field.Symbol.FIELD);
-        	rawValues.put("Symbol", symbolVal);
-        	return symbolVal;
-		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveOrderQty(Message message) {
-        try {
-        	String orderQtyVal = message.getString(quickfix.field.OrderQty.FIELD);
-        	rawValues.put("OrderQty", orderQtyVal);
-        	return orderQtyVal;
-		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveLastShares(Message message) {
-        try {
-        	String lastSharesVal = message.getString(quickfix.field.LastShares.FIELD);
-        	rawValues.put("LastShares", lastSharesVal);
-        	return lastSharesVal;
-		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveOrderID(Message message) {
-        try {
-        	String orderIDVal = message.getString(quickfix.field.OrderID.FIELD);
-        	rawValues.put("OrderID", orderIDVal);
-        	return orderIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("OrderID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveClOrdID(Message message) {
-        try {
-        	String clOrdIDVal = message.getString(quickfix.field.ClOrdID.FIELD);
-        	rawValues.put("ClOrdID", clOrdIDVal);
-        	return clOrdIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("ClOrdID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveOrigClOrdID(Message message) {
-        try {
-        	String origClOrdIDVal = message.getString(quickfix.field.OrigClOrdID.FIELD);
-        	rawValues.put("OrigClOrdID", origClOrdIDVal);
-        	return origClOrdIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("OrigClOrdID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveOrdType(Message message) {
-        try {
-        	String ordTypeVal = message.getString(quickfix.field.OrdType.FIELD);
-        	rawValues.put("OrdType", ordTypeVal);
-        	return ordTypeVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("OrdType", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveText(Message message) {
-        try {
-        	String textVal = message.getString(quickfix.field.Text.FIELD);
-        	rawValues.put("Text", textVal);
-        	return textVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("Text", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveCumQty(Message message) {
-        try {
-        	String cumQtyVal = message.getString(quickfix.field.CumQty.FIELD);
-        	rawValues.put("CumQty", cumQtyVal);
-        	return cumQtyVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("CumQty", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveLeavesQty(Message message) {
-        try {
-        	String leavesQtyVal = message.getString(quickfix.field.LeavesQty.FIELD);
-        	rawValues.put("LeavesQty", leavesQtyVal);
-        	return leavesQtyVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("LeavesQty", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveAvgPx(Message message) {
-        try {
-        	String avgPxVal = message.getString(quickfix.field.AvgPx.FIELD);
-        	rawValues.put("AvgPx", avgPxVal);
-        	return avgPxVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("AvgPx", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
 	private String resolveDirection() {
     	String msgTypeVal = (String) rawValues.get("MsgType");
     	switch(msgTypeVal) {
@@ -403,6 +231,56 @@ public class MessageContainer {
     	}
     	return "Inbound";
 	}
+
+	public String getDisplayID() {
+    	String msgTypeVal = rawValues.get("MsgType");
+    	switch(msgTypeVal) {
+		case quickfix.field.MsgType.EXECUTION_REPORT:
+		case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
+			return OrderID;
+		case quickfix.field.MsgType.ORDER_SINGLE:
+		case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
+		case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
+		case quickfix.field.MsgType.HEARTBEAT:
+		case quickfix.field.MsgType.LOGON:
+		case quickfix.field.MsgType.SEQUENCE_RESET:
+		case quickfix.field.MsgType.RESEND_REQUEST:
+			return "-";	
+    	}
+    	return OrderID;
+    }
+
+	public String getMsgQty() {
+    	String execTypeVal = rawValues.get("ExecType");
+    	char execTypeChar = execTypeVal.charAt(0);
+    	switch(execTypeChar) {
+    	case quickfix.field.ExecType.PARTIAL_FILL:
+    		return LastShares;
+    	case quickfix.field.ExecType.FILL:
+    		return LastShares;
+    	}
+    	return OrderQty;
+    }
+
+    public String getStatus() {
+    	String msgTypeVal = rawValues.get("MsgType");
+    	switch(msgTypeVal) {
+    	case quickfix.field.MsgType.EXECUTION_REPORT:
+    		return ExecType;
+    	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
+    		return OrdStatus;
+    	case quickfix.field.MsgType.ORDER_SINGLE:
+    	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
+    	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
+    		return Side;
+		case quickfix.field.MsgType.HEARTBEAT:
+		case quickfix.field.MsgType.LOGON:
+		case quickfix.field.MsgType.SEQUENCE_RESET:
+		case quickfix.field.MsgType.RESEND_REQUEST:
+			return "-";	
+    	}
+    	return "FieldNotFound";
+    }
 
     public Message getMessage() {
         	return this.message;
@@ -434,6 +312,10 @@ public class MessageContainer {
 
     public String getSymbol() {
     	return Symbol;
+    }
+
+    public String getSymbolSfx() {
+    	return SymbolSfx;
     }
 
     public String getSide() {
@@ -489,6 +371,18 @@ public class MessageContainer {
     
     public String getMsgSeqNum() {
     	return MsgSeqNum;
+    }
+
+    public String getTransactTime() {
+    	return TransactTime;
+    }
+    
+    public String getLastPx() {
+    	return LastPx;
+    }
+
+    public String getOpenClose() {
+    	return OpenClose;
     }
 }
 

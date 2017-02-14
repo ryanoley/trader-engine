@@ -159,7 +159,6 @@ class OrderTable extends JTable implements MouseListener {
         this.application = application;
         addMouseListener(this);
         this.setAutoCreateRowSorter(true);
-        this.setRowSelectionAllowed(false);
     }
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
@@ -184,10 +183,9 @@ class OrderTable extends JTable implements MouseListener {
             c.setBackground(Color.white);
         else if (open == 0)
             c.setBackground(Color.lightGray);
-        
+
         JComponent jc = (JComponent) c;
         if (isRowSelected(row)){
-          c.setBackground(Color.white);
           int left = column == 0 ? 1:0;
           int right = column == getColumnCount() - 1 ? 1:0;
           jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 

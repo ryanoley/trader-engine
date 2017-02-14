@@ -115,6 +115,8 @@ public class MessageContainer {
         		return "SequenceReset";
         	case quickfix.field.MsgType.RESEND_REQUEST:
         		return "ResendRequest";
+        	case quickfix.field.MsgType.TEST_REQUEST:
+        		return "TestRequest";
         	}
         	return msgTypeVal;
 		} catch (FieldNotFound e) {

@@ -102,7 +102,7 @@ public class OrderBook {
 		char execType = messageContainer.rawValues.get("ExecType").charAt(0);
     	switch (execType) {
     	case quickfix.field.ExecType.PARTIAL_FILL:
-    		order.setMessage("In Process");
+    		order.setMessage("Working");
     		break;
     	case quickfix.field.ExecType.FILL:
     		order.setMessage("Filled");

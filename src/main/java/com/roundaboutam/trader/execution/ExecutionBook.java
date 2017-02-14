@@ -53,26 +53,26 @@ public class ExecutionBook {
 
 	public void processExecutionReport(MessageContainer messageContainer, Order order) {
 		char execType = messageContainer.rawValues.get("ExecType").charAt(0);
-		
+		String execString = null;
+
     	switch (execType) {
     	case quickfix.field.ExecType.PARTIAL_FILL:
     	case quickfix.field.ExecType.FILL:
-    		processFill(messageContainer, order);
+    		execString = Execution.FILL;
     		break;
     	case quickfix.field.ExecType.CANCELED:
-    		processCancel(messageContainer, order);
+    		execString = Execution.CANCEL;
     		break;
     	case quickfix.field.ExecType.REPLACE:
-    		processReplace(messageContainer, order);
+    		execString = Execution.REPLACE;
     		break;
     	case quickfix.field.ExecType.REJECTED:
-    		processReject(messageContainer, order);
+    		execString = Execution.REJECT;
     		break;
+    	case quickfix.field.ExecType.NEW:
+    		return;
     	}
 
-	}
-
-	private void processReplace(MessageContainer messageContainer, Order order) {
     	Execution execution = new Execution(
     			messageContainer.getClOrdID(),
     			order.getPermanentID(),
@@ -81,7 +81,7 @@ public class ExecutionBook {
     			messageContainer.getSide(),
     			Integer.parseInt(messageContainer.getLastShares()),
     			Double.parseDouble(messageContainer.getLastPx()),
-    			Execution.REPLACE
+    			execString
     			);
         if (!messageContainer.getSymbolSfx().equals("FieldNotFound")) {
             execution.setSuffix(messageContainer.getSymbolSfx());
@@ -91,80 +91,6 @@ public class ExecutionBook {
         execution.setBid(0);
         execution.setAsk(0);
         addExecution(execution);
-	}
-
-	private void processCancel(MessageContainer messageContainer, Order order) {
-    	Execution execution = new Execution(
-    			messageContainer.getClOrdID(),
-    			order.getPermanentID(),
-    			messageContainer.getSymbol(),
-    			messageContainer.getTransactTime(),
-    			messageContainer.getSide(),
-    			Integer.parseInt(messageContainer.getLastShares()),
-    			Double.parseDouble(messageContainer.getLastPx()),
-    			Execution.CANCEL
-    			);
-        if (!messageContainer.getSymbolSfx().equals("FieldNotFound")) {
-            execution.setSuffix(messageContainer.getSymbolSfx());
-        }
-        execution.setCustomTag(order.getCustomTag());
-        // TODO: Market data used here to capture BidAsk
-        execution.setBid(0);
-        execution.setAsk(0);
-        addExecution(execution);
-	}
-
-
-	private void processReject(MessageContainer messageContainer, Order order) {
-    	Execution execution = new Execution(
-    			messageContainer.getClOrdID(),
-    			order.getPermanentID(),
-    			messageContainer.getSymbol(),
-    			messageContainer.getTransactTime(),
-    			messageContainer.getSide(),
-    			Integer.parseInt(messageContainer.getLastShares()),
-    			Double.parseDouble(messageContainer.getLastPx()),
-    			Execution.REJECT
-    			);
-        if (!messageContainer.getSymbolSfx().equals("FieldNotFound")) {
-            execution.setSuffix(messageContainer.getSymbolSfx());
-        }
-        execution.setCustomTag(order.getCustomTag());
-        // TODO: Market data used here to capture BidAsk
-        execution.setBid(0);
-        execution.setAsk(0);
-        addExecution(execution);
-	}
-
-	private void processFill(MessageContainer messageContainer, Order order) {
-		int fillSize;
-		try {
-			fillSize = Integer.parseInt(messageContainer.getLastShares());
-		} catch (NumberFormatException e) {
-			fillSize = 0;
-		}
-
-		if (fillSize > 0) {
-        	Execution execution = new Execution(
-        			messageContainer.getClOrdID(),
-        			order.getPermanentID(),
-        			messageContainer.getSymbol(),
-        			messageContainer.getTransactTime(),
-        			messageContainer.getSide(),
-        			Integer.parseInt(messageContainer.getLastShares()),
-        			Double.parseDouble(messageContainer.getLastPx()),
-        			Execution.FILL
-        			);
-
-            if (!messageContainer.getSymbolSfx().equals("FieldNotFound")) {
-                execution.setSuffix(messageContainer.getSymbolSfx());
-            }
-            execution.setCustomTag(order.getCustomTag());
-            // TODO: Market data used here to capture BidAsk
-            execution.setBid(0);
-            execution.setAsk(0);
-            addExecution(execution);
-        }
 	}
 	
 	public void addExecution(Execution execution) {

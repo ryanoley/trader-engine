@@ -3,7 +3,11 @@ package com.roundaboutam.trader.order;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.roundaboutam.trader.MessageContainer;
+
 import quickfix.SessionID;
+import quickfix.field.OrdType;
+import quickfix.field.Side;
 
 public class OrderBook {
 
@@ -48,15 +52,16 @@ public class OrderBook {
 		}
 	}
 
-	public int processExecutionReport(String orderID, String symbol, int orderQty, int cumQty, 
-			int leavesQty, double avgPx, OrderSide orderSide, OrderType orderType, 
-			SessionID sessionID, String FIXMessage) {
-
+	public int processExecutionReport(MessageContainer messageContainer, SessionID sessionID) {
 		Order order;
+		String orderID = messageContainer.getClOrdID();
+		int cumQty = Integer.parseInt(messageContainer.getCumQty());
+		int leavesQty = Integer.parseInt(messageContainer.getLeavesQty());
+		int orderQty = Integer.parseInt(messageContainer.getOrderQty());
+		double avgPx = Double.parseDouble(messageContainer.getAvgPx());
 
 		if (replaceOrderMap.containsKey(orderID)) {
 			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
-			// TODO: This should be logged
 			replaceOrder.setAcknowledged(true);
 			order = orderMap.get(replaceOrder.getOrigOrderID());
 			order.setQuantity(replaceOrder.getQuantity());
@@ -67,7 +72,6 @@ public class OrderBook {
 
 		} else if (cancelOrderMap.containsKey(orderID)) {
 			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
-			// TODO: This should be logged
 			cancelOrder.setAcknowledged(true);
 			order = orderMap.get(cancelOrder.getOrigOrderID());
 			order.setCanceled(true);
@@ -79,7 +83,9 @@ public class OrderBook {
 
 		} else {
 			order = new Order(orderID);
-			order.setSymbol(symbol);
+			OrderSide orderSide = OrderSide.fromFIX(new Side(messageContainer.getSide().charAt(0)));
+			OrderType orderType = OrderType.fromFIX(new OrdType(messageContainer.getOrdType().charAt(0)));
+			order.setSymbol(messageContainer.getSymbol());
 			order.setOrderID(orderID);
 			order.setOrderSide(orderSide);
 			order.setQuantity(orderQty);
@@ -88,8 +94,26 @@ public class OrderBook {
 			order.setMessage("Order from old session");
 			addOrder(order);
 		}
+		updateOrderMessage(order, messageContainer);
+		return order.processFill(cumQty, leavesQty, avgPx, orderQty, messageContainer.getText());
+	}
 
-		return order.processFill(cumQty, leavesQty, avgPx, orderQty, FIXMessage);
+	public void updateOrderMessage(Order order, MessageContainer messageContainer) {
+		char execType = messageContainer.rawValues.get("ExecType").charAt(0);
+    	switch (execType) {
+    	case quickfix.field.ExecType.PARTIAL_FILL:
+    		order.setMessage("In Process");
+    		break;
+    	case quickfix.field.ExecType.FILL:
+    		order.setMessage("Filled");
+    		break;
+    	case quickfix.field.ExecType.CANCELED:
+    		order.setMessage("Canceled");
+    		break;
+    	case quickfix.field.ExecType.REPLACE:
+    		order.setMessage("Replaced");
+    		break;
+    	}
 	}
 
 	public void orderRejected(String orderID) {
@@ -97,6 +121,7 @@ public class OrderBook {
 		Order order = orderMap.get(orderID);
 		order.setRejected(true);
 		order.setLeavesQty(0);
+		order.setMessage("Rejected");
 	}
 
 	public ArrayList<Order> getAllOpenOrders() {

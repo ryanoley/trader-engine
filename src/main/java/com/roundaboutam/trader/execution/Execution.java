@@ -2,30 +2,32 @@ package com.roundaboutam.trader.execution;
 
 import java.util.StringJoiner;
 
-import com.roundaboutam.trader.order.OrderSide;
 
 public class Execution {
-
+	  
+    public static final String FILL = "F";
+    public static final String CANCEL = "C";
+    public static final String REPLACE = "R";
     private String ID = null;
     private String symbol = null;
     private String suffix = null;
     private String orderID = null;
     private String permanentID = null;
     private String customTag = null;
-
-    private String exchangeID = null;
     private String transactTime;
-    private OrderSide orderSide = null;
+    private String orderSide = null;
+    private String execType = null;
     private int quantity = 0;
     private double price;
     private double bid;
     private double ask;
-
+ 
     private static int nextID = 1;
 
+    
     public Execution(String orderID, String permanentID, String symbol,
-    		String transactTime, OrderSide orderSide,
-    		int quantity, double price) {
+    		String transactTime, String orderSide,
+    		int quantity, double price, String execType) {
     	ID = Integer.toString(nextID++);
     	this.orderID = orderID;
     	this.permanentID = permanentID;
@@ -34,8 +36,10 @@ public class Execution {
     	this.orderSide = orderSide;
     	this.quantity = quantity;
     	this.price = price;
+    	this.execType = execType;
     }
 
+    
     public String getLogEntry() {
     	// Updated symbol if suffix
     	String outSymbol = symbol;
@@ -43,8 +47,10 @@ public class Execution {
             outSymbol = outSymbol + "/" + suffix;
         }
     	StringJoiner joiner = new StringJoiner(",");
-    	joiner.add(ID).add(orderID).add(permanentID).add(outSymbol).add(transactTime).add(orderSide.toString()).add(
-    			Integer.toString(quantity)).add(Double.toString(price)).add(Double.toString(bid)).add(Double.toString(ask)).add(customTag);
+    	joiner.add(ID).add(execType).add(orderID).add(permanentID).add(outSymbol).add(
+    			transactTime).add(orderSide).add(Integer.toString(quantity)).add(
+    			Double.toString(price)).add(Double.toString(bid)).add(
+    			Double.toString(ask)).add(customTag);
     	return joiner.toString();
     }
 
@@ -64,7 +70,7 @@ public class Execution {
 		return transactTime;
 	}
 	
-	public OrderSide getSide() {
+	public String getSide() {
 		return orderSide;
 	}
 
@@ -112,8 +118,5 @@ public class Execution {
 		this.customTag = customTag;
 	}
 
-	public String getExchangeID() {
-		return exchangeID;
-	}
 
 }

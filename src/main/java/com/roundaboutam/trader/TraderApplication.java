@@ -133,16 +133,13 @@ public class TraderApplication implements Application {
         String orderMessage = messageContainer.getText();
 
         char ordStatus = message.getChar(OrdStatus.FIELD);
-       
         if (ordStatus == OrdStatus.REJECTED) {
         	System.out.println("TraderApplication.executionReport - Rejected: " + orderMessage);
         	orderBook.orderRejected(orderID);
-        	return;
-        } else if (ordStatus == OrdStatus.CANCELED || ordStatus == OrdStatus.DONE_FOR_DAY) {
-        	System.out.println("TraderApplication.executionReport - Canceled: " + orderMessage);
         }
-
-        orderBook.processExecutionReport(messageContainer, sessionID);
+        else {
+        	orderBook.processExecutionReport(messageContainer, sessionID);
+        }
         observableOrder.update(orderBook.getOrder(orderID));
         executionBook.processExecutionReport(messageContainer, orderBook.getOrder(orderID));
     }

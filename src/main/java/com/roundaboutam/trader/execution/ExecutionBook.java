@@ -65,6 +65,9 @@ public class ExecutionBook {
     	case quickfix.field.ExecType.REPLACE:
     		processReplace(messageContainer, order);
     		break;
+    	case quickfix.field.ExecType.REJECTED:
+    		processReject(messageContainer, order);
+    		break;
     	}
 
 	}
@@ -110,7 +113,29 @@ public class ExecutionBook {
         execution.setAsk(0);
         addExecution(execution);
 	}
-	
+
+
+	private void processReject(MessageContainer messageContainer, Order order) {
+    	Execution execution = new Execution(
+    			messageContainer.getClOrdID(),
+    			order.getPermanentID(),
+    			messageContainer.getSymbol(),
+    			messageContainer.getTransactTime(),
+    			messageContainer.getSide(),
+    			Integer.parseInt(messageContainer.getLastShares()),
+    			Double.parseDouble(messageContainer.getLastPx()),
+    			Execution.REJECT
+    			);
+        if (!messageContainer.getSymbolSfx().equals("FieldNotFound")) {
+            execution.setSuffix(messageContainer.getSymbolSfx());
+        }
+        execution.setCustomTag(order.getCustomTag());
+        // TODO: Market data used here to capture BidAsk
+        execution.setBid(0);
+        execution.setAsk(0);
+        addExecution(execution);
+	}
+
 	private void processFill(MessageContainer messageContainer, Order order) {
 		int fillSize;
 		try {

@@ -7,7 +7,8 @@ public class Execution {
 	  
     public static final String FILL = "F";
     public static final String CANCEL = "C";
-    public static final String REPLACE = "R";
+    public static final String REPLACE = "RP";
+    public static final String REJECT = "RJ";
     private String ID = null;
     private String symbol = null;
     private String suffix = null;

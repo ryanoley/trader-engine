@@ -42,6 +42,7 @@ public class Order {
     public Order() {
         orderID = IdGenerator.makeID();
         permanentID = orderID;
+        setMessage("Created");
     }
 
     public Order(String newID) {
@@ -63,7 +64,7 @@ public class Order {
 
     private void checkExecution() {
     	if (quantity != orderQty) {
-    		this.message = "Quantity Mismatch";
+    		setMessage("Quantity Mismatch");
     		System.out.println("Quantity Mismatch: " + symbol);
     	}
     }

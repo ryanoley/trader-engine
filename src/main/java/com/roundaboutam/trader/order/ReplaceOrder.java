@@ -37,6 +37,7 @@ public class ReplaceOrder {
     	this.limitPrice = order.getLimitPrice();
     	this.stopPrice = order.getStopPrice();
     	order.setModified(true);
+    	order.setMessage("ReplaceReq");
     }
 
     public int getQuantity() {

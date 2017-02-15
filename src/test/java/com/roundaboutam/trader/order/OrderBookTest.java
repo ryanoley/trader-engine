@@ -58,7 +58,7 @@ public class OrderBookTest extends TestCase {
 
         orderBook.addCancelOrder(cancelOrder);
 
-        orderBook.cancelReplaceRejected(cancelOrder.getOrderID());
+        orderBook.processOrderCancelReject(cancelOrder.getOrderID());
 
         assertFalse(orderBook.getOrder(order.getOrderID()).isCanceled());
         assertEquals(orderBook.getOrder(order.getOrderID()).getMessage(), "Cancel Rejected");
@@ -89,7 +89,7 @@ public class OrderBookTest extends TestCase {
 
         orderBook.addReplaceOrder(replaceOrder);
 
-        orderBook.cancelReplaceRejected(replaceOrder.getOrderID());
+        orderBook.processOrderCancelReject(replaceOrder.getOrderID());
 
         assertFalse(orderBook.getOrder(order.getOrderID()).isModified());
         assertEquals(orderBook.getOrder(order.getOrderID()).getMessage(), "Replace Rejected");

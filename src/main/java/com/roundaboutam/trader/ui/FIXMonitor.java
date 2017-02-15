@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.StringJoiner;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
@@ -109,6 +111,15 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 	            	attributes.put(TextAttribute.SIZE, 18L);
 	            	sessionArea.setForeground(Color.RED);
 	            	sessionArea.setFont(sessionFont.deriveFont(attributes));
+	            }
+	            
+	            if (contactDiff > 120000 && contactDiff < 122000){
+	        		StringJoiner joiner = new StringJoiner(" ");
+	        		joiner.add("No Messages recieved from");
+	        		joiner.add(sessionID);
+	        		joiner.add("for 120 seconds");
+	        		JOptionPane.showMessageDialog(null, joiner.toString(), "FIX MESSAGE ALERT", 
+	        				JOptionPane.OK_OPTION);
 	            }
 
 	            Thread.sleep(1000);

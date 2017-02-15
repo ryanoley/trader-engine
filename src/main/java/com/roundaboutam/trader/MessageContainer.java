@@ -100,7 +100,7 @@ public class MessageContainer {
         	case quickfix.field.MsgType.EXECUTION_REPORT:
         		return "ExecRept";
         	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
-        		return "CancelOrReject";
+        		return "Reject";
         	case quickfix.field.MsgType.ORDER_SINGLE:
         		return "NewOrder";
         	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:

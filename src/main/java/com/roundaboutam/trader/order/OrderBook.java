@@ -37,8 +37,7 @@ public class OrderBook {
 			return orderMap.get(orderID);
 	}
 
-	public void cancelReplaceRejected(String orderID) {
-		// TODO: Log these rejects
+	public void processOrderCancelReject(String orderID) {
 		if (replaceOrderMap.containsKey(orderID)) {
 			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
 			replaceOrder.setRejected(true);

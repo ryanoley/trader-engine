@@ -87,7 +87,7 @@ public class TraderApplication implements Application {
                 if (message.getHeader().getField(msgType).valueEquals("8")) {
                 	executionReport(message, sessionID);
                 } else if (message.getHeader().getField(msgType).valueEquals("9")) {
-                	cancelReplaceRejected(message, sessionID);
+                	orderCancelReject(message, sessionID);
                 } else {
                 	sendBusinessReject(message, BusinessRejectReason.UNSUPPORTED_MESSAGE_TYPE,
                 			"Unsupported Message Type");
@@ -144,8 +144,10 @@ public class TraderApplication implements Application {
         executionBook.processExecutionReport(messageContainer, orderBook.getOrder(orderID));
     }
 
-    private void cancelReplaceRejected(Message message, SessionID sessionID) throws FieldNotFound {
-    	orderBook.cancelReplaceRejected(message.getString(ClOrdID.FIELD));
+    private void orderCancelReject(Message message, SessionID sessionID) throws FieldNotFound {
+    	MessageContainer messageContainer = new MessageContainer(message);
+    	orderBook.processOrderCancelReject(message.getString(ClOrdID.FIELD));
+    	executionBook.processOrderCancelReject(messageContainer, orderBook.getOrder(messageContainer.getOrigClOrdID()));
     }
 
     private boolean alreadyProcessed(ExecID execID, SessionID sessionID) {
@@ -261,13 +263,13 @@ public class TraderApplication implements Application {
     public void onLogon(SessionID sessionID) {
     	sessionIDs.add(sessionID);
         observableLogon.logon(sessionID);
-		executionBook.setExecutionLog(sessionID);
+		executionBook.setExecutionLogs(sessionID);
     }
 
     public void onLogout(SessionID sessionID) {
     	sessionIDs.remove(sessionID);
     	observableLogon.logoff(sessionID);
-    	executionBook.closeExecutionLog(sessionID);
+    	executionBook.closeExecutionLogs(sessionID);
     }
 
     public void toAdmin(Message message, SessionID sessionID) { }

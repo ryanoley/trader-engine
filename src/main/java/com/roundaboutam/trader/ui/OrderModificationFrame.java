@@ -15,13 +15,8 @@ import javax.swing.JTextField;
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
-import com.roundaboutam.trader.order.OrderSide;
-import com.roundaboutam.trader.order.OrderTIF;
 import com.roundaboutam.trader.order.OrderType;
 import com.roundaboutam.trader.order.ReplaceOrder;
-import com.roundaboutam.trader.order.VwapOrder;
-
-import quickfix.SessionID;
 
 
 public class OrderModificationFrame {

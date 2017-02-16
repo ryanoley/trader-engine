@@ -82,8 +82,10 @@ public class OrderBook {
 
 		} else {
 			order = new Order(orderID);
-			OrderSide orderSide = OrderSide.fromFIX(new Side(messageContainer.getSide().charAt(0)));
-			OrderType orderType = OrderType.fromFIX(new OrdType(messageContainer.getOrdType().charAt(0)));
+			char side = messageContainer.rawValues.get("Side").charAt(0);
+			char ordType = messageContainer.rawValues.get("OrdType").charAt(0);
+			OrderSide orderSide = OrderSide.fromFIX(new Side(side));
+			OrderType orderType = OrderType.fromFIX(new OrdType(ordType));
 			order.setSymbol(messageContainer.getSymbol());
 			order.setOrderID(orderID);
 			order.setOrderSide(orderSide);

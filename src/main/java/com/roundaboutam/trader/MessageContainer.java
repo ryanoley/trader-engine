@@ -200,7 +200,7 @@ public class MessageContainer {
 	private String resolveSide(Message message) {
         try {
         	char sideVal = message.getChar(quickfix.field.Side.FIELD);
-        	rawValues.put("Symbol", String.valueOf(sideVal));
+        	rawValues.put("Side", String.valueOf(sideVal));
         	switch (sideVal) {
         	case quickfix.field.Side.BUY:
         		return "Buy";
@@ -213,7 +213,7 @@ public class MessageContainer {
         	}
         	return String.valueOf(sideVal);
 		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "FieldNotFound");
+        	rawValues.put("Side", "FieldNotFound");
 			return "FieldNotFound";
 		}
 	}

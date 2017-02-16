@@ -11,6 +11,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.StringJoiner;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -88,7 +89,7 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
         addMessage(message);
 	}
 
-
+	JFrame alertFrame;
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void run() {
@@ -113,13 +114,18 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 	            	sessionArea.setFont(sessionFont.deriveFont(attributes));
 	            }
 	            
-	            if (contactDiff > 120000 && contactDiff < 122000){
+	            if (contactDiff > 120000 && contactDiff < 130000){
+	            	alertFrame = new JFrame();
+	            	alertFrame.setLocation(500, 400);
+	        		alertFrame.setVisible(true);
+	        		alertFrame.setAlwaysOnTop(true);
 	        		StringJoiner joiner = new StringJoiner(" ");
 	        		joiner.add("No Messages recieved from");
 	        		joiner.add(sessionID);
 	        		joiner.add("for 120 seconds");
-	        		JOptionPane.showMessageDialog(null, joiner.toString(), "FIX MESSAGE ALERT", 
-	        				JOptionPane.OK_OPTION);
+	        		int input = JOptionPane.showOptionDialog(alertFrame, joiner.toString(), "FIX MESSAGE ALERT", 
+	        				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+	        		alertFrame.dispose();
 	            }
 
 	            Thread.sleep(1000);

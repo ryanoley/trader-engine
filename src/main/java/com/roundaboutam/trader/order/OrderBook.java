@@ -2,6 +2,7 @@ package com.roundaboutam.trader.order;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.StringJoiner;
 
 import com.roundaboutam.trader.MessageContainer;
 
@@ -92,7 +93,8 @@ public class OrderBook {
 			order.setQuantity(orderQty);
 			order.setOrderType(orderType);
 			order.setSessionID(sessionID);
-			order.setMessage("Order from old session");
+			order.setOldSession(true);
+			order.setAcknowledged(true);
 			addOrder(order);
 		}
 		updateOrderMessage(order, messageContainer);
@@ -101,20 +103,24 @@ public class OrderBook {
 
 	public void updateOrderMessage(Order order, MessageContainer messageContainer) {
 		char execType = messageContainer.rawValues.get("ExecType").charAt(0);
+		StringJoiner joiner = new StringJoiner(" ");
+		if (order.isOldSession())
+			joiner.add("Old Session -");
     	switch (execType) {
     	case quickfix.field.ExecType.PARTIAL_FILL:
-    		order.setMessage("Working");
+    		joiner.add("Working");
     		break;
     	case quickfix.field.ExecType.FILL:
-    		order.setMessage("Filled");
+    		joiner.add("Filled");
     		break;
     	case quickfix.field.ExecType.CANCELED:
-    		order.setMessage("Canceled");
+    		joiner.add("Canceled");
     		break;
     	case quickfix.field.ExecType.REPLACE:
-    		order.setMessage("Replaced");
+    		joiner.add("Replaced");
     		break;
     	}
+		order.setMessage(joiner.toString());
 	}
 
 	public void orderRejected(String orderID) {

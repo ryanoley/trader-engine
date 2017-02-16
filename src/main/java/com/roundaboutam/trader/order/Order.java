@@ -35,6 +35,7 @@ public class Order {
     private boolean canceled = false;
     private boolean modified = false;
     private boolean acknowledged = false;
+    private boolean oldSession = false;
 
     private String FIXMessage = null;
     private String message = null;
@@ -227,6 +228,14 @@ public class Order {
 
 	public void setAcknowledged(boolean acknowledged) {
 		this.acknowledged = acknowledged;
+	}
+	
+	public boolean isOldSession() {
+		return oldSession;
+	}
+
+	public void setOldSession(boolean acknowledged) {
+		this.oldSession = acknowledged;
 	}
 
 	public String getMessage() {

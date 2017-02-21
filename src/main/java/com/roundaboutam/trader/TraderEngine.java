@@ -2,6 +2,9 @@ package com.roundaboutam.trader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.UIManager;
@@ -33,6 +36,7 @@ public class TraderEngine {
 	private static TraderEngine traderEngine;
 	private static Initiator initiator;
 	private TraderApplication application;
+	private TraderFrame frame;
 
 	public TraderEngine(String launchEnv) throws Exception {
 		System.out.println(launchEnv);
@@ -48,7 +52,8 @@ public class TraderEngine {
 
         JmxExporter exporter = new JmxExporter();
         exporter.register(initiator);
-        new TraderFrame(application);
+        frame = new TraderFrame(application);
+        startLogOnMonitor(launchEnv);
 	}
 
 	private SessionSettings getSettings(String launchEnv) throws ConfigError, IOException {
@@ -119,6 +124,34 @@ public class TraderEngine {
 
 	public static TraderEngine get() {
 		return traderEngine;
+	}
+
+	private void startLogOnMonitor(String launchEnv) {
+		class LogOnMonitor implements Runnable {
+			int currentTime;
+			public LogOnMonitor() {
+			}
+			public void run() {
+				try {
+					SimpleDateFormat formatter = new SimpleDateFormat("HHmm");
+					formatter.setTimeZone(TimeZone.getTimeZone("EST"));
+					while (true) {
+						currentTime = Integer.parseInt(formatter.format(new Date()));
+						if (currentTime >= 1730 && getInitiatorState()) {
+							shutdown();
+						}
+			            Thread.sleep(300000);
+			         }
+			      }
+			      catch (Exception e) {e.printStackTrace();}
+			}
+		}
+		if (launchEnv.equals("prod")){
+			logon();
+			frame.btnFIX.setText("Stop FIX");
+			Thread t = new Thread(new LogOnMonitor());
+			t.start();
+		}
 	}
 
 	public static void main(String[] args) throws Exception {

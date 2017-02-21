@@ -114,7 +114,7 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 	            	sessionArea.setFont(sessionFont.deriveFont(attributes));
 	            }
 	            
-	            if (contactDiff > 120000 && contactDiff < 130000){
+	            if (contactDiff > 120000 && contactDiff < 122000){
 	            	alertFrame = new JFrame();
 	            	alertFrame.setLocation(500, 400);
 	        		alertFrame.setVisible(true);

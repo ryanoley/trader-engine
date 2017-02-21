@@ -124,7 +124,7 @@ public class TraderFrame extends JFrame {
 		return panel;
 	}
 
-	private JButton btnFIX;
+	public JButton btnFIX;
 
 	private JPanel makeButtonPanel() {
 		

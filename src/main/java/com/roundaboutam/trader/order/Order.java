@@ -16,7 +16,7 @@ public class Order {
 
     // Order related fields
     private OrderSide orderSide = null;
-	private char openClose;
+	private OrderOpenClose orderOpenClose = null;
     private OrderType orderType = null;
     private OrderTIF orderTIF = null;
 
@@ -254,12 +254,15 @@ public class Order {
 		this.FIXMessage = FIXMessage;
 	}
 
-	public void setOpenClose(char openClose) {
-		this.openClose = openClose;
+
+	public OrderOpenClose getOrderOpenClose() {
+		return orderOpenClose;
 	}
 
-	public char getOpenClose() {
-		return openClose;
+	public void setOrderOpenClose(OrderOpenClose orderOpenClose) {
+		this.orderOpenClose = orderOpenClose;
 	}
-
+	
+	
+	
 }

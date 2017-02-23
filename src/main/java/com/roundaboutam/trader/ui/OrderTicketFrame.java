@@ -21,6 +21,7 @@ import javax.swing.JTextField;
 
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
+import com.roundaboutam.trader.order.OrderOpenClose;
 import com.roundaboutam.trader.order.OrderSide;
 import com.roundaboutam.trader.order.OrderTIF;
 import com.roundaboutam.trader.order.OrderType;
@@ -235,7 +236,7 @@ public class OrderTicketFrame {
 	private void confirmAndSubmit(Order order) {
 		StringJoiner joiner = new StringJoiner(" ");
 		joiner.add(order.getOrderSide().toString().toUpperCase());
-		joiner.add("(" + order.getOpenClose() + ")");
+		joiner.add("(" + order.getOrderOpenClose().toString() + ")");
 		joiner.add(order.getOrderType().toString().toUpperCase());
 		joiner.add(Integer.toString(order.getQuantity()));
 		joiner.add(order.getSymbol() +"?");
@@ -297,19 +298,19 @@ public class OrderTicketFrame {
 
         String orderSideText = (String) orderSideCombo.getSelectedItem();
         OrderSide orderSide = null;
-        char openClose;
+        OrderOpenClose orderOpenClose = null;
         if (orderSideText == "SHORT") {
         	orderSide = OrderSide.SHORT_SELL;
-        	openClose = quickfix.field.OpenClose.OPEN;
+        	orderOpenClose = OrderOpenClose.OPEN;
         } else if (orderSideText == "SELL") {
         	orderSide = OrderSide.SELL;
-        	openClose = quickfix.field.OpenClose.CLOSE;
+        	orderOpenClose = OrderOpenClose.CLOSE;
         } else if (orderSideText == "BUYTOCOVER") {
         	orderSide = OrderSide.BUY;
-        	openClose = quickfix.field.OpenClose.CLOSE;
+        	orderOpenClose = OrderOpenClose.CLOSE;
         } else {
         	orderSide = OrderSide.BUY;
-        	openClose = quickfix.field.OpenClose.OPEN;
+        	orderOpenClose = OrderOpenClose.OPEN;
         }
 
         String orderTypeText = (String) orderTypesCombo.getSelectedItem();
@@ -326,7 +327,7 @@ public class OrderTicketFrame {
             order.setCustomTag(customTag);
             order.setOrderTIF(OrderTIF.DAY);
             order.setSessionID(sessionID);
-            order.setOpenClose(openClose);
+            order.setOrderOpenClose(orderOpenClose);
             confirmAndSubmit(order);
         } else if (orderTypeText == "LIMIT") {
         	Order order = new Order();
@@ -338,7 +339,7 @@ public class OrderTicketFrame {
             order.setCustomTag(customTag);
             order.setOrderTIF(OrderTIF.DAY);
             order.setSessionID(sessionID);
-            order.setOpenClose(openClose);
+            order.setOrderOpenClose(orderOpenClose);
             confirmAndSubmit(order);
         } else if (orderTypeText == "MARKET") {
         	Order order = new Order();
@@ -349,7 +350,7 @@ public class OrderTicketFrame {
             order.setCustomTag(customTag);
             order.setOrderTIF(OrderTIF.DAY);
             order.setSessionID(sessionID);
-            order.setOpenClose(openClose);
+            order.setOrderOpenClose(orderOpenClose);
             confirmAndSubmit(order);
         }
 

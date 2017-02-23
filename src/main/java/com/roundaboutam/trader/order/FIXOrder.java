@@ -30,6 +30,7 @@ public class FIXOrder {
     static private final TwoWayMap sideMap = new TwoWayMap();
     static private final TwoWayMap tifMap = new TwoWayMap();
     static private final TwoWayMap typeMap = new TwoWayMap();
+    static private final TwoWayMap opencloseMap = new TwoWayMap();
     
 	
 	public static Message formatNewOrder(Order order) {
@@ -87,7 +88,7 @@ public class FIXOrder {
 
     	fixOrder.setField(new OrderQty(order.getQuantity()));
     	fixOrder.setField(tifToFIXTif(order.getOrderTIF()));
-    	fixOrder.setField(new OpenClose(order.getOpenClose()));
+    	fixOrder.setField(openCloseToFIXOpenClose(order.getOrderOpenClose()));
 
         if (order.getOrderSide() == OrderSide.SHORT_SELL) {
         	fixOrder.setField(new LocateReqd(false));
@@ -159,6 +160,14 @@ public class FIXOrder {
     public static OrderTIF FIXTifToTif(TimeInForce tif) {
         return (OrderTIF) typeMap.getSecond(tif);
     }
+
+    public static OpenClose openCloseToFIXOpenClose(OrderOpenClose openclose) {
+        return (OpenClose) opencloseMap.getFirst(openclose);
+    }
+
+    public static OrderOpenClose FIXOpenCloseToOpenClose(OpenClose openclose) {
+        return (OrderOpenClose) opencloseMap.getSecond(openclose);
+    }
     
     static {
     	sideMap.put(OrderSide.BUY, new Side(Side.BUY));
@@ -175,6 +184,9 @@ public class FIXOrder {
 	    tifMap.put(OrderTIF.AT_OPEN, new TimeInForce(TimeInForce.AT_THE_OPENING));
 	    tifMap.put(OrderTIF.AT_CLOSE, new TimeInForce(TimeInForce.AT_THE_CLOSE));
 	    tifMap.put(OrderTIF.GTC, new TimeInForce(TimeInForce.GOOD_TILL_CANCEL));
+	    
+    	opencloseMap.put(OrderOpenClose.OPEN, new OpenClose(OpenClose.OPEN));
+    	opencloseMap.put(OrderOpenClose.CLOSE,  new OpenClose(OpenClose.CLOSE));
     }
 
     

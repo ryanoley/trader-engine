@@ -1,13 +1,13 @@
 package com.roundaboutam.trader.order;
 
-import com.roundaboutam.trader.TwoWayMap;
+import java.util.HashMap;
+import java.util.Map;
 
-import quickfix.field.OrdType;
 
 public class OrderType {
 
-	private final String name;
-
+	static private final Map<String, OrderType> known = new HashMap<>();
+	
 	// Trader Engine Types
     static public final OrderType MARKET = new OrderType("Market");
     static public final OrderType LIMIT = new OrderType("Limit");
@@ -16,34 +16,34 @@ public class OrderType {
 
     static private final OrderType[] array = { MARKET, LIMIT, MOC, LOC };
 
-    // Map QuickFIXJ Types
-    static private final TwoWayMap typeMap = new TwoWayMap();
-
-    static {
-    	typeMap.put(OrderType.MARKET, new OrdType(OrdType.MARKET));
-        typeMap.put(OrderType.LIMIT, new OrdType(OrdType.LIMIT));
-        typeMap.put(OrderType.MOC, new OrdType(OrdType.MARKET_ON_CLOSE));
-        typeMap.put(OrderType.LOC, new OrdType(OrdType.LIMIT_ON_CLOSE));
-    }
+	private final String name;
 
     private OrderType(String name) {
         this.name = name;
+        synchronized (OrderType.class) {
+            known.put(name, this);
+        }
     }
 
+    public String getName() {
+        return name;
+    }
+    
     public String toString() {
         return name;
     }
 
-    public static OrdType toFIX(OrderType type) {
-    	return (OrdType) typeMap.getFirst(type);
-    }
-
-    public static OrderType fromFIX(OrdType type) {
-    	return (OrderType) typeMap.getSecond(type);
-    }
-
     static public Object[] toArray() {
         return array;
+    }
+
+    public static OrderType parse(String type) throws IllegalArgumentException {
+        OrderType result = known.get(type);
+        if (result == null) {
+            throw new IllegalArgumentException
+            ("OrderType: " + type + " is unknown.");
+        }
+        return result;
     }
 
 }

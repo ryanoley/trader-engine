@@ -1,12 +1,10 @@
 package com.roundaboutam.trader.order;
 
-import com.roundaboutam.trader.TwoWayMap;
-
-import quickfix.field.Side;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OrderSide {
-
-	private final String name;
+	static private final Map<String, OrderSide> known = new HashMap<>();
 
 	// Trader Engine Types
 	static public final OrderSide BUY = new OrderSide("Buy");
@@ -15,33 +13,34 @@ public class OrderSide {
 
     static private final OrderSide[] array = { BUY, SELL, SHORT_SELL };
 
-    // Map QuickFIXJ Types
-    static private final TwoWayMap sideMap = new TwoWayMap();
-
-    static {
-    	sideMap.put(OrderSide.BUY, new Side(Side.BUY));
-    	sideMap.put(OrderSide.SELL, new Side(Side.SELL));
-    	sideMap.put(OrderSide.SHORT_SELL, new Side(Side.SELL_SHORT));
-    }
-
+	private final String name;
+    
     private OrderSide(String name) {
         this.name = name;
+        synchronized (OrderSide.class) {
+            known.put(name, this);
+        }
     }
 
+    public String getName() {
+        return name;
+    }
+    
     public String toString() {
         return name;
     }
 
-    public static Side toFIX(OrderSide side) {
-    	return (Side) sideMap.getFirst(side);
-    }
-
-    public static OrderSide fromFIX(Side side) {
-    	return (OrderSide) sideMap.getSecond(side);
-    }
-
     static public Object[] toArray() {
         return array;
+    }
+
+    public static OrderSide parse(String type) throws IllegalArgumentException {
+        OrderSide result = known.get(type);
+        if (result == null) {
+            throw new IllegalArgumentException
+            ("OrderSide: " + type + " is unknown.");
+        }
+        return result;
     }
 
 }

@@ -107,7 +107,7 @@ public class TraderFrame extends JFrame {
 		panel.add(buttonPanel, BorderLayout.WEST);
 
 		JPanel orderPanel = makeOrderTablePanel();
-		panel.add(orderPanel,BorderLayout.CENTER);
+		panel.add(orderPanel, BorderLayout.CENTER);
 
 		return panel;
 	}

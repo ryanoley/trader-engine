@@ -85,8 +85,8 @@ public class OrderBook {
 			order = new Order(orderID);
 			char side = messageContainer.rawValues.get("Side").charAt(0);
 			char ordType = messageContainer.rawValues.get("OrdType").charAt(0);
-			OrderSide orderSide = OrderSide.fromFIX(new Side(side));
-			OrderType orderType = OrderType.fromFIX(new OrdType(ordType));
+			OrderSide orderSide = FIXOrder.FIXSideToSide(new Side(side));
+			OrderType orderType = FIXOrder.FIXTypeToType(new OrdType(ordType));
 			order.setSymbol(messageContainer.getSymbol());
 			order.setOrderID(orderID);
 			order.setOrderSide(orderSide);
@@ -124,7 +124,6 @@ public class OrderBook {
 	}
 
 	public void orderRejected(String orderID) {
-		// TODO: Log this?
 		Order order = orderMap.get(orderID);
 		order.setRejected(true);
 		order.setLeavesQty(0);

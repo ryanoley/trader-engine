@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.StringJoiner;
 
 import com.roundaboutam.trader.MessageContainer;
+import com.roundaboutam.trader.execution.ExecutionType;
 
 import quickfix.SessionID;
 import quickfix.field.OrdType;
@@ -55,10 +56,10 @@ public class OrderBook {
 	public int processExecutionReport(MessageContainer messageContainer, SessionID sessionID) {
 		Order order;
 		String orderID = messageContainer.getClOrdID();
-		int cumQty = Integer.parseInt(messageContainer.getCumQty());
-		int leavesQty = Integer.parseInt(messageContainer.getLeavesQty());
-		int orderQty = Integer.parseInt(messageContainer.getOrderQty());
-		double avgPx = Double.parseDouble(messageContainer.getAvgPx());
+		int cumQty = messageContainer.getCumQty();
+		int leavesQty = messageContainer.getLeavesQty();
+		int orderQty = messageContainer.getOrderQty();
+		double avgPx = messageContainer.getAvgPx();
 
 		if (replaceOrderMap.containsKey(orderID)) {
 			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
@@ -83,10 +84,8 @@ public class OrderBook {
 
 		} else {
 			order = new Order(orderID);
-			char side = messageContainer.rawValues.get("Side").charAt(0);
-			char ordType = messageContainer.rawValues.get("OrdType").charAt(0);
-			OrderSide orderSide = FIXOrder.FIXSideToSide(new Side(side));
-			OrderType orderType = FIXOrder.FIXTypeToType(new OrdType(ordType));
+			OrderSide orderSide = messageContainer.getOrderSide();
+			OrderType orderType = messageContainer.getOrderType();
 			order.setSymbol(messageContainer.getSymbol());
 			order.setOrderID(orderID);
 			order.setOrderSide(orderSide);
@@ -98,28 +97,16 @@ public class OrderBook {
 			addOrder(order);
 		}
 		updateOrderMessage(order, messageContainer);
-		return order.processFill(cumQty, leavesQty, avgPx, orderQty, messageContainer.getText());
+		return order.processFill(cumQty, leavesQty, avgPx, orderQty);
 	}
 
 	public void updateOrderMessage(Order order, MessageContainer messageContainer) {
-		char execType = messageContainer.rawValues.get("ExecType").charAt(0);
+		ExecutionType executionType = messageContainer.getExecutionType();
 		StringJoiner joiner = new StringJoiner(" ");
 		if (order.isOldSession())
 			joiner.add("Old Session -");
-    	switch (execType) {
-    	case quickfix.field.ExecType.PARTIAL_FILL:
-    		joiner.add("Working");
-    		break;
-    	case quickfix.field.ExecType.FILL:
-    		joiner.add("Filled");
-    		break;
-    	case quickfix.field.ExecType.CANCELED:
-    		joiner.add("Canceled");
-    		break;
-    	case quickfix.field.ExecType.REPLACE:
-    		joiner.add("Replaced");
-    		break;
-    	}
+
+		joiner.add(executionType.toString());
 		order.setMessage(joiner.toString());
 	}
 

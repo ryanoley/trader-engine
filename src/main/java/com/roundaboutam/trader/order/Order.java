@@ -37,7 +37,6 @@ public class Order {
     private boolean acknowledged = false;
     private boolean oldSession = false;
 
-    private String FIXMessage = null;
     private String message = null;
 
     public Order() {
@@ -51,14 +50,12 @@ public class Order {
     	permanentID = newID;
     }
 
-    public int processFill(int cumQty, int leavesQty, double avgPx, 
-    		int orderQty, String FIXMessage) {
+    public int processFill(int cumQty, int leavesQty, double avgPx, int orderQty) {
     	int fillSize = cumQty - getCumQty();
     	setCumQty(cumQty);
     	setAvgPx(avgPx);
     	setLeavesQty(leavesQty);
     	setOrderQty(orderQty);
-    	setFIXMessage(FIXMessage);
     	checkExecution();
     	return fillSize;
     }
@@ -245,15 +242,6 @@ public class Order {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-
-	public String getFIXMessage() {
-		return FIXMessage;
-	}
-
-	public void setFIXMessage(String FIXMessage) {
-		this.FIXMessage = FIXMessage;
-	}
-
 
 	public OrderOpenClose getOrderOpenClose() {
 		return orderOpenClose;

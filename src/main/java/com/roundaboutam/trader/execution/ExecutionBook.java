@@ -56,38 +56,33 @@ public class ExecutionBook {
 	}
 
 	public void processExecutionReport(MessageContainer messageContainer, Order order) {
-		char execType = messageContainer.rawValues.get("ExecType").charAt(0);
-		String execString = null;
 
-    	switch (execType) {
-    	case quickfix.field.ExecType.PARTIAL_FILL:
-    	case quickfix.field.ExecType.FILL:
-    		execString = Execution.FILL;
-    		break;
-    	case quickfix.field.ExecType.CANCELED:
-    		execString = Execution.CANCEL;
-    		break;
-    	case quickfix.field.ExecType.REPLACE:
-    		execString = Execution.REPLACE;
-    		break;
-    	case quickfix.field.ExecType.REJECTED:
-    		execString = Execution.REJECT;
-    		break;
-    	case quickfix.field.ExecType.NEW:
-    		return;
-    	}
+		String execString = null;
+		ExecutionType executionType = messageContainer.getExecutionType();
+		if (executionType == ExecutionType.PARTIAL_FILL || executionType == ExecutionType.FILL) {
+			execString = Execution.FILL;
+		} else if (executionType == ExecutionType.CANCELED) {
+			execString = Execution.CANCEL;
+		} else if (executionType == ExecutionType.REPLACE) {
+			execString = Execution.REPLACE;
+		} else if (executionType == ExecutionType.REJECTED) {
+			execString = Execution.REJECT;
+		} else {
+			return;
+		}
 
     	Execution execution = new Execution(
     			messageContainer.getClOrdID(),
     			order.getPermanentID(),
     			messageContainer.getSymbol(),
     			messageContainer.getTransactTime(),
-    			messageContainer.getSide(),
-    			Integer.parseInt(messageContainer.getLastShares()),
-    			Double.parseDouble(messageContainer.getLastPx()),
+    			messageContainer.getOrderSide().toString(),
+    			messageContainer.getLastShares(),
+    			messageContainer.getLastPx(),
     			execString
     			);
-        if (!messageContainer.getSymbolSfx().equals("FieldNotFound")) {
+ 
+        if (messageContainer.getSymbolSfx() != null) {
             execution.setSuffix(messageContainer.getSymbolSfx());
         }
         execution.setCustomTag(order.getCustomTag());
@@ -114,12 +109,12 @@ public class ExecutionBook {
 		OrderCancelReject orderCancelReject = new OrderCancelReject(
     			messageContainer.getClOrdID(),
     			order.getPermanentID(),
-    			messageContainer.getSymbol(),
-    			messageContainer.getTransactTime(),
-    			messageContainer.getSide(),
+    			order.getSymbol(),
+    			messageContainer.getSendingTime(),
+    			order.getOrderSide().toString(),
     			messageContainer.getText()
     			);
-        if (!messageContainer.getSymbolSfx().equals("FieldNotFound")) {
+        if (messageContainer.getSymbolSfx() != null) {
         	orderCancelReject.setSuffix(messageContainer.getSymbolSfx());
         }
         orderCancelReject.setCustomTag(order.getCustomTag());

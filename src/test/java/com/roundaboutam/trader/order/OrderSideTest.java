@@ -12,13 +12,13 @@ public class OrderSideTest extends TestCase {
 		assertEquals(OrderSide.SELL.toString(), "Sell");
 		assertEquals(OrderSide.SHORT_SELL.toString(), "Short Sell");
 
-		assertEquals(FIXOrder.sideToFIXSide(OrderSide.BUY), new Side(Side.BUY));
-		assertEquals(FIXOrder.sideToFIXSide(OrderSide.SELL), new Side(Side.SELL));
-		assertEquals(FIXOrder.sideToFIXSide(OrderSide.SHORT_SELL), new Side(Side.SELL_SHORT));
+		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.BUY), new Side(Side.BUY));
+		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.SELL), new Side(Side.SELL));
+		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.SHORT_SELL), new Side(Side.SELL_SHORT));
 
-		assertEquals(FIXOrder.FIXSideToSide(new Side(Side.BUY)), OrderSide.BUY);
-		assertEquals(FIXOrder.FIXSideToSide(new Side(Side.SELL)), OrderSide.SELL);
-		assertEquals(FIXOrder.FIXSideToSide(new Side(Side.SELL_SHORT)), OrderSide.SHORT_SELL);
+		assertEquals(FIXOrder.FIXSideToOrderSide(new Side(Side.BUY)), OrderSide.BUY);
+		assertEquals(FIXOrder.FIXSideToOrderSide(new Side(Side.SELL)), OrderSide.SELL);
+		assertEquals(FIXOrder.FIXSideToOrderSide(new Side(Side.SELL_SHORT)), OrderSide.SHORT_SELL);
 
 		assertEquals(OrderSide.toArray().length, 3);
 
@@ -26,9 +26,9 @@ public class OrderSideTest extends TestCase {
 
 	public void testOrderSideFixTags() {
 		
-		assertEquals(FIXOrder.sideToFIXSide(OrderSide.BUY).toString(), "54=1");
-		assertEquals(FIXOrder.sideToFIXSide(OrderSide.SELL).toString(), "54=2");
-		assertEquals(FIXOrder.sideToFIXSide(OrderSide.SHORT_SELL).toString(), "54=5");
+		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.BUY).toString(), "54=1");
+		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.SELL).toString(), "54=2");
+		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.SHORT_SELL).toString(), "54=5");
 
 	}
 

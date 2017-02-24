@@ -78,17 +78,17 @@ public class FIXOrder {
     			new ClOrdID(order.getOrderID()), 
     			new HandlInst('1'),
     			new Symbol(order.getSymbol()),
-    			sideToFIXSide(order.getOrderSide()),
+    			orderSideToFIXSide(order.getOrderSide()),
     			new TransactTime(), 
-    			typeToFIXType(order.getOrderType()));
+    			orderTypeToFIXType(order.getOrderType()));
 
     	if (order.getSuffix() != null) {
     		fixOrder.setField(new SymbolSfx(order.getSuffix()));
     	}
 
     	fixOrder.setField(new OrderQty(order.getQuantity()));
-    	fixOrder.setField(tifToFIXTif(order.getOrderTIF()));
-    	fixOrder.setField(openCloseToFIXOpenClose(order.getOrderOpenClose()));
+    	fixOrder.setField(orderTifToFIXTif(order.getOrderTIF()));
+    	fixOrder.setField(orderOpenCloseToFIXOpenClose(order.getOrderOpenClose()));
 
         if (order.getOrderSide() == OrderSide.SHORT_SELL) {
         	fixOrder.setField(new LocateReqd(false));
@@ -108,7 +108,7 @@ public class FIXOrder {
 	            new OrigClOrdID(cancelOrder.getOrigOrderID()), 
 	            new ClOrdID(cancelOrder.getOrderID()), 
 	            new Symbol(cancelOrder.getSymbol()),
-	            sideToFIXSide(cancelOrder.getOrderSide()), 
+	            orderSideToFIXSide(cancelOrder.getOrderSide()), 
 	            new TransactTime());
 
 		fixOrder.setField(new OrderQty(cancelOrder.getQuantity()));
@@ -123,9 +123,9 @@ public class FIXOrder {
                 new ClOrdID(replaceOrder.getOrderID()), 
                 new HandlInst('1'),
                 new Symbol(replaceOrder.getSymbol()), 
-                sideToFIXSide(replaceOrder.getOrderSide()),
+                orderSideToFIXSide(replaceOrder.getOrderSide()),
                 new TransactTime(),
-                typeToFIXType(replaceOrder.getOrderType()));
+                orderTypeToFIXType(replaceOrder.getOrderType()));
 
 		fixOrder.setField(new OrderQty(replaceOrder.getQuantity()));
 
@@ -137,35 +137,35 @@ public class FIXOrder {
 
 	}
 
-    public static Side sideToFIXSide(OrderSide side) {
+    public static Side orderSideToFIXSide(OrderSide side) {
         return (Side) sideMap.getFirst(side);
     }
 
-    public static OrderSide FIXSideToSide(Side side) {
+    public static OrderSide FIXSideToOrderSide(Side side) {
         return (OrderSide) sideMap.getSecond(side);
     }
 
-    public static OrdType typeToFIXType(OrderType type) {
+    public static OrdType orderTypeToFIXType(OrderType type) {
         return (OrdType) typeMap.getFirst(type);
     }
 
-    public static OrderType FIXTypeToType(OrdType type) {
+    public static OrderType FIXTypeToOrderType(OrdType type) {
         return (OrderType) typeMap.getSecond(type);
     }
 
-    public static TimeInForce tifToFIXTif(OrderTIF tif) {
+    public static TimeInForce orderTifToFIXTif(OrderTIF tif) {
         return (TimeInForce) tifMap.getFirst(tif);
     }
 
-    public static OrderTIF FIXTifToTif(TimeInForce tif) {
+    public static OrderTIF FIXTifToOrderTif(TimeInForce tif) {
         return (OrderTIF) typeMap.getSecond(tif);
     }
 
-    public static OpenClose openCloseToFIXOpenClose(OrderOpenClose openclose) {
+    public static OpenClose orderOpenCloseToFIXOpenClose(OrderOpenClose openclose) {
         return (OpenClose) opencloseMap.getFirst(openclose);
     }
 
-    public static OrderOpenClose FIXOpenCloseToOpenClose(OpenClose openclose) {
+    public static OrderOpenClose FIXOpenCloseToOrderOpenClose(OpenClose openclose) {
         return (OrderOpenClose) opencloseMap.getSecond(openclose);
     }
     

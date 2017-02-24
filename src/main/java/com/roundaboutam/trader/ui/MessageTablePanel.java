@@ -23,9 +23,9 @@ import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.MessageContainer;
+import com.roundaboutam.trader.MessageType;
 
 import quickfix.Message;
-
 
 
 
@@ -71,7 +71,7 @@ class MessageTableModel extends AbstractTableModel implements Observer {
     private void addMessage(Message message) {
     	int row = rowToMessage.size();
     	MessageContainer messageContainer = new MessageContainer(message);
-    	if (!"Heartbeat".equals(messageContainer.getMsgType())) {
+    	if (messageContainer.getMessageType() != MessageType.HEARTBEAT) {
 	    	rowToMessage.put(row, messageContainer);
 	    	rowToTimeStamp.put(row, new Date(System.currentTimeMillis()));
 	        fireTableRowsInserted(row, row);
@@ -107,22 +107,35 @@ class MessageTableModel extends AbstractTableModel implements Observer {
         	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.S");  
         	return sdf.format(timeStamp);
         case MSGTYPE:
-        	return messageContainer.getMsgType();
+        	MessageType messageType = messageContainer.getMessageType();
+        	String typeString = (messageType == null) ? null : messageType.toString();
+        	return replaceNull(typeString);
         case SYMBOL:
-        	return messageContainer.getSymbol();
+        	return replaceNull(messageContainer.getSymbol());
         case ORDID:
-        	return messageContainer.getDisplayID();
+        	return replaceNull(messageContainer.getDisplayID());
         case ORDQTY:
-        	return messageContainer.getMsgQty();
+        	Integer dispQty = messageContainer.getDisplayQty();
+        	String qtyString = (dispQty == null) ? null : dispQty.toString();
+        	return replaceNull(qtyString);
         case STATUS:
-        	return messageContainer.getStatus();
+        	return replaceNull(messageContainer.getDisplayStatus());
         case TEXT:
-        	return messageContainer.getText();
+        	return replaceNull(messageContainer.getText());
         case MESSAGE:
-            return messageContainer.getMessage().toString();
+            return replaceNull(messageContainer.getMessage().toString());
         }
         return "#NA";
     }
+
+    private static String replaceNull(String input) {
+    	if (input == null)
+    		return "-";
+    	else if (input.isEmpty())
+    		return "-";
+    	else
+    		return input.equals("null") ? "-" : input;
+    	}
 
 	public void update(Observable o, Object arg) {
 		Message message = (Message) arg;
@@ -130,7 +143,6 @@ class MessageTableModel extends AbstractTableModel implements Observer {
 	}
 
 }
-
 
 
 

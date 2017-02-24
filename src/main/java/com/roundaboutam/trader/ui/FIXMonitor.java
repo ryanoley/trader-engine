@@ -78,7 +78,7 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
     		messageMap.put(row, messageContainer);
         	timeStampMap.put(row, timeNow);
         	lastContact = timeNow;
-        	seqNum = Integer.parseInt(messageContainer.getMsgSeqNum());
+        	seqNum = messageContainer.getMsgSeqNum();
             sessionID = messageContainer.getTargetCompID();
             }
     }

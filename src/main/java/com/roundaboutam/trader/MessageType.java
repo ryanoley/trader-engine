@@ -12,7 +12,7 @@ public class MessageType {
 	static private final Map<String, MessageType> known = new HashMap<>();
 
 	// Trader Engine Types
-    static public final MessageType EXECUTION_REPORT = new MessageType("ExecRept");
+    static public final MessageType EXECUTION_REPORT = new MessageType("ExecutionReport");
     static public final MessageType ORDER_CANCEL_REJECT = new MessageType("Reject");
     static public final MessageType NEW_ORDER = new MessageType("NewOrder");
     static public final MessageType REPLACE_ORDER = new MessageType("ReplaceOrder");

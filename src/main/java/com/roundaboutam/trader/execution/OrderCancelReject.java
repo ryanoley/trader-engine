@@ -6,18 +6,17 @@ import com.roundaboutam.trader.order.OrderSide;
 
 public class OrderCancelReject {
 
-	private String ID = null;
-    private String orderID = null;
-    private String permanentID = null;
-    private String symbol = null;
-    private String suffix = null;
-    private OrderSide orderSide = null;
-    private String text = null;
+	private String ID;
+    private String orderID;
+    private String permanentID;
+    private String symbol;
+    private OrderSide orderSide;
+    private String text;
     private String transactTime;
+    private String suffix = null;
     private String customTag = null;
     private static int nextID = 1;
-	
-	
+
 
     public OrderCancelReject(String orderID, String permanentID, String symbol,
     		String transactTime, OrderSide orderSide, String text) {

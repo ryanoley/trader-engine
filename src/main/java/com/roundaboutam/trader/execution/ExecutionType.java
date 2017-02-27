@@ -25,7 +25,7 @@ public class ExecutionType {
     static public final ExecutionType CLEARNING_HOLD = new ExecutionType("ClearingHold");
 
     static private final ExecutionType[] array = { NEW, PARTIAL_FILL, FILL, DONE_FOR_DAY, CANCELED,
-    		REPLACE, STOPPED, SUSPENDED, REJECTED, PENDING_CANCEL, PENDING_REPLACE, CLEARNING_HOLD};
+    		REPLACE, STOPPED, SUSPENDED, REJECTED, PENDING_CANCEL, PENDING_REPLACE, PENDING_NEW, CLEARNING_HOLD};
 
 	private final String name;
 

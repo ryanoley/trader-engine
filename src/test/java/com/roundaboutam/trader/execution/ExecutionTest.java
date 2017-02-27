@@ -12,7 +12,7 @@ public class ExecutionTest extends TestCase {
     			"1234", "1234", "BRK", "20160101-14:45:64", 
     			OrderSide.BUY, 100, 100.5, ExecutionType.FILL);
 		execution.setSuffix("B");
-        assertEquals(execution.getLogEntry(), "1,Fill,1234,1234,BRK/B,20160101-14:45:64,Buy,100,100.5,0.0,0.0,null");
+        assertEquals(execution.getLogEntry(), "1,Filled,1234,1234,BRK/B,20160101-14:45:64,Buy,100,100.5,0.0,0.0,null");
 	}
 
 }

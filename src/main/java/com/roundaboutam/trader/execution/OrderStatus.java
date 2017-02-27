@@ -24,7 +24,7 @@ public class OrderStatus {
     static public final OrderStatus PENDING_NEW = new OrderStatus("PendingNew");
 
     static private final OrderStatus[] array = { NEW, PARTIAL_FILL, FILL, DONE_FOR_DAY, CANCELED,
-    		REPLACE, STOPPED, SUSPENDED, REJECTED, PENDING_CANCEL, PENDING_REPLACE};
+    		REPLACE, STOPPED, SUSPENDED, REJECTED, PENDING_CANCEL, PENDING_REPLACE, PENDING_NEW};
 
 	private final String name;
 

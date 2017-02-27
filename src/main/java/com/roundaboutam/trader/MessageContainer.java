@@ -29,7 +29,6 @@ public class MessageContainer {
 	private OrderSide orderSide;
 	private OrderType orderType;
 	private OrderOpenClose orderOpenClose;
-	
 
 	private int msgSeqNum;
 	private String senderCompID;

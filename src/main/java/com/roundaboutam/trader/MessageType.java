@@ -25,7 +25,7 @@ public class MessageType {
 
 
     static private final MessageType[] array = { EXECUTION_REPORT, ORDER_CANCEL_REJECT, NEW_ORDER,
-    		REPLACE_ORDER, CANCEL_ORDER, LOGON, HEARTBEAT, TEST_REQUEST};
+    		REPLACE_ORDER, CANCEL_ORDER, LOGON, HEARTBEAT, SEQUENCE_RESET, RESEND_REQUEST, TEST_REQUEST};
 
 	private final String name;
 

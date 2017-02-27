@@ -2,6 +2,8 @@ package com.roundaboutam.trader.execution;
 
 import java.util.StringJoiner;
 
+import com.roundaboutam.trader.order.OrderSide;
+
 public class OrderCancelReject {
 
 	private String ID = null;
@@ -9,7 +11,7 @@ public class OrderCancelReject {
     private String permanentID = null;
     private String symbol = null;
     private String suffix = null;
-    private String orderSide = null;
+    private OrderSide orderSide = null;
     private String text = null;
     private String transactTime;
     private String customTag = null;
@@ -18,7 +20,7 @@ public class OrderCancelReject {
 	
 
     public OrderCancelReject(String orderID, String permanentID, String symbol,
-    		String transactTime, String orderSide, String text) {
+    		String transactTime, OrderSide orderSide, String text) {
     	ID = Integer.toString(nextID++);
     	this.orderID = orderID;
     	this.permanentID = permanentID;
@@ -37,7 +39,7 @@ public class OrderCancelReject {
         }
     	StringJoiner joiner = new StringJoiner(",");
     	joiner.add(ID).add(orderID).add(permanentID).add(outSymbol).add(
-    			transactTime).add(orderSide).add(customTag).add(text);
+    			transactTime).add(orderSide.toString()).add(customTag).add(text);
     	return joiner.toString();
     }
 
@@ -57,7 +59,7 @@ public class OrderCancelReject {
 		return transactTime;
 	}
 	
-	public String getSide() {
+	public OrderSide getOrderSide() {
 		return orderSide;
 	}
 

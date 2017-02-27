@@ -27,14 +27,11 @@ public class ExecutionBook {
 	private final HashMap<String, OrderCancelReject> orderCancelRejectMap;
 	
 
-	public ExecutionBook(SessionSettings settings){
+	public ExecutionBook(String filePath){
 		executionMap = new HashMap<String, Execution>();
 		orderCancelRejectMap = new HashMap<String, OrderCancelReject>();
-		try {
-			logFilePath = settings.getString("CustomLogPath");
-		} catch (ConfigError | FieldConvertError e) {
-			e.printStackTrace();
-		}
+		this.logFilePath = filePath;
+
 	}
 
 	public void setExecutionLogs(SessionID sessionID) {
@@ -56,30 +53,15 @@ public class ExecutionBook {
 	}
 
 	public void processExecutionReport(MessageContainer messageContainer, Order order) {
-
-		String execString = null;
-		ExecutionType executionType = messageContainer.getExecutionType();
-		if (executionType == ExecutionType.PARTIAL_FILL || executionType == ExecutionType.FILL) {
-			execString = Execution.FILL;
-		} else if (executionType == ExecutionType.CANCELED) {
-			execString = Execution.CANCEL;
-		} else if (executionType == ExecutionType.REPLACE) {
-			execString = Execution.REPLACE;
-		} else if (executionType == ExecutionType.REJECTED) {
-			execString = Execution.REJECT;
-		} else {
-			return;
-		}
-
     	Execution execution = new Execution(
     			messageContainer.getClOrdID(),
     			order.getPermanentID(),
     			messageContainer.getSymbol(),
     			messageContainer.getTransactTime(),
-    			messageContainer.getOrderSide().toString(),
+    			messageContainer.getOrderSide(),
     			messageContainer.getLastShares(),
     			messageContainer.getLastPx(),
-    			execString
+    			messageContainer.getExecutionType()
     			);
  
         if (messageContainer.getSymbolSfx() != null) {
@@ -105,13 +87,12 @@ public class ExecutionBook {
 	}
 	
 	public void processOrderCancelReject(MessageContainer messageContainer, Order order){
-    	
 		OrderCancelReject orderCancelReject = new OrderCancelReject(
     			messageContainer.getClOrdID(),
     			order.getPermanentID(),
     			order.getSymbol(),
     			messageContainer.getSendingTime(),
-    			order.getOrderSide().toString(),
+    			order.getOrderSide(),
     			messageContainer.getText()
     			);
         if (messageContainer.getSymbolSfx() != null) {

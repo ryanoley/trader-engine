@@ -1,25 +1,21 @@
 package com.roundaboutam.trader.execution;
 
 import java.util.StringJoiner;
+import com.roundaboutam.trader.order.OrderSide;
 
 
 public class Execution {
-	  
-    public static final String FILL = "F";
-    public static final String CANCEL = "C";
-    public static final String REPLACE = "RP";
-    public static final String REJECT = "RJ";
-    private String ID = null;
-    private String symbol = null;
-    private String suffix = null;
-    private String orderID = null;
-    private String permanentID = null;
-    private String customTag = null;
+    private String ID;
+    private String symbol;
+    private String orderID;
+    private String permanentID;
     private String transactTime;
-    private String orderSide = null;
-    private String execType = null;
-    private int quantity = 0;
     private double price;
+    private int quantity;
+    private String suffix = null;
+    private String customTag = null;
+    private OrderSide orderSide;
+    private ExecutionType executionType;
     private double bid;
     private double ask;
  
@@ -27,17 +23,17 @@ public class Execution {
 
     
     public Execution(String orderID, String permanentID, String symbol,
-    		String transactTime, String orderSide,
-    		int quantity, double price, String execType) {
+    		String transactTime, OrderSide orderSide,
+    		int quantity, double price, ExecutionType executionType) {
     	ID = Integer.toString(nextID++);
     	this.orderID = orderID;
     	this.permanentID = permanentID;
     	this.symbol = symbol;
     	this.transactTime = transactTime;
-    	this.orderSide = orderSide;
     	this.quantity = quantity;
     	this.price = price;
-    	this.execType = execType;
+    	this.orderSide = orderSide;
+    	this.executionType = executionType;
     }
 
     
@@ -47,9 +43,10 @@ public class Execution {
     	if (suffix != null) {
             outSymbol = outSymbol + "/" + suffix;
         }
+
     	StringJoiner joiner = new StringJoiner(",");
-    	joiner.add(ID).add(execType).add(orderID).add(permanentID).add(outSymbol).add(
-    			transactTime).add(orderSide).add(Integer.toString(quantity)).add(
+    	joiner.add(ID).add(executionType.toString()).add(orderID).add(permanentID).add(outSymbol).add(
+    			transactTime).add(orderSide.toString()).add(Integer.toString(quantity)).add(
     			Double.toString(price)).add(Double.toString(bid)).add(
     			Double.toString(ask)).add(customTag);
     	return joiner.toString();
@@ -71,7 +68,7 @@ public class Execution {
 		return transactTime;
 	}
 	
-	public String getSide() {
+	public OrderSide getOrderSide() {
 		return orderSide;
 	}
 

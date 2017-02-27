@@ -15,8 +15,10 @@ import com.roundaboutam.trader.order.FIXOrder;
 import com.roundaboutam.trader.execution.ExecutionBook;
 
 import quickfix.Application;
+import quickfix.ConfigError;
 import quickfix.DefaultMessageFactory;
 import quickfix.DoNotSend;
+import quickfix.FieldConvertError;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
 import quickfix.IncorrectTagValue;
@@ -56,9 +58,9 @@ public class TraderApplication implements Application {
 
 	static private final HashSet<SessionID> sessionIDs = new HashSet<SessionID>();
 
-	public TraderApplication(SessionSettings settings) {
+	public TraderApplication(SessionSettings settings) throws ConfigError, FieldConvertError {
 		orderBook = new OrderBook();
-		executionBook = new ExecutionBook(settings);
+		executionBook = new ExecutionBook(settings.getString("CustomLogPath"));
 	}
 	
     // Main message handler

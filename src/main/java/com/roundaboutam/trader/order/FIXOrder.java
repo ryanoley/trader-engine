@@ -158,7 +158,7 @@ public class FIXOrder {
     }
 
     public static OrderTIF FIXTifToOrderTif(TimeInForce tif) {
-        return (OrderTIF) typeMap.getSecond(tif);
+        return (OrderTIF) tifMap.getSecond(tif);
     }
 
     public static OpenClose orderOpenCloseToFIXOpenClose(OrderOpenClose openclose) {

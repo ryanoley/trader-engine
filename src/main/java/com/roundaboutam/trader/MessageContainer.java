@@ -129,7 +129,7 @@ public class MessageContainer {
 	private void resolveOrderType(Message message) {
         try {
         	OrdType fixOrdType = (OrdType) message.getField(new OrdType());
-        	this.orderType = FIXMessage.FIXTypeToOrderType(fixOrdType);
+        	this.orderType = FIXMessage.FIXOrdTypeToOrderType(fixOrdType);
 		} catch (FieldNotFound e) {
 			this.orderType = null;
 		}

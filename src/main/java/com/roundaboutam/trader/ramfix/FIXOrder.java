@@ -73,7 +73,7 @@ public class FIXOrder {
     			new Symbol(order.getSymbol()),
     			FIXMessage.orderSideToFIXSide(order.getOrderSide()),
     			new TransactTime(), 
-    			FIXMessage.orderTypeToFIXType(order.getOrderType()));
+    			FIXMessage.orderTypeToFIXOrdType(order.getOrderType()));
 
     	if (order.getSuffix() != null) {
     		fixOrder.setField(new SymbolSfx(order.getSuffix()));
@@ -118,7 +118,7 @@ public class FIXOrder {
                 new Symbol(replaceOrder.getSymbol()), 
                 FIXMessage.orderSideToFIXSide(replaceOrder.getOrderSide()),
                 new TransactTime(),
-                FIXMessage.orderTypeToFIXType(replaceOrder.getOrderType()));
+                FIXMessage.orderTypeToFIXOrdType(replaceOrder.getOrderType()));
 
 		fixOrder.setField(new OrderQty(replaceOrder.getQuantity()));
 

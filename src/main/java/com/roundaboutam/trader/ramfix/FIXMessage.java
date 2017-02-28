@@ -12,13 +12,12 @@ import quickfix.field.TimeInForce;
 
 public class FIXMessage {
 
-	
     static private final TwoWayMap msgTypeMap = new TwoWayMap();
     static private final TwoWayMap execTypeMap = new TwoWayMap();
     static private final TwoWayMap ordStatusMap = new TwoWayMap();
     static private final TwoWayMap sideMap = new TwoWayMap();
     static private final TwoWayMap tifMap = new TwoWayMap();
-    static private final TwoWayMap typeMap = new TwoWayMap();
+    static private final TwoWayMap ordTypeMap = new TwoWayMap();
     static private final TwoWayMap opencloseMap = new TwoWayMap();
     
     public static MsgType messageTypeToFIXMsgType(MessageType type) {
@@ -47,27 +46,23 @@ public class FIXMessage {
     	checkNull(ordStatusMap.getSecond(status), status);
         return (OrderStatus) ordStatusMap.getSecond(status);
     }
-    
-    private static void checkNull(Object o, Object p) {
-    	if (o == null) {
-    		System.out.println("Unknown FIX tag: " + p.toString());
-    	}
-    }
 
     public static Side orderSideToFIXSide(OrderSide side) {
         return (Side) sideMap.getFirst(side);
     }
 
     public static OrderSide FIXSideToOrderSide(Side side) {
+    	checkNull(sideMap.getSecond(side), side);
         return (OrderSide) sideMap.getSecond(side);
     }
 
-    public static OrdType orderTypeToFIXType(OrderType type) {
-        return (OrdType) typeMap.getFirst(type);
+    public static OrdType orderTypeToFIXOrdType(OrderType type) {
+        return (OrdType) ordTypeMap.getFirst(type);
     }
 
-    public static OrderType FIXTypeToOrderType(OrdType type) {
-        return (OrderType) typeMap.getSecond(type);
+    public static OrderType FIXOrdTypeToOrderType(OrdType type) {
+    	checkNull(ordTypeMap.getSecond(type), type);
+        return (OrderType) ordTypeMap.getSecond(type);
     }
 
     public static TimeInForce orderTifToFIXTif(OrderTIF tif) {
@@ -75,6 +70,7 @@ public class FIXMessage {
     }
 
     public static OrderTIF FIXTifToOrderTif(TimeInForce tif) {
+    	checkNull(tifMap.getSecond(tif), tif);
         return (OrderTIF) tifMap.getSecond(tif);
     }
 
@@ -83,7 +79,14 @@ public class FIXMessage {
     }
 
     public static OrderOpenClose FIXOpenCloseToOrderOpenClose(OpenClose openclose) {
+    	checkNull(opencloseMap.getSecond(openclose), openclose);
         return (OrderOpenClose) opencloseMap.getSecond(openclose);
+    }
+    
+    private static void checkNull(Object o, Object p) {
+    	if (o == null) {
+    		System.out.println("Unknown FIX tag: " + p.toString());
+    	}
     }
 
     static {
@@ -129,10 +132,10 @@ public class FIXMessage {
     	sideMap.put(OrderSide.SELL, new Side(Side.SELL));
     	sideMap.put(OrderSide.SHORT_SELL, new Side(Side.SELL_SHORT));
 
-    	typeMap.put(OrderType.MARKET, new OrdType(OrdType.MARKET));
-        typeMap.put(OrderType.LIMIT, new OrdType(OrdType.LIMIT));
-        typeMap.put(OrderType.MOC, new OrdType(OrdType.MARKET_ON_CLOSE));
-        typeMap.put(OrderType.LOC, new OrdType(OrdType.LIMIT_ON_CLOSE));
+    	ordTypeMap.put(OrderType.MARKET, new OrdType(OrdType.MARKET));
+    	ordTypeMap.put(OrderType.LIMIT, new OrdType(OrdType.LIMIT));
+    	ordTypeMap.put(OrderType.MOC, new OrdType(OrdType.MARKET_ON_CLOSE));
+    	ordTypeMap.put(OrderType.LOC, new OrdType(OrdType.LIMIT_ON_CLOSE));
 
 	    tifMap.put(OrderTIF.DAY, new TimeInForce(TimeInForce.DAY));
 	    tifMap.put(OrderTIF.IOC, new TimeInForce(TimeInForce.IMMEDIATE_OR_CANCEL));
@@ -142,6 +145,29 @@ public class FIXMessage {
 	    
     	opencloseMap.put(OrderOpenClose.OPEN, new OpenClose(OpenClose.OPEN));
     	opencloseMap.put(OrderOpenClose.CLOSE,  new OpenClose(OpenClose.CLOSE));	
+    }
+
+
+    public static TwoWayMap getMsgTypeMap() {
+    	return msgTypeMap;
+    }
+    public static TwoWayMap getExecTypeMap() {
+    	return execTypeMap;
+    }
+    public static TwoWayMap getOrdStatusMap() {
+    	return ordStatusMap;
+    }
+    public static TwoWayMap getSideMap() {
+    	return sideMap;
+    }
+    public static TwoWayMap getOrdTypeMap() {
+    	return ordTypeMap;
+    }
+    public static TwoWayMap getTifMap() {
+    	return tifMap;
+    }
+    public static TwoWayMap getOpenCloseMap() {
+    	return opencloseMap;
     }
 
 }

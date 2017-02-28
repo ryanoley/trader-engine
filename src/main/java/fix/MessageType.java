@@ -1,9 +1,7 @@
-package com.roundaboutam.trader;
+package fix;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.roundaboutam.trader.execution.ExecutionType;
 
 
 	

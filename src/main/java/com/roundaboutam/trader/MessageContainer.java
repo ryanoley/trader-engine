@@ -1,14 +1,15 @@
 package com.roundaboutam.trader;
 
-import com.roundaboutam.trader.execution.ExecutionType;
-import com.roundaboutam.trader.execution.OrderStatus;
 import com.roundaboutam.trader.order.FIXOrder;
-import com.roundaboutam.trader.order.OrderOpenClose;
-import com.roundaboutam.trader.order.OrderSide;
-import com.roundaboutam.trader.order.OrderTIF;
-import com.roundaboutam.trader.order.OrderType;
 
+import fix.ExecutionType;
 import fix.FIXMessage;
+import fix.MessageType;
+import fix.OrderOpenClose;
+import fix.OrderSide;
+import fix.OrderStatus;
+import fix.OrderTIF;
+import fix.OrderType;
 import quickfix.FieldNotFound;
 import quickfix.Message;
 import quickfix.Message.Header;

@@ -1,5 +1,6 @@
 package com.roundaboutam.trader.order;
 
+import fix.OrderSide;
 import quickfix.SessionID;
 
 public class CancelOrder {

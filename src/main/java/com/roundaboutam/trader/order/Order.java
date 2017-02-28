@@ -1,5 +1,9 @@
 package com.roundaboutam.trader.order;
 
+import fix.OrderOpenClose;
+import fix.OrderSide;
+import fix.OrderTIF;
+import fix.OrderType;
 import quickfix.SessionID;
 
 public class Order {

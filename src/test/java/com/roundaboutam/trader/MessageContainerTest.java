@@ -1,12 +1,12 @@
 package com.roundaboutam.trader;
 
 
-import com.roundaboutam.trader.execution.ExecutionType;
-import com.roundaboutam.trader.execution.OrderStatus;
-import com.roundaboutam.trader.order.OrderSide;
-import com.roundaboutam.trader.order.OrderTIF;
-import com.roundaboutam.trader.order.OrderType;
-
+import fix.ExecutionType;
+import fix.MessageType;
+import fix.OrderSide;
+import fix.OrderStatus;
+import fix.OrderTIF;
+import fix.OrderType;
 import junit.framework.TestCase;
 import quickfix.InvalidMessage;
 import quickfix.Message;

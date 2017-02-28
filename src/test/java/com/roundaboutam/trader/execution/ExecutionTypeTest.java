@@ -1,5 +1,6 @@
 package com.roundaboutam.trader.execution;
 
+import fix.ExecutionType;
 import fix.FIXMessage;
 import junit.framework.TestCase;
 import quickfix.field.ExecType;

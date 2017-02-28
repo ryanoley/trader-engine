@@ -1,5 +1,7 @@
 package com.roundaboutam.trader.order;
 
+import fix.OrderSide;
+import fix.OrderType;
 import quickfix.SessionID;
 
 public class ReplaceOrder {

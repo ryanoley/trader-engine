@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.StringJoiner;
 
 import com.roundaboutam.trader.MessageContainer;
-import com.roundaboutam.trader.execution.ExecutionType;
 
+import fix.ExecutionType;
+import fix.OrderSide;
+import fix.OrderType;
 import quickfix.SessionID;
 import quickfix.field.OrdType;
 import quickfix.field.Side;

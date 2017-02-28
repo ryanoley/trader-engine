@@ -1,5 +1,8 @@
 package com.roundaboutam.trader.order;
 
+import fix.OrderSide;
+import fix.OrderTIF;
+import fix.OrderType;
 import junit.framework.TestCase;
 
 import quickfix.SessionID;

@@ -4,8 +4,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.roundaboutam.trader.TwoWayMap;
-
+import fix.OrderOpenClose;
+import fix.OrderSide;
+import fix.OrderTIF;
+import fix.OrderType;
+import fix.TwoWayMap;
 import quickfix.field.ClOrdID;
 import quickfix.field.HandlInst;
 import quickfix.field.LocateReqd;

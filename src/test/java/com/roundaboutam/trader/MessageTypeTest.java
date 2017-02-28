@@ -1,6 +1,7 @@
 package com.roundaboutam.trader;
 
 import fix.FIXMessage;
+import fix.MessageType;
 import junit.framework.TestCase;
 import quickfix.field.MsgType;
 

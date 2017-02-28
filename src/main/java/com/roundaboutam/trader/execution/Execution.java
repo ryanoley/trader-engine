@@ -1,7 +1,9 @@
 package com.roundaboutam.trader.execution;
 
 import java.util.StringJoiner;
-import com.roundaboutam.trader.order.OrderSide;
+
+import fix.ExecutionType;
+import fix.OrderSide;
 
 
 public class Execution {

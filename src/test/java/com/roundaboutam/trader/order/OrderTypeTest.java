@@ -1,5 +1,6 @@
 package com.roundaboutam.trader.order;
 
+import fix.OrderType;
 import junit.framework.TestCase;
 
 import quickfix.field.OrdType;

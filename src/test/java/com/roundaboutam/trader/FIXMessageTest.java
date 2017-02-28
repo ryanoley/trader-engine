@@ -3,6 +3,7 @@ package com.roundaboutam.trader;
 import com.roundaboutam.trader.execution.ExecutionType;
 import com.roundaboutam.trader.execution.OrderStatus;
 
+import fix.FIXMessage;
 import junit.framework.TestCase;
 import quickfix.field.ExecType;
 import quickfix.field.MsgType;

@@ -8,6 +8,7 @@ import com.roundaboutam.trader.order.OrderSide;
 import com.roundaboutam.trader.order.OrderTIF;
 import com.roundaboutam.trader.order.OrderType;
 
+import fix.FIXMessage;
 import quickfix.FieldNotFound;
 import quickfix.Message;
 import quickfix.Message.Header;

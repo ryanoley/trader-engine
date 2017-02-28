@@ -1,6 +1,6 @@
 package com.roundaboutam.trader.execution;
 
-import com.roundaboutam.trader.FIXMessage;
+import fix.FIXMessage;
 import junit.framework.TestCase;
 import quickfix.field.OrdStatus;
 

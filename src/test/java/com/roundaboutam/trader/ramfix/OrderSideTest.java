@@ -1,6 +1,5 @@
 package com.roundaboutam.trader.ramfix;
 
-import com.roundaboutam.trader.order.FIXOrder;
 import com.roundaboutam.trader.ramfix.OrderSide;
 
 import junit.framework.TestCase;
@@ -15,13 +14,13 @@ public class OrderSideTest extends TestCase {
 		assertEquals(OrderSide.SELL.toString(), "Sell");
 		assertEquals(OrderSide.SHORT_SELL.toString(), "Short Sell");
 
-		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.BUY), new Side(Side.BUY));
-		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.SELL), new Side(Side.SELL));
-		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.SHORT_SELL), new Side(Side.SELL_SHORT));
+		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.BUY), new Side(Side.BUY));
+		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.SELL), new Side(Side.SELL));
+		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.SHORT_SELL), new Side(Side.SELL_SHORT));
 
-		assertEquals(FIXOrder.FIXSideToOrderSide(new Side(Side.BUY)), OrderSide.BUY);
-		assertEquals(FIXOrder.FIXSideToOrderSide(new Side(Side.SELL)), OrderSide.SELL);
-		assertEquals(FIXOrder.FIXSideToOrderSide(new Side(Side.SELL_SHORT)), OrderSide.SHORT_SELL);
+		assertEquals(FIXMessage.FIXSideToOrderSide(new Side(Side.BUY)), OrderSide.BUY);
+		assertEquals(FIXMessage.FIXSideToOrderSide(new Side(Side.SELL)), OrderSide.SELL);
+		assertEquals(FIXMessage.FIXSideToOrderSide(new Side(Side.SELL_SHORT)), OrderSide.SHORT_SELL);
 
 		assertEquals(OrderSide.toArray().length, 3);
 
@@ -29,9 +28,9 @@ public class OrderSideTest extends TestCase {
 
 	public void testOrderSideFixTags() {
 		
-		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.BUY).toString(), "54=1");
-		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.SELL).toString(), "54=2");
-		assertEquals(FIXOrder.orderSideToFIXSide(OrderSide.SHORT_SELL).toString(), "54=5");
+		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.BUY).toString(), "54=1");
+		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.SELL).toString(), "54=2");
+		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.SHORT_SELL).toString(), "54=5");
 
 	}
 

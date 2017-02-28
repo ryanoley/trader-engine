@@ -1,6 +1,5 @@
 package com.roundaboutam.trader;
 
-import com.roundaboutam.trader.order.FIXOrder;
 import com.roundaboutam.trader.ramfix.ExecutionType;
 import com.roundaboutam.trader.ramfix.FIXMessage;
 import com.roundaboutam.trader.ramfix.MessageType;
@@ -121,7 +120,7 @@ public class MessageContainer {
 	private void resolveSide(Message message) {
         try {
         	Side fixSide = (Side) message.getField(new Side());
-        	this.orderSide = FIXOrder.FIXSideToOrderSide(fixSide);
+        	this.orderSide = FIXMessage.FIXSideToOrderSide(fixSide);
 		} catch (FieldNotFound e) {
 			this.orderSide = null;
 		}
@@ -130,7 +129,7 @@ public class MessageContainer {
 	private void resolveOrderType(Message message) {
         try {
         	OrdType fixOrdType = (OrdType) message.getField(new OrdType());
-        	this.orderType = FIXOrder.FIXTypeToOrderType(fixOrdType);
+        	this.orderType = FIXMessage.FIXTypeToOrderType(fixOrdType);
 		} catch (FieldNotFound e) {
 			this.orderType = null;
 		}
@@ -139,7 +138,7 @@ public class MessageContainer {
 	private void resolveOpenClose(Message message) {
         try {
         	OpenClose fixOpenClose = (OpenClose) message.getField(new OpenClose());
-        	this.orderOpenClose = FIXOrder.FIXOpenCloseToOrderOpenClose(fixOpenClose);
+        	this.orderOpenClose = FIXMessage.FIXOpenCloseToOrderOpenClose(fixOpenClose);
 		} catch (FieldNotFound e) {
 			this.orderOpenClose = null;
 		}
@@ -148,7 +147,7 @@ public class MessageContainer {
 	private void resolveOrderTIF(Message message) {
         try {
         	TimeInForce fixTimeInForce = (TimeInForce) message.getField(new TimeInForce());
-        	this.orderTIF = FIXOrder.FIXTifToOrderTif(fixTimeInForce);
+        	this.orderTIF = FIXMessage.FIXTifToOrderTif(fixTimeInForce);
 		} catch (FieldNotFound e) {
 			this.orderTIF = null;
 		}

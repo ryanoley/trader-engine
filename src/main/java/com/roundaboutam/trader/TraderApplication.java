@@ -11,7 +11,7 @@ import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderBook;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.ReplaceOrder;
-import com.roundaboutam.trader.order.FIXOrder;
+import com.roundaboutam.trader.ramfix.FIXOrder;
 import com.roundaboutam.trader.execution.ExecutionBook;
 
 import quickfix.Application;

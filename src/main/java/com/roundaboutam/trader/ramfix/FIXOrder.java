@@ -1,28 +1,23 @@
-package com.roundaboutam.trader.order;
+package com.roundaboutam.trader.ramfix;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.roundaboutam.trader.ramfix.OrderOpenClose;
-import com.roundaboutam.trader.ramfix.OrderSide;
-import com.roundaboutam.trader.ramfix.OrderTIF;
-import com.roundaboutam.trader.ramfix.OrderType;
-import com.roundaboutam.trader.ramfix.TwoWayMap;
+import com.roundaboutam.trader.order.CancelOrder;
+import com.roundaboutam.trader.order.Order;
+import com.roundaboutam.trader.order.ReplaceOrder;
+import com.roundaboutam.trader.order.VwapOrder;
 
 import quickfix.field.ClOrdID;
 import quickfix.field.HandlInst;
 import quickfix.field.LocateReqd;
-import quickfix.field.OpenClose;
-import quickfix.field.OrdType;
 import quickfix.field.OrderQty;
 import quickfix.field.OrigClOrdID;
 import quickfix.field.Price;
-import quickfix.field.Side;
 import quickfix.field.Symbol;
 import quickfix.field.SymbolSfx;
 import quickfix.field.TargetSubID;
-import quickfix.field.TimeInForce;
 import quickfix.field.TransactTime;
 import quickfix.fix42.Message;
 import quickfix.fix42.NewOrderSingle;
@@ -31,12 +26,6 @@ import quickfix.fix42.OrderCancelRequest;
 
 public class FIXOrder {
 
-    static private final TwoWayMap sideMap = new TwoWayMap();
-    static private final TwoWayMap tifMap = new TwoWayMap();
-    static private final TwoWayMap typeMap = new TwoWayMap();
-    static private final TwoWayMap opencloseMap = new TwoWayMap();
-    
-	
 	public static Message formatNewOrder(Order order) {
 		if (VwapOrder.class.isInstance(order)) {
 			return formatVwapOrder((VwapOrder) order);
@@ -60,7 +49,7 @@ public class FIXOrder {
         // Destination
 		fixOrder.setString(TargetSubID.FIELD, "ML_ALGO_US");
 
-		// Current date is automatically generated for bookends
+		// Current date is automatically generated for start/stop date
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
     	String currentDate = dateFormat.format(new Date());
 
@@ -82,17 +71,17 @@ public class FIXOrder {
     			new ClOrdID(order.getOrderID()), 
     			new HandlInst('1'),
     			new Symbol(order.getSymbol()),
-    			orderSideToFIXSide(order.getOrderSide()),
+    			FIXMessage.orderSideToFIXSide(order.getOrderSide()),
     			new TransactTime(), 
-    			orderTypeToFIXType(order.getOrderType()));
+    			FIXMessage.orderTypeToFIXType(order.getOrderType()));
 
     	if (order.getSuffix() != null) {
     		fixOrder.setField(new SymbolSfx(order.getSuffix()));
     	}
 
     	fixOrder.setField(new OrderQty(order.getQuantity()));
-    	fixOrder.setField(orderTifToFIXTif(order.getOrderTIF()));
-    	fixOrder.setField(orderOpenCloseToFIXOpenClose(order.getOrderOpenClose()));
+    	fixOrder.setField(FIXMessage.orderTifToFIXTif(order.getOrderTIF()));
+    	fixOrder.setField(FIXMessage.orderOpenCloseToFIXOpenClose(order.getOrderOpenClose()));
 
         if (order.getOrderSide() == OrderSide.SHORT_SELL) {
         	fixOrder.setField(new LocateReqd(false));
@@ -112,7 +101,7 @@ public class FIXOrder {
 	            new OrigClOrdID(cancelOrder.getOrigOrderID()), 
 	            new ClOrdID(cancelOrder.getOrderID()), 
 	            new Symbol(cancelOrder.getSymbol()),
-	            orderSideToFIXSide(cancelOrder.getOrderSide()), 
+	            FIXMessage.orderSideToFIXSide(cancelOrder.getOrderSide()), 
 	            new TransactTime());
 
 		fixOrder.setField(new OrderQty(cancelOrder.getQuantity()));
@@ -127,9 +116,9 @@ public class FIXOrder {
                 new ClOrdID(replaceOrder.getOrderID()), 
                 new HandlInst('1'),
                 new Symbol(replaceOrder.getSymbol()), 
-                orderSideToFIXSide(replaceOrder.getOrderSide()),
+                FIXMessage.orderSideToFIXSide(replaceOrder.getOrderSide()),
                 new TransactTime(),
-                orderTypeToFIXType(replaceOrder.getOrderType()));
+                FIXMessage.orderTypeToFIXType(replaceOrder.getOrderType()));
 
 		fixOrder.setField(new OrderQty(replaceOrder.getQuantity()));
 
@@ -141,62 +130,7 @@ public class FIXOrder {
 
 	}
 
-    public static Side orderSideToFIXSide(OrderSide side) {
-        return (Side) sideMap.getFirst(side);
-    }
-
-    public static OrderSide FIXSideToOrderSide(Side side) {
-        return (OrderSide) sideMap.getSecond(side);
-    }
-
-    public static OrdType orderTypeToFIXType(OrderType type) {
-        return (OrdType) typeMap.getFirst(type);
-    }
-
-    public static OrderType FIXTypeToOrderType(OrdType type) {
-        return (OrderType) typeMap.getSecond(type);
-    }
-
-    public static TimeInForce orderTifToFIXTif(OrderTIF tif) {
-        return (TimeInForce) tifMap.getFirst(tif);
-    }
-
-    public static OrderTIF FIXTifToOrderTif(TimeInForce tif) {
-        return (OrderTIF) tifMap.getSecond(tif);
-    }
-
-    public static OpenClose orderOpenCloseToFIXOpenClose(OrderOpenClose openclose) {
-        return (OpenClose) opencloseMap.getFirst(openclose);
-    }
-
-    public static OrderOpenClose FIXOpenCloseToOrderOpenClose(OpenClose openclose) {
-        return (OrderOpenClose) opencloseMap.getSecond(openclose);
-    }
-    
-    static {
-    	sideMap.put(OrderSide.BUY, new Side(Side.BUY));
-    	sideMap.put(OrderSide.SELL, new Side(Side.SELL));
-    	sideMap.put(OrderSide.SHORT_SELL, new Side(Side.SELL_SHORT));
-
-    	typeMap.put(OrderType.MARKET, new OrdType(OrdType.MARKET));
-        typeMap.put(OrderType.LIMIT, new OrdType(OrdType.LIMIT));
-        typeMap.put(OrderType.MOC, new OrdType(OrdType.MARKET_ON_CLOSE));
-        typeMap.put(OrderType.LOC, new OrdType(OrdType.LIMIT_ON_CLOSE));
-
-	    tifMap.put(OrderTIF.DAY, new TimeInForce(TimeInForce.DAY));
-	    tifMap.put(OrderTIF.IOC, new TimeInForce(TimeInForce.IMMEDIATE_OR_CANCEL));
-	    tifMap.put(OrderTIF.AT_OPEN, new TimeInForce(TimeInForce.AT_THE_OPENING));
-	    tifMap.put(OrderTIF.AT_CLOSE, new TimeInForce(TimeInForce.AT_THE_CLOSE));
-	    tifMap.put(OrderTIF.GTC, new TimeInForce(TimeInForce.GOOD_TILL_CANCEL));
-	    
-    	opencloseMap.put(OrderOpenClose.OPEN, new OpenClose(OpenClose.OPEN));
-    	opencloseMap.put(OrderOpenClose.CLOSE,  new OpenClose(OpenClose.CLOSE));
-    }
-
-    
-    
-    
-    
+  
 }
 
 

@@ -3,15 +3,24 @@ package com.roundaboutam.trader.ramfix;
 
 import quickfix.field.ExecType;
 import quickfix.field.MsgType;
+import quickfix.field.OpenClose;
 import quickfix.field.OrdStatus;
+import quickfix.field.OrdType;
+import quickfix.field.Side;
+import quickfix.field.TimeInForce;
 
 
 public class FIXMessage {
 
+	
     static private final TwoWayMap msgTypeMap = new TwoWayMap();
     static private final TwoWayMap execTypeMap = new TwoWayMap();
     static private final TwoWayMap ordStatusMap = new TwoWayMap();
-
+    static private final TwoWayMap sideMap = new TwoWayMap();
+    static private final TwoWayMap tifMap = new TwoWayMap();
+    static private final TwoWayMap typeMap = new TwoWayMap();
+    static private final TwoWayMap opencloseMap = new TwoWayMap();
+    
     public static MsgType messageTypeToFIXMsgType(MessageType type) {
         return (MsgType) msgTypeMap.getFirst(type);
     }
@@ -43,6 +52,38 @@ public class FIXMessage {
     	if (o == null) {
     		System.out.println("Unknown FIX tag: " + p.toString());
     	}
+    }
+
+    public static Side orderSideToFIXSide(OrderSide side) {
+        return (Side) sideMap.getFirst(side);
+    }
+
+    public static OrderSide FIXSideToOrderSide(Side side) {
+        return (OrderSide) sideMap.getSecond(side);
+    }
+
+    public static OrdType orderTypeToFIXType(OrderType type) {
+        return (OrdType) typeMap.getFirst(type);
+    }
+
+    public static OrderType FIXTypeToOrderType(OrdType type) {
+        return (OrderType) typeMap.getSecond(type);
+    }
+
+    public static TimeInForce orderTifToFIXTif(OrderTIF tif) {
+        return (TimeInForce) tifMap.getFirst(tif);
+    }
+
+    public static OrderTIF FIXTifToOrderTif(TimeInForce tif) {
+        return (OrderTIF) tifMap.getSecond(tif);
+    }
+
+    public static OpenClose orderOpenCloseToFIXOpenClose(OrderOpenClose openclose) {
+        return (OpenClose) opencloseMap.getFirst(openclose);
+    }
+
+    public static OrderOpenClose FIXOpenCloseToOrderOpenClose(OpenClose openclose) {
+        return (OrderOpenClose) opencloseMap.getSecond(openclose);
     }
 
     static {
@@ -83,10 +124,25 @@ public class FIXMessage {
     	ordStatusMap.put(OrderStatus.PENDING_CANCEL, new OrdStatus(OrdStatus.PENDING_CANCEL));
     	ordStatusMap.put(OrderStatus.PENDING_REPLACE, new OrdStatus(OrdStatus.PENDING_REPLACE));
     	ordStatusMap.put(OrderStatus.PENDING_NEW, new OrdStatus(OrdStatus.PENDING_NEW));
-    	
+
+    	sideMap.put(OrderSide.BUY, new Side(Side.BUY));
+    	sideMap.put(OrderSide.SELL, new Side(Side.SELL));
+    	sideMap.put(OrderSide.SHORT_SELL, new Side(Side.SELL_SHORT));
+
+    	typeMap.put(OrderType.MARKET, new OrdType(OrdType.MARKET));
+        typeMap.put(OrderType.LIMIT, new OrdType(OrdType.LIMIT));
+        typeMap.put(OrderType.MOC, new OrdType(OrdType.MARKET_ON_CLOSE));
+        typeMap.put(OrderType.LOC, new OrdType(OrdType.LIMIT_ON_CLOSE));
+
+	    tifMap.put(OrderTIF.DAY, new TimeInForce(TimeInForce.DAY));
+	    tifMap.put(OrderTIF.IOC, new TimeInForce(TimeInForce.IMMEDIATE_OR_CANCEL));
+	    tifMap.put(OrderTIF.AT_OPEN, new TimeInForce(TimeInForce.AT_THE_OPENING));
+	    tifMap.put(OrderTIF.AT_CLOSE, new TimeInForce(TimeInForce.AT_THE_CLOSE));
+	    tifMap.put(OrderTIF.GTC, new TimeInForce(TimeInForce.GOOD_TILL_CANCEL));
+	    
+    	opencloseMap.put(OrderOpenClose.OPEN, new OpenClose(OpenClose.OPEN));
+    	opencloseMap.put(OrderOpenClose.CLOSE,  new OpenClose(OpenClose.CLOSE));	
     }
-
-
 
 }
 

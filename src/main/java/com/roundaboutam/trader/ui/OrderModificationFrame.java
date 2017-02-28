@@ -17,7 +17,7 @@ import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.ReplaceOrder;
 
-import fix.OrderType;
+import ramfix.OrderType;
 
 
 public class OrderModificationFrame {

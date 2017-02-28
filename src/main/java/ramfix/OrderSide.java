@@ -1,4 +1,4 @@
-package fix;
+package ramfix;
 
 import java.util.HashMap;
 import java.util.Map;

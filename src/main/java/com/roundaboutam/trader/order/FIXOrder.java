@@ -4,11 +4,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import fix.OrderOpenClose;
-import fix.OrderSide;
-import fix.OrderTIF;
-import fix.OrderType;
-import fix.TwoWayMap;
 import quickfix.field.ClOrdID;
 import quickfix.field.HandlInst;
 import quickfix.field.LocateReqd;
@@ -27,6 +22,11 @@ import quickfix.fix42.Message;
 import quickfix.fix42.NewOrderSingle;
 import quickfix.fix42.OrderCancelReplaceRequest;
 import quickfix.fix42.OrderCancelRequest;
+import ramfix.OrderOpenClose;
+import ramfix.OrderSide;
+import ramfix.OrderTIF;
+import ramfix.OrderType;
+import ramfix.TwoWayMap;
 
 public class FIXOrder {
 

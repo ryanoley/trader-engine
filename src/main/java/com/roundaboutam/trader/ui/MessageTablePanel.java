@@ -22,12 +22,10 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
-
-import fix.MessageType;
-
 import com.roundaboutam.trader.MessageContainer;
 
 import quickfix.Message;
+import ramfix.MessageType;
 
 
 

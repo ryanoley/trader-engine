@@ -1,11 +1,11 @@
 package com.roundaboutam.trader.order;
 
-import fix.OrderSide;
-import fix.OrderTIF;
-import fix.OrderType;
 import junit.framework.TestCase;
 
 import quickfix.SessionID;
+import ramfix.OrderSide;
+import ramfix.OrderTIF;
+import ramfix.OrderType;
 
 public class CancelOrderTest extends TestCase {
 

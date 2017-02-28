@@ -1,7 +1,7 @@
 package com.roundaboutam.trader.execution;
 
-import fix.OrderSide;
 import junit.framework.TestCase;
+import ramfix.OrderSide;
 
 public class OrderCancelRejectTest extends TestCase {
 

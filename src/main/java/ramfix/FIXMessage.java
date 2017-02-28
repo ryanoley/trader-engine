@@ -1,4 +1,4 @@
-package fix;
+package ramfix;
 
 
 import quickfix.field.ExecType;

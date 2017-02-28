@@ -2,14 +2,6 @@ package com.roundaboutam.trader;
 
 import com.roundaboutam.trader.order.FIXOrder;
 
-import fix.ExecutionType;
-import fix.FIXMessage;
-import fix.MessageType;
-import fix.OrderOpenClose;
-import fix.OrderSide;
-import fix.OrderStatus;
-import fix.OrderTIF;
-import fix.OrderType;
 import quickfix.FieldNotFound;
 import quickfix.Message;
 import quickfix.Message.Header;
@@ -20,6 +12,14 @@ import quickfix.field.OrdStatus;
 import quickfix.field.OrdType;
 import quickfix.field.Side;
 import quickfix.field.TimeInForce;
+import ramfix.ExecutionType;
+import ramfix.FIXMessage;
+import ramfix.MessageType;
+import ramfix.OrderOpenClose;
+import ramfix.OrderSide;
+import ramfix.OrderStatus;
+import ramfix.OrderTIF;
+import ramfix.OrderType;
 
 
 

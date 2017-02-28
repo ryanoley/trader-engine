@@ -2,8 +2,8 @@ package com.roundaboutam.trader.execution;
 
 import java.util.StringJoiner;
 
-import fix.ExecutionType;
-import fix.OrderSide;
+import ramfix.ExecutionType;
+import ramfix.OrderSide;
 
 
 public class Execution {

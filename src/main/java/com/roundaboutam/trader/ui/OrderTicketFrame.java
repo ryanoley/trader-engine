@@ -23,11 +23,11 @@ import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.VwapOrder;
 
-import fix.OrderOpenClose;
-import fix.OrderSide;
-import fix.OrderTIF;
-import fix.OrderType;
 import quickfix.SessionID;
+import ramfix.OrderOpenClose;
+import ramfix.OrderSide;
+import ramfix.OrderTIF;
+import ramfix.OrderType;
 
 public class OrderTicketFrame {
 

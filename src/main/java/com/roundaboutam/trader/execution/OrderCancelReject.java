@@ -2,7 +2,7 @@ package com.roundaboutam.trader.execution;
 
 import java.util.StringJoiner;
 
-import fix.OrderSide;
+import ramfix.OrderSide;
 
 public class OrderCancelReject {
 

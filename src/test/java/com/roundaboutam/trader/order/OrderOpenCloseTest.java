@@ -1,8 +1,8 @@
 package com.roundaboutam.trader.order;
 
-import fix.OrderOpenClose;
 import junit.framework.TestCase;
 import quickfix.field.OpenClose;
+import ramfix.OrderOpenClose;
 
 public class OrderOpenCloseTest extends TestCase {
 

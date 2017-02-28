@@ -1,13 +1,13 @@
 package com.roundaboutam.trader;
 
-import fix.ExecutionType;
-import fix.FIXMessage;
-import fix.MessageType;
-import fix.OrderStatus;
 import junit.framework.TestCase;
 import quickfix.field.ExecType;
 import quickfix.field.MsgType;
 import quickfix.field.OrdStatus;
+import ramfix.ExecutionType;
+import ramfix.FIXMessage;
+import ramfix.MessageType;
+import ramfix.OrderStatus;
 
 
 

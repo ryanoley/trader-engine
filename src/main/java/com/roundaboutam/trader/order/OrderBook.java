@@ -6,12 +6,12 @@ import java.util.StringJoiner;
 
 import com.roundaboutam.trader.MessageContainer;
 
-import fix.ExecutionType;
-import fix.OrderSide;
-import fix.OrderType;
 import quickfix.SessionID;
 import quickfix.field.OrdType;
 import quickfix.field.Side;
+import ramfix.ExecutionType;
+import ramfix.OrderSide;
+import ramfix.OrderType;
 
 public class OrderBook {
 

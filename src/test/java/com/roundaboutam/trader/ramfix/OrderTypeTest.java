@@ -1,9 +1,11 @@
-package com.roundaboutam.trader.order;
+package com.roundaboutam.trader.ramfix;
+
+import com.roundaboutam.trader.order.FIXOrder;
+import com.roundaboutam.trader.ramfix.OrderType;
 
 import junit.framework.TestCase;
 
 import quickfix.field.OrdType;
-import ramfix.OrderType;
 
 public class OrderTypeTest extends TestCase {
 

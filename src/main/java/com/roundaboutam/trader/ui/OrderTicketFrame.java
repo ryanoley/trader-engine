@@ -22,12 +22,12 @@ import javax.swing.JTextField;
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.VwapOrder;
+import com.roundaboutam.trader.ramfix.OrderOpenClose;
+import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.ramfix.OrderTIF;
+import com.roundaboutam.trader.ramfix.OrderType;
 
 import quickfix.SessionID;
-import ramfix.OrderOpenClose;
-import ramfix.OrderSide;
-import ramfix.OrderTIF;
-import ramfix.OrderType;
 
 public class OrderTicketFrame {
 

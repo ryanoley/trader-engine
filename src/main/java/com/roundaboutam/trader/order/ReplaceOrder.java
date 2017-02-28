@@ -1,8 +1,9 @@
 package com.roundaboutam.trader.order;
 
+import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.ramfix.OrderType;
+
 import quickfix.SessionID;
-import ramfix.OrderSide;
-import ramfix.OrderType;
 
 public class ReplaceOrder {
 

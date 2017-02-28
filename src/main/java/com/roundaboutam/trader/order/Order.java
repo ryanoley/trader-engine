@@ -1,10 +1,11 @@
 package com.roundaboutam.trader.order;
 
+import com.roundaboutam.trader.ramfix.OrderOpenClose;
+import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.ramfix.OrderTIF;
+import com.roundaboutam.trader.ramfix.OrderType;
+
 import quickfix.SessionID;
-import ramfix.OrderOpenClose;
-import ramfix.OrderSide;
-import ramfix.OrderTIF;
-import ramfix.OrderType;
 
 public class Order {
 

@@ -1,9 +1,11 @@
-package com.roundaboutam.trader.order;
+package com.roundaboutam.trader.ramfix;
+
+import com.roundaboutam.trader.order.FIXOrder;
+import com.roundaboutam.trader.ramfix.OrderTIF;
 
 import junit.framework.TestCase;
 
 import quickfix.field.TimeInForce;
-import ramfix.OrderTIF;
 
 public class OrderTIFTest extends TestCase {
 

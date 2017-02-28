@@ -1,9 +1,10 @@
-package com.roundaboutam.trader.execution;
+package com.roundaboutam.trader.ramfix;
+
+import com.roundaboutam.trader.ramfix.ExecutionType;
+import com.roundaboutam.trader.ramfix.FIXMessage;
 
 import junit.framework.TestCase;
 import quickfix.field.ExecType;
-import ramfix.ExecutionType;
-import ramfix.FIXMessage;
 
 
 

@@ -1,10 +1,11 @@
 package com.roundaboutam.trader.order;
 
+import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.ramfix.OrderTIF;
+import com.roundaboutam.trader.ramfix.OrderType;
+
 import junit.framework.TestCase;
 import quickfix.SessionID;
-import ramfix.OrderSide;
-import ramfix.OrderTIF;
-import ramfix.OrderType;
 
 public class OrderBookTest extends TestCase {
 

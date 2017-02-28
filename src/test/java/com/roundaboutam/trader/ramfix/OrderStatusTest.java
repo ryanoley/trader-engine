@@ -1,9 +1,10 @@
-package com.roundaboutam.trader.execution;
+package com.roundaboutam.trader.ramfix;
+
+import com.roundaboutam.trader.ramfix.FIXMessage;
+import com.roundaboutam.trader.ramfix.OrderStatus;
 
 import junit.framework.TestCase;
 import quickfix.field.OrdStatus;
-import ramfix.FIXMessage;
-import ramfix.OrderStatus;
 
 
 

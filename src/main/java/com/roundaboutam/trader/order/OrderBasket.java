@@ -4,13 +4,13 @@ package com.roundaboutam.trader.order;
 
 import java.util.HashMap;
 
+import com.roundaboutam.trader.ramfix.OrderOpenClose;
+import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.ramfix.OrderTIF;
+import com.roundaboutam.trader.ramfix.OrderType;
 import com.roundaboutam.trader.ui.BasketFrame;
 
 import quickfix.SessionID;
-import ramfix.OrderOpenClose;
-import ramfix.OrderSide;
-import ramfix.OrderTIF;
-import ramfix.OrderType;
 
 
 public class OrderBasket {

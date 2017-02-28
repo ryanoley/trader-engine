@@ -1,7 +1,8 @@
 package com.roundaboutam.trader.order;
 
+import com.roundaboutam.trader.ramfix.OrderSide;
+
 import quickfix.SessionID;
-import ramfix.OrderSide;
 
 public class CancelOrder {
 

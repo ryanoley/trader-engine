@@ -1,9 +1,10 @@
 package com.roundaboutam.trader.execution;
 
 
+import com.roundaboutam.trader.ramfix.ExecutionType;
+import com.roundaboutam.trader.ramfix.OrderSide;
+
 import junit.framework.TestCase;
-import ramfix.ExecutionType;
-import ramfix.OrderSide;
 
 public class ExecutionTest extends TestCase {
 

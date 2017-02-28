@@ -1,15 +1,16 @@
 package com.roundaboutam.trader;
 
 
+import com.roundaboutam.trader.ramfix.ExecutionType;
+import com.roundaboutam.trader.ramfix.MessageType;
+import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.ramfix.OrderStatus;
+import com.roundaboutam.trader.ramfix.OrderTIF;
+import com.roundaboutam.trader.ramfix.OrderType;
+
 import junit.framework.TestCase;
 import quickfix.InvalidMessage;
 import quickfix.Message;
-import ramfix.ExecutionType;
-import ramfix.MessageType;
-import ramfix.OrderSide;
-import ramfix.OrderStatus;
-import ramfix.OrderTIF;
-import ramfix.OrderType;
 
 
 public class MessageContainerTest extends TestCase {

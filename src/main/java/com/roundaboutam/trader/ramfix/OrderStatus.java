@@ -1,4 +1,4 @@
-package ramfix;
+package com.roundaboutam.trader.ramfix;
 
 import java.util.HashMap;
 import java.util.Map;

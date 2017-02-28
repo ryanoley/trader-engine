@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.StringJoiner;
 
 import com.roundaboutam.trader.MessageContainer;
+import com.roundaboutam.trader.ramfix.ExecutionType;
+import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.ramfix.OrderType;
 
 import quickfix.SessionID;
 import quickfix.field.OrdType;
 import quickfix.field.Side;
-import ramfix.ExecutionType;
-import ramfix.OrderSide;
-import ramfix.OrderType;
 
 public class OrderBook {
 

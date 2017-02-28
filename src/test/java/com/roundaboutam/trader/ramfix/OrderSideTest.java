@@ -1,9 +1,11 @@
-package com.roundaboutam.trader.order;
+package com.roundaboutam.trader.ramfix;
+
+import com.roundaboutam.trader.order.FIXOrder;
+import com.roundaboutam.trader.ramfix.OrderSide;
 
 import junit.framework.TestCase;
 
 import quickfix.field.Side;
-import ramfix.OrderSide;
 
 public class OrderSideTest extends TestCase {
 

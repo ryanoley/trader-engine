@@ -4,6 +4,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.roundaboutam.trader.ramfix.OrderOpenClose;
+import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.ramfix.OrderTIF;
+import com.roundaboutam.trader.ramfix.OrderType;
+import com.roundaboutam.trader.ramfix.TwoWayMap;
+
 import quickfix.field.ClOrdID;
 import quickfix.field.HandlInst;
 import quickfix.field.LocateReqd;
@@ -22,11 +28,6 @@ import quickfix.fix42.Message;
 import quickfix.fix42.NewOrderSingle;
 import quickfix.fix42.OrderCancelReplaceRequest;
 import quickfix.fix42.OrderCancelRequest;
-import ramfix.OrderOpenClose;
-import ramfix.OrderSide;
-import ramfix.OrderTIF;
-import ramfix.OrderType;
-import ramfix.TwoWayMap;
 
 public class FIXOrder {
 

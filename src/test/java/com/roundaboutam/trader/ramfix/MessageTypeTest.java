@@ -1,9 +1,10 @@
-package com.roundaboutam.trader;
+package com.roundaboutam.trader.ramfix;
+
+import com.roundaboutam.trader.ramfix.FIXMessage;
+import com.roundaboutam.trader.ramfix.MessageType;
 
 import junit.framework.TestCase;
 import quickfix.field.MsgType;
-import ramfix.FIXMessage;
-import ramfix.MessageType;
 
 
 

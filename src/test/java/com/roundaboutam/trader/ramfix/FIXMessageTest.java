@@ -1,13 +1,14 @@
-package com.roundaboutam.trader;
+package com.roundaboutam.trader.ramfix;
+
+import com.roundaboutam.trader.ramfix.ExecutionType;
+import com.roundaboutam.trader.ramfix.FIXMessage;
+import com.roundaboutam.trader.ramfix.MessageType;
+import com.roundaboutam.trader.ramfix.OrderStatus;
 
 import junit.framework.TestCase;
 import quickfix.field.ExecType;
 import quickfix.field.MsgType;
 import quickfix.field.OrdStatus;
-import ramfix.ExecutionType;
-import ramfix.FIXMessage;
-import ramfix.MessageType;
-import ramfix.OrderStatus;
 
 
 

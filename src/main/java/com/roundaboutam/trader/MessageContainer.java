@@ -5,6 +5,7 @@ import com.roundaboutam.trader.execution.OrderStatus;
 import com.roundaboutam.trader.order.FIXOrder;
 import com.roundaboutam.trader.order.OrderOpenClose;
 import com.roundaboutam.trader.order.OrderSide;
+import com.roundaboutam.trader.order.OrderTIF;
 import com.roundaboutam.trader.order.OrderType;
 
 import quickfix.FieldNotFound;
@@ -16,6 +17,7 @@ import quickfix.field.OpenClose;
 import quickfix.field.OrdStatus;
 import quickfix.field.OrdType;
 import quickfix.field.Side;
+import quickfix.field.TimeInForce;
 
 
 
@@ -29,6 +31,7 @@ public class MessageContainer {
 	private OrderSide orderSide;
 	private OrderType orderType;
 	private OrderOpenClose orderOpenClose;
+	private OrderTIF orderTIF;
 
 	private int msgSeqNum;
 	private String senderCompID;
@@ -61,6 +64,7 @@ public class MessageContainer {
 		resolveSide(message);
 		resolveOrderType(message);
 		resolveOpenClose(message);
+		resolveOrderTIF(message);
 	
 		senderCompID = resolveHeaderField(header, quickfix.field.SenderCompID.FIELD);
 		targetCompID = resolveHeaderField(header, quickfix.field.TargetCompID.FIELD);
@@ -138,7 +142,16 @@ public class MessageContainer {
 			this.orderOpenClose = null;
 		}
 	}
-	
+
+	private void resolveOrderTIF(Message message) {
+        try {
+        	TimeInForce fixTimeInForce = (TimeInForce) message.getField(new TimeInForce());
+        	this.orderTIF = FIXOrder.FIXTifToOrderTif(fixTimeInForce);
+		} catch (FieldNotFound e) {
+			this.orderTIF = null;
+		}
+	}
+
 	private String resolveHeaderField(Header header, int fieldInt) {
         try {
         	String fieldVal = header.getString(fieldInt);
@@ -172,8 +185,8 @@ public class MessageContainer {
 	}
 
 	private void resolveDirection() {
-		if (messageType == MessageType.LOGON || messageType == MessageType.HEARTBEAT 
-				|| messageType == MessageType.EXECUTION_REPORT || messageType == MessageType.ORDER_CANCEL_REJECT) {
+		if (messageType == MessageType.LOGON ||  messageType == MessageType.EXECUTION_REPORT || 
+				messageType == MessageType.ORDER_CANCEL_REJECT) {
 			this.direction = "Inbound";
 		} else if (messageType == MessageType.NEW_ORDER || messageType == MessageType.REPLACE_ORDER 
 				|| messageType == MessageType.CANCEL_ORDER){
@@ -225,6 +238,10 @@ public class MessageContainer {
 
     public OrderStatus getOrderStatus() {
     	return orderStatus;
+    }
+
+    public OrderTIF getOrderTIF() {
+    	return orderTIF;
     }
 
     public Integer getOrderQty() {
@@ -315,7 +332,6 @@ public class MessageContainer {
     		return "-";
     	}
     }
-
 
 }
 

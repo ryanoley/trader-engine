@@ -1,6 +1,5 @@
 package com.roundaboutam.trader.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
@@ -9,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.MatteBorder;
 import javax.swing.table.AbstractTableModel;
@@ -22,14 +19,56 @@ import com.roundaboutam.trader.order.OrderBasket;
 
 
 @SuppressWarnings("serial")
-public class BasketTablePanel extends JPanel {
+class BasketTable extends JTable implements MouseListener {
 
-	public BasketTablePanel(OrderBasket orderBasket) {
-		setLayout(new BorderLayout());
-		BasketTable basketTable = new BasketTable(orderBasket);
-		add(new JScrollPane(basketTable));
+    public BasketTable(OrderBasket orderBasket) {
+        super(new BasketTableModel(orderBasket));
+        initColumnWidths();
+        addMouseListener(this);
+        this.setAutoCreateRowSorter(true);
+    }
+ 
+	private void initColumnWidths() {
+		TableColumnModel model = this.getColumnModel();
+        TableColumn column = model.getColumn(0);
+        column.setPreferredWidth((int) (100));
+        column = model.getColumn(1);
+        column.setPreferredWidth((int) (100));
+        column = model.getColumn(2);
+        column.setPreferredWidth((int) (100));
+        column = model.getColumn(3);
+        column.setPreferredWidth((int) (100));
+	}
+
+    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+
+        int modelIdx = convertRowIndexToModel(row);
+    	Order order = ((BasketTableModel) getModel()).getOrder(modelIdx);
+        Component c = super.prepareRenderer(renderer, row, column);
+        
+        JComponent jc = (JComponent) c;
+        if (isRowSelected(row)){
+          c.setBackground(Color.white);
+          int left = column == 0 ? 1:0;
+          int right = column == getColumnCount() - 1 ? 1:0;
+          jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 
+        }
+        else
+          jc.setBorder(null);
+
+        return c;
     }
 
+    public void mouseClicked(MouseEvent e) {}
+
+    public void mouseEntered(MouseEvent e) {}
+
+    public void mouseExited(MouseEvent e) {}
+
+    public void mousePressed(MouseEvent e) {}
+
+    public void mouseReleased(MouseEvent e) {}
+	
 }
 
 
@@ -101,56 +140,3 @@ class BasketTableModel extends AbstractTableModel {
     }
 }
 
-
-@SuppressWarnings("serial")
-	class BasketTable extends JTable implements MouseListener {
-
-	    public BasketTable(OrderBasket orderBasket) {
-	        super(new BasketTableModel(orderBasket));
-	        initColumnWidths();
-	        addMouseListener(this);
-	        this.setAutoCreateRowSorter(true);
-	    }
-	 
-		private void initColumnWidths() {
-			TableColumnModel model = this.getColumnModel();
-	        TableColumn column = model.getColumn(0);
-	        column.setPreferredWidth((int) (100));
-	        column = model.getColumn(1);
-	        column.setPreferredWidth((int) (100));
-	        column = model.getColumn(2);
-	        column.setPreferredWidth((int) (100));
-	        column = model.getColumn(3);
-	        column.setPreferredWidth((int) (100));
-		}
-
-	    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-
-	        int modelIdx = convertRowIndexToModel(row);
-	    	Order order = ((BasketTableModel) getModel()).getOrder(modelIdx);
-	        Component c = super.prepareRenderer(renderer, row, column);
-	        
-	        JComponent jc = (JComponent) c;
-	        if (isRowSelected(row)){
-	          c.setBackground(Color.white);
-	          int left = column == 0 ? 1:0;
-	          int right = column == getColumnCount() - 1 ? 1:0;
-	          jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 
-	        }
-	        else
-	          jc.setBorder(null);
-
-	        return c;
-	    }
-
-	    public void mouseClicked(MouseEvent e) {}
-
-	    public void mouseEntered(MouseEvent e) {}
-
-	    public void mouseExited(MouseEvent e) {}
-
-	    public void mousePressed(MouseEvent e) {}
-
-	    public void mouseReleased(MouseEvent e) {}
-	
-}

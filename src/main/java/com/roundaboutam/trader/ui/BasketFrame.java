@@ -1,17 +1,20 @@
 package com.roundaboutam.trader.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
+
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
-import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderBasket;
 
 
@@ -20,7 +23,7 @@ public class BasketFrame {
 	private static JFrame frame;
 	private static JPanel panel;
 	private static BasketFrame instance = null;
-	private static OrderBasket orderBasket = null;
+	private OrderBasket orderBasket = null;
 
 	public static BasketFrame getInstance(OrderBasket orderBasket) {
 		if (instance == null) {
@@ -39,27 +42,53 @@ public class BasketFrame {
 	private void makeOrderBasketFrame() {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.setTitle("Order Basket Summary Ticket");
+		frame.setTitle("Order Basket Summary");
 		frame.setSize(800, 600);
 		panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.PAGE_START;
-		
-		BasketTablePanel basketTablePanel = new BasketTablePanel(orderBasket);
-		panel.add(basketTablePanel);
-		
 
-		
-	    JPanel summaryPanel = basketSummary(orderBasket);
-	    
-	    
-	    
-	    
-	    
-	    
-		c.gridx = 0;
+		c.gridx=0;
+		c.gridy=0;
+		c.gridwidth = 2;
+		c.weighty = 1;
+		c.weightx = 1;
+		c.fill = GridBagConstraints.BOTH;
+		BasketTable basketTable = new BasketTable(orderBasket);
+		panel.add(new JScrollPane(basketTable), c);
+
 	    c.gridy = 1;
+		c.weighty = .25;
+	    JTable summaryTable = basketSummaryPanel(orderBasket);
+	    panel.add(new JScrollPane(summaryTable), c);
+	    
+	    c = new GridBagConstraints();
+	    c.gridy = 2;
+		c.weighty = .1;
+		c.weightx = 1;
+	    JButton submitButton = getSubmitButton();
+	    panel.add(submitButton, c);
+
+	    c.gridx = 1;
+	    JButton closeButton = getCloseButton();
+	    panel.add(closeButton, c);
+	    
+	    frame.add(panel);
+	    frame.setVisible(true);
+	}
+
+	private JTable basketSummaryPanel(OrderBasket orderBasket) {
+		String[] columns = new String[] {"BasketSummary", "BY", "SS", "BTC", "SL"};
+		
+		Object[][] data = new Object[][] {
+			{"nOrders", orderBasket.nBY, orderBasket.nSS, orderBasket.nBTC, orderBasket.nSL },
+			{"nShares", orderBasket.shrBY, orderBasket.shrSS, orderBasket.shrBTC, orderBasket.shrSL },
+			};
+			
+		JTable table = new JTable(data, columns);
+		return table;
+	}
+	
+	private JButton getCloseButton() {
 	    JButton btnClose = new JButton("Close");
 	    btnClose.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -67,32 +96,30 @@ public class BasketFrame {
 				frame.dispose();
 			}
 		});
-	    panel.add(btnClose, c);
-	    frame.add(panel);	    
-	    frame.setVisible(true);
+	    return btnClose;
 	}
 	
-	private JPanel basketSummary(OrderBasket orderBasket) {
-		
-		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBackground(Color.LIGHT_GRAY);
-		
-		int nB = 0;
-		int nS = 0;
-		int sharesB = 0;
-		int sharesS = 0;
-		double dollarsB = 0.0;
-		double dollarsS = 0.0;
-
-		
-		
-		return panel;
+	private JButton getSubmitButton() {
+	    JButton btnSubmit = new JButton("Submit");
+	    btnSubmit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				confirmAndSubmit();
+			}
+		});
+	    return btnSubmit;
 	}
 
+	private void confirmAndSubmit() {
+		int choice = JOptionPane.showOptionDialog(null, "Submit basket to exchange?", "Confirm?", 
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		if (choice == JOptionPane.YES_OPTION) {
+            orderBasket.sendOrders();
+			instance = null;
+			frame.dispose();
+		}
+	}
+
+
 }
-
-
-
-
 
 

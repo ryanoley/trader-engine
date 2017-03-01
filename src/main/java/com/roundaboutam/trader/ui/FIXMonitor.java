@@ -83,7 +83,6 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
             }
     }
 
-
 	public void update(Observable o, Object arg) {
 		Message message = (Message) arg;
         addMessage(message);

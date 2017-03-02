@@ -8,58 +8,65 @@ import com.roundaboutam.trader.ramfix.OrderOpenClose;
 import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderTIF;
 import com.roundaboutam.trader.ramfix.OrderType;
-import com.roundaboutam.trader.ui.BasketFrame;
+import com.roundaboutam.trader.ui.BasketSummaryFrame;
 
 import quickfix.SessionID;
 
 
 public class OrderBasket {
 
-	private HashMap<String, Order> basketOrderMap;
-	private BasketFrame basketFrame;
+	private HashMap<String, Order> orderMap;
+	private String basketName;
+	private String basketID;
+	public boolean isStaged = false;
+	public boolean isLive = false;
 	public int nBY = 0;
 	public int nSL = 0;
 	public int nSS = 0;
 	public int nBTC = 0;
-	public Double shrBY = 0.0;
-	public Double shrSL = 0.0;
-	public Double shrSS = 0.0;
-	public Double shrBTC = 0.0;
+	public int shrBY = 0;
+	public int shrSL = 0;
+	public int shrSS = 0;
+	public int shrBTC = 0;
 
 	public OrderBasket() {
-		basketOrderMap = new HashMap<String, Order>();
+		orderMap = new HashMap<String, Order>();
+		basketID = IdGenerator.makeID();
+		isStaged = true;
 	}
-
-	public void showBasket() {
-		summarizeBasket();
-		basketFrame = BasketFrame.getInstance(this);
+	
+	public OrderBasket(String name) {
+		orderMap = new HashMap<String, Order>();
+		basketID = IdGenerator.makeID();
+		basketName = name;
+		isStaged = true;
 	}
 
 	public void addOrder(Order order) {
-		basketOrderMap.put(order.getOrderID(), order);
+		orderMap.put(order.getOrderID(), order);
 	}
 
 	public void removeOrder(Order order) {
-		basketOrderMap.remove(order.getOrderID());
+		orderMap.remove(order.getOrderID());
 	}
 
-	private void summarizeBasket() {
+	public void summarizeBasket() {
 		nBY = 0;
 		nSL = 0;
 		nSS = 0;
 		nBTC = 0;
-		shrBY = 0.0;
-		shrSL = 0.0;
-		shrSS = 0.0;
-		shrBTC = 0.0;
+		shrBY = 0;
+		shrSL = 0;
+		shrSS = 0;
+		shrBTC = 0;
 
-		if (basketOrderMap.size() ==0 )
+		if (orderMap.size() == 0)
 			return;
 		
-		for (Order order : basketOrderMap.values()) {
+		for (Order order : orderMap.values()) {
 			OrderSide orderSide = order.getOrderSide();
 			OrderOpenClose orderOpenClose = order.getOrderOpenClose();
-			Double orderQty = order.getOrderQty();	
+			int orderQty = order.getQuantity();	
 
 			if (orderSide == OrderSide.BUY && orderOpenClose == OrderOpenClose.OPEN) {
 				nBY ++;
@@ -77,73 +84,27 @@ public class OrderBasket {
 		}
 	}
 
-	public HashMap<String, Order> getBasketOrderMap() {
-		return basketOrderMap;
+	public HashMap<String, Order> getOrderMap() {
+		return orderMap;
 	}
 	
-	public void sendOrders() {
-		// TODO Auto-generated method stub
+	public void logSend() {
+		isStaged = false;
+		isLive = true;
 	}
 	
-	public static void main(String[] args) throws Exception {
-		
-		OrderBasket orderBasket = new OrderBasket();
-    	Order order = new Order();
-    	OrderSide orderSide = OrderSide.BUY;
-    	SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
-        order.setOrderType(OrderType.MARKET);
-        order.setSymbol("IBM");
-        order.setOrderQty(100);
-        order.setOrderSide(orderSide);
-        order.setOrderTIF(OrderTIF.DAY);
-        order.setLimitPrice(50.50);
-        order.setOrderOpenClose(OrderOpenClose.OPEN);
-        order.setSessionID(sessionID);
-        orderBasket.addOrder(order);
+	public String getBasketId() {
+		return basketID;
+	}
+	
+	public String getBasketName() {
+		return basketName;
+	}
+	
+	public void setBasketName(String basketName) {
+		this.basketName = basketName;
+	}
 
-    	Order order2 = new Order();
-    	orderSide = OrderSide.SHORT_SELL;
-    	order2.setOrderType(OrderType.MARKET);
-    	order2.setSymbol("AAPL");
-    	order2.setOrderQty(300);
-        order2.setLimitPrice(51.50);
-    	order2.setOrderSide(orderSide);
-    	order2.setOrderTIF(OrderTIF.DAY);
-        order2.setOrderOpenClose(OrderOpenClose.OPEN);
-    	order2.setSessionID(sessionID);
-        orderBasket.addOrder(order2);
-
-    	Order order3 = new Order();
-    	orderSide = OrderSide.SELL;
-    	order3.setOrderType(OrderType.MARKET);
-    	order3.setSymbol("GOOGL");
-    	order3.setOrderQty(400);
-        order3.setLimitPrice(3.50);
-    	order3.setOrderSide(orderSide);
-    	order3.setOrderTIF(OrderTIF.DAY);
-    	order3.setOrderOpenClose(OrderOpenClose.OPEN);
-    	order3.setSessionID(sessionID);
-        orderBasket.addOrder(order3);
-
-    	Order order4 = new Order();
-    	orderSide = OrderSide.BUY;
-    	order4.setOrderType(OrderType.MARKET);
-    	order4.setSymbol("FB");
-    	order4.setOrderQty(500);
-        order4.setLimitPrice(4.50);
-    	order4.setOrderSide(orderSide);
-    	order4.setOrderTIF(OrderTIF.DAY);
-    	order4.setOrderOpenClose(OrderOpenClose.OPEN);
-    	order4.setSessionID(sessionID);
-        orderBasket.addOrder(order4);
-        
-        orderBasket.showBasket();
-    }
 	
 }
-
-
-
-
-
 

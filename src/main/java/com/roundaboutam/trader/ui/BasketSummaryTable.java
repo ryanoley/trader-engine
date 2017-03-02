@@ -19,9 +19,9 @@ import com.roundaboutam.trader.order.OrderBasket;
 
 
 @SuppressWarnings("serial")
-class BasketTable extends JTable implements MouseListener {
+class BasketSummaryTable extends JTable implements MouseListener {
 
-    public BasketTable(OrderBasket orderBasket) {
+    public BasketSummaryTable(OrderBasket orderBasket) {
         super(new BasketTableModel(orderBasket));
         initColumnWidths();
         addMouseListener(this);
@@ -43,12 +43,13 @@ class BasketTable extends JTable implements MouseListener {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
         int modelIdx = convertRowIndexToModel(row);
-    	Order order = ((BasketTableModel) getModel()).getOrder(modelIdx);
+    	//Order order = ((BasketTableModel) getModel()).getOrder(modelIdx);
         Component c = super.prepareRenderer(renderer, row, column);
         
         JComponent jc = (JComponent) c;
         if (isRowSelected(row)){
           c.setBackground(Color.white);
+          c.setForeground(Color.black);
           int left = column == 0 ? 1:0;
           int right = column == getColumnCount() - 1 ? 1:0;
           jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 
@@ -79,18 +80,18 @@ class BasketTableModel extends AbstractTableModel {
     private final static int SIDE = 1;
     private final static int SYMBOL = 2;
     private final static int LIMIT = 3;
-    private final static int ORDQTY = 4;
+    private final static int SHARES = 4;
 
     protected final HashMap<Integer, Order> rowToOrder;
     protected final HashMap<Integer, String> rowToOrderID;
 
-    public final String[] headers = new String[] {"OrdID", "Side", "Sym", "Limit", "OrdQty"};
+    public final String[] headers = new String[] {"OrdID", "Side", "Sym", "Limit", "Shares"};
 
     public BasketTableModel(OrderBasket orderBasket) {
     	rowToOrder = new HashMap<Integer, Order>();
     	rowToOrderID = new HashMap<Integer, String>();
     	int i = 0;
-    	for (Map.Entry<String, Order> entry : orderBasket.getBasketOrderMap().entrySet()) {
+    	for (Map.Entry<String, Order> entry : orderBasket.getOrderMap().entrySet()) {
     	 rowToOrder.put(i, entry.getValue());
     	 rowToOrderID.put(i, entry.getKey());
     	 i++;
@@ -133,8 +134,8 @@ class BasketTableModel extends AbstractTableModel {
         	return order.getOrderID();
         case LIMIT:
         	return String.valueOf(order.getLimitPrice());
-        case ORDQTY:
-        	return String.valueOf(order.getOrderQty());
+        case SHARES:
+        	return String.valueOf(order.getQuantity());
         }
         return "#NA";
     }

@@ -106,18 +106,19 @@ public class TraderFrame extends JFrame {
 		JPanel buttonPanel = makeButtonPanel();
 		panel.add(buttonPanel, BorderLayout.WEST);
 
-		JPanel orderPanel = makeOrderTablePanel();
+		JPanel orderPanel = makeTabbedPanel();
 		panel.add(orderPanel, BorderLayout.CENTER);
 
 		return panel;
 	}
 
-	private JPanel makeOrderTablePanel() {
+	private JPanel makeTabbedPanel() {
 
 		JPanel panel = new JPanel(new BorderLayout());
 		JTabbedPane tabbedPane = new JTabbedPane();
 
 		tabbedPane.add("Orders", new OrderTablePanel(this.application));
+		tabbedPane.add("Baskets", new BasketPorfolioTablePanel(this.application));
         tabbedPane.add("Messages", new MessageTablePanel(this.application));
 
         panel.add(tabbedPane);

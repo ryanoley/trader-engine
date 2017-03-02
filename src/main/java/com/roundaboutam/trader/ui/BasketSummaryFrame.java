@@ -1,12 +1,10 @@
 package com.roundaboutam.trader.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,27 +13,30 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.OrderBasket;
 
 
-public class BasketFrame {
+public class BasketSummaryFrame {
 
+	private transient TraderApplication application = null;
 	private static JFrame frame;
 	private static JPanel panel;
-	private static BasketFrame instance = null;
-	private OrderBasket orderBasket = null;
+	private static BasketSummaryFrame instance = null;
+	private OrderBasket orderBasket;
 
-	public static BasketFrame getInstance(OrderBasket orderBasket) {
+	public static BasketSummaryFrame getInstance(OrderBasket orderBasket, TraderApplication application) {
 		if (instance == null) {
-			instance = new BasketFrame(orderBasket);
+			instance = new BasketSummaryFrame(orderBasket, application);
 		}
 		if (!frame.isVisible())
 			frame.setVisible(true);
 		return instance;
 	}
 
-	private BasketFrame(OrderBasket orderBasket) {
+	private BasketSummaryFrame(OrderBasket orderBasket, TraderApplication application) {
 		this.orderBasket = orderBasket;
+		this.application = application;
 		makeOrderBasketFrame();
 	}
 
@@ -43,24 +44,25 @@ public class BasketFrame {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Order Basket Summary");
-		frame.setSize(800, 600);
+		frame.setSize(600, 400);
 		panel = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
 
+		GridBagConstraints c = new GridBagConstraints();
 		c.gridx=0;
 		c.gridy=0;
 		c.gridwidth = 2;
 		c.weighty = 1;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
-		BasketTable basketTable = new BasketTable(orderBasket);
+		BasketSummaryTable basketTable = new BasketSummaryTable(orderBasket);
 		panel.add(new JScrollPane(basketTable), c);
 
 	    c.gridy = 1;
 		c.weighty = .25;
 	    JTable summaryTable = basketSummaryPanel(orderBasket);
+	    summaryTable.setBackground(Color.LIGHT_GRAY);
 	    panel.add(new JScrollPane(summaryTable), c);
-	    
+
 	    c = new GridBagConstraints();
 	    c.gridy = 2;
 		c.weighty = .1;
@@ -71,19 +73,18 @@ public class BasketFrame {
 	    c.gridx = 1;
 	    JButton closeButton = getCloseButton();
 	    panel.add(closeButton, c);
-	    
+
 	    frame.add(panel);
 	    frame.setVisible(true);
 	}
 
 	private JTable basketSummaryPanel(OrderBasket orderBasket) {
 		String[] columns = new String[] {"BasketSummary", "BY", "SS", "BTC", "SL"};
-		
+
 		Object[][] data = new Object[][] {
-			{"nOrders", orderBasket.nBY, orderBasket.nSS, orderBasket.nBTC, orderBasket.nSL },
-			{"nShares", orderBasket.shrBY, orderBasket.shrSS, orderBasket.shrBTC, orderBasket.shrSL },
+			{"Orders", orderBasket.nBY, orderBasket.nSS, orderBasket.nBTC, orderBasket.nSL },
+			{"Shares", orderBasket.shrBY, orderBasket.shrSS, orderBasket.shrBTC, orderBasket.shrSL },
 			};
-			
 		JTable table = new JTable(data, columns);
 		return table;
 	}
@@ -113,7 +114,8 @@ public class BasketFrame {
 		int choice = JOptionPane.showOptionDialog(null, "Submit basket to exchange?", "Confirm?", 
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (choice == JOptionPane.YES_OPTION) {
-            orderBasket.sendOrders();
+            application.sendBasket(orderBasket);
+			orderBasket.logSend();
 			instance = null;
 			frame.dispose();
 		}

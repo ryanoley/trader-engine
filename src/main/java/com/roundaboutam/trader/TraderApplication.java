@@ -8,10 +8,15 @@ import java.util.Observer;
 import javax.swing.SwingUtilities;
 
 import com.roundaboutam.trader.order.Order;
+import com.roundaboutam.trader.order.OrderBasket;
 import com.roundaboutam.trader.order.OrderBook;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.ReplaceOrder;
 import com.roundaboutam.trader.ramfix.FIXOrder;
+import com.roundaboutam.trader.ramfix.OrderOpenClose;
+import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.ramfix.OrderTIF;
+import com.roundaboutam.trader.ramfix.OrderType;
 import com.roundaboutam.trader.execution.ExecutionBook;
 
 import quickfix.Application;
@@ -47,6 +52,7 @@ public class TraderApplication implements Application {
     private final ObservableOrder observableOrder = new ObservableOrder();
     private final ObservableMessage observableMessage = new ObservableMessage();
     private final ObservableLogon observableLogon = new ObservableLogon();
+    private final ObservableBasket observableBasket = new ObservableBasket();
 
     private final OrderBook orderBook;
 	private final ExecutionBook executionBook;
@@ -196,6 +202,14 @@ public class TraderApplication implements Application {
             cancel(new CancelOrder(o));
     	}
     }
+    
+    public void sendBasket(OrderBasket orderBasket) {
+    	for (Order order : orderBasket.getOrderMap().values()) {
+	    	orderBook.addOrder(order);
+	    	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
+	    	observableBasket.update(orderBasket);
+    	}
+    }
 
     // Various observable and getter functionality
     public HashSet<SessionID> getSessionIDs() {
@@ -226,6 +240,14 @@ public class TraderApplication implements Application {
     	observableMessage.deleteObserver(observer);
     }
 
+    public void addOrderBasketObserver(Observer observer) {
+        observableBasket.addObserver(observer);
+    }
+
+    public void deleteOrderBasketObserver(Observer observer) {
+    	observableBasket.deleteObserver(observer);
+    }
+
     private static class ObservableMessage extends Observable {
         public void update(Message message) {
             setChanged();
@@ -238,6 +260,14 @@ public class TraderApplication implements Application {
         public void update(Order order) {
             setChanged();
             notifyObservers(order);
+            clearChanged();
+        }
+    }
+
+    private static class ObservableBasket extends Observable {
+        public void update(OrderBasket orderBasket) {
+            setChanged();
+            notifyObservers(orderBasket);
             clearChanged();
         }
     }
@@ -266,6 +296,7 @@ public class TraderApplication implements Application {
     	sessionIDs.add(sessionID);
         observableLogon.logon(sessionID);
 		executionBook.setExecutionLogs(sessionID);
+        //populateBaskets(sessionID);
     }
 
     public void onLogout(SessionID sessionID) {
@@ -282,6 +313,60 @@ public class TraderApplication implements Application {
     	IncorrectDataFormat, IncorrectTagValue, RejectLogon {
     	System.out.println(message.toString());
     	observableMessage.update(message);
+    }
+    
+    
+    public void populateBaskets(SessionID sessionID) {
+		OrderBasket orderBasket = new OrderBasket("Basket1");
+		Order order = new Order();
+		OrderSide orderSide = OrderSide.BUY;
+		order.setOrderType(OrderType.MARKET);
+		order.setSymbol("GLD");
+		order.setQuantity(100);
+		order.setOrderSide(orderSide);
+		order.setOrderTIF(OrderTIF.DAY);
+		order.setOrderOpenClose(OrderOpenClose.OPEN);
+		order.setSessionID(sessionID);
+		orderBasket.addOrder(order);
+		
+		Order order2 = new Order();
+		orderSide = OrderSide.BUY;
+		order2.setOrderType(OrderType.MARKET);
+		order2.setSymbol("XOP");
+		order2.setQuantity(50);
+		order2.setOrderSide(orderSide);
+		order2.setOrderTIF(OrderTIF.DAY);
+		order2.setOrderOpenClose(OrderOpenClose.OPEN);
+		order2.setSessionID(sessionID);
+		orderBasket.addOrder(order2);
+		observableBasket.update(orderBasket);
+
+		OrderBasket orderBasket2 = new OrderBasket("Basket2");
+		Order order3 = new Order();
+		orderSide = OrderSide.SELL;
+		order3.setOrderType(OrderType.MARKET);
+		order3.setSymbol("GOOGL");
+		order3.setQuantity(400);
+		order3.setLimitPrice(3.50);
+		order3.setOrderSide(orderSide);
+		order3.setOrderTIF(OrderTIF.DAY);
+		order3.setOrderOpenClose(OrderOpenClose.OPEN);
+		order3.setSessionID(sessionID);
+		orderBasket2.addOrder(order3);
+		
+		Order order4 = new Order();
+		orderSide = OrderSide.BUY;
+		order4.setOrderType(OrderType.MARKET);
+		order4.setSymbol("FB");
+		order4.setQuantity(500);
+		order4.setLimitPrice(4.50);
+		order4.setOrderSide(orderSide);
+		order4.setOrderTIF(OrderTIF.DAY);
+		order4.setOrderOpenClose(OrderOpenClose.OPEN);
+		order4.setSessionID(sessionID);
+		orderBasket2.addOrder(order4);
+
+		observableBasket.update(orderBasket2);
     }
 
 }

@@ -205,10 +205,9 @@ public class TraderApplication implements Application {
     
     public void sendBasket(OrderBasket orderBasket) {
     	for (Order order : orderBasket.getOrderMap().values()) {
-	    	orderBook.addOrder(order);
-	    	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
-	    	observableBasket.update(orderBasket);
+	    	send(order);
     	}
+    	observableBasket.update(orderBasket);
     }
 
     // Various observable and getter functionality

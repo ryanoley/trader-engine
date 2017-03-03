@@ -297,7 +297,7 @@ public class TraderApplication implements Application {
     	sessionIDs.add(sessionID);
         observableLogon.logon(sessionID);
 		executionBook.setExecutionLogs(sessionID);
-        populateBaskets(sessionID);
+        //populateBaskets(sessionID);
     }
 
     public void onLogout(SessionID sessionID) {

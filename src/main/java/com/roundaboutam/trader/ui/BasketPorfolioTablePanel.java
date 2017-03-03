@@ -179,7 +179,7 @@ class BasketPortfolioTable extends JTable implements MouseListener {
         if (orderBasket.isStaged)
             c.setBackground(Color.white);
         else if (orderBasket.isLive)
-            c.setBackground(Color.blue);
+            c.setBackground(Color.lightGray);
         else if (orderBasket.isFilled)
             c.setBackground(Color.lightGray);
         else

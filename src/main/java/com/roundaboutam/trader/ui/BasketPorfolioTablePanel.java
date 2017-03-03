@@ -57,7 +57,7 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
     private final HashMap<String, Integer> idToRow;
     private final HashMap<String, OrderBasket> idToOrderBasket;
 
-    public final String[] headers = new String[] {"BasketID", "Name", "Staged", "Live", "CreateTime"};
+    public final String[] headers = new String[] {"BasketID", "Name", "Staged", "Live", "Filled", "CreateTime"};
 
     public BasketPortfolioTableModel(TraderApplication application) {
     	application.addOrderBasketObserver(this);

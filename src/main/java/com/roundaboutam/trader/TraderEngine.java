@@ -126,6 +126,10 @@ public class TraderEngine {
 		return traderEngine;
 	}
 
+    public TraderFrame getTraderFrame() {
+    	return frame;
+    }
+
 	private void startLogOnMonitor(String launchEnv) {
 		class LogOnMonitor implements Runnable {
 			int currentTime;

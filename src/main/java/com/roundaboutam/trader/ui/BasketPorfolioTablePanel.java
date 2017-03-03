@@ -22,6 +22,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.TraderEngine;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderBasket;
 
@@ -173,10 +174,19 @@ class BasketPortfolioTable extends JTable implements MouseListener {
     	OrderBasket orderBasket = ((BasketPortfolioTableModel) getModel()).getOrderBasket(modelIdx);
         Component c = super.prepareRenderer(renderer, row, column); 
         c.setForeground(Color.black);
-    
+
+        c.setForeground(Color.black);
+        if (orderBasket.isStaged)
+            c.setBackground(Color.white);
+        else if (orderBasket.isLive)
+            c.setBackground(Color.blue);
+        else if (orderBasket.isFilled)
+            c.setBackground(Color.lightGray);
+        else
+        	c.setBackground(Color.white);
+
         JComponent jc = (JComponent) c;
         if (isRowSelected(row)){
-          c.setBackground(Color.white);
           int left = column == 0 ? 1:0;
           int right = column == getColumnCount() - 1 ? 1:0;
           jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 
@@ -193,8 +203,9 @@ class BasketPortfolioTable extends JTable implements MouseListener {
 		    int modelIdx = convertRowIndexToModel(row);
 		    OrderBasket orderBasket = ((BasketPortfolioTableModel) dataModel).getOrderBasket(modelIdx);
 		    orderBasket.summarizeBasket();
-		    BasketSummaryFrame.getInstance(orderBasket, application);
+		    BasketInfoFrame.getInstance(orderBasket, application);
 	    }
+    	
     }
 
     public void mouseEntered(MouseEvent e) {}

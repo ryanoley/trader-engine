@@ -8,7 +8,7 @@ import com.roundaboutam.trader.ramfix.OrderOpenClose;
 import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderTIF;
 import com.roundaboutam.trader.ramfix.OrderType;
-import com.roundaboutam.trader.ui.BasketSummaryFrame;
+import com.roundaboutam.trader.ui.BasketInfoFrame;
 
 import quickfix.SessionID;
 
@@ -20,6 +20,7 @@ public class OrderBasket {
 	private String basketID;
 	public boolean isStaged = false;
 	public boolean isLive = false;
+	public boolean isFilled = false;
 	public int nBY = 0;
 	public int nSL = 0;
 	public int nSS = 0;
@@ -43,6 +44,7 @@ public class OrderBasket {
 	}
 
 	public void addOrder(Order order) {
+		order.setParentBasket(basketName);
 		orderMap.put(order.getOrderID(), order);
 	}
 

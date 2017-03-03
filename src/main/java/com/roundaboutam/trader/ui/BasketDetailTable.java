@@ -19,9 +19,9 @@ import com.roundaboutam.trader.order.OrderBasket;
 
 
 @SuppressWarnings("serial")
-class BasketSummaryTable extends JTable implements MouseListener {
+class BasketDetailTable extends JTable implements MouseListener {
 
-    public BasketSummaryTable(OrderBasket orderBasket) {
+    public BasketDetailTable(OrderBasket orderBasket) {
         super(new BasketTableModel(orderBasket));
         initColumnWidths();
         addMouseListener(this);
@@ -79,13 +79,14 @@ class BasketTableModel extends AbstractTableModel {
     private final static int ORDID = 0;
     private final static int SIDE = 1;
     private final static int SYMBOL = 2;
-    private final static int LIMIT = 3;
-    private final static int SHARES = 4;
+    private final static int TYPE = 3;
+    private final static int LIMIT = 4;
+    private final static int SHARES = 5;
 
     protected final HashMap<Integer, Order> rowToOrder;
     protected final HashMap<Integer, String> rowToOrderID;
 
-    public final String[] headers = new String[] {"OrdID", "Side", "Sym", "Limit", "Shares"};
+    public final String[] headers = new String[] {"OrdID", "Side", "Sym", "Type", "Limit", "Shares"};
 
     public BasketTableModel(OrderBasket orderBasket) {
     	rowToOrder = new HashMap<Integer, Order>();
@@ -132,6 +133,8 @@ class BasketTableModel extends AbstractTableModel {
         	return order.getSymbol();
         case ORDID:
         	return order.getOrderID();
+        case TYPE:
+        	return order.getOrderType().toString();
         case LIMIT:
         	return String.valueOf(order.getLimitPrice());
         case SHARES:

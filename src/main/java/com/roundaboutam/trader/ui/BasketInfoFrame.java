@@ -3,6 +3,7 @@ package com.roundaboutam.trader.ui;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -14,27 +15,28 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.TraderEngine;
 import com.roundaboutam.trader.order.OrderBasket;
 
 
-public class BasketSummaryFrame {
+public class BasketInfoFrame {
 
 	private transient TraderApplication application = null;
 	private static JFrame frame;
 	private static JPanel panel;
-	private static BasketSummaryFrame instance = null;
+	private static BasketInfoFrame instance = null;
 	private OrderBasket orderBasket;
 
-	public static BasketSummaryFrame getInstance(OrderBasket orderBasket, TraderApplication application) {
+	public static BasketInfoFrame getInstance(OrderBasket orderBasket, TraderApplication application) {
 		if (instance == null) {
-			instance = new BasketSummaryFrame(orderBasket, application);
+			instance = new BasketInfoFrame(orderBasket, application);
 		}
 		if (!frame.isVisible())
 			frame.setVisible(true);
 		return instance;
 	}
 
-	private BasketSummaryFrame(OrderBasket orderBasket, TraderApplication application) {
+	private BasketInfoFrame(OrderBasket orderBasket, TraderApplication application) {
 		this.orderBasket = orderBasket;
 		this.application = application;
 		makeOrderBasketFrame();
@@ -42,6 +44,8 @@ public class BasketSummaryFrame {
 
 	private void makeOrderBasketFrame() {
 		frame = new JFrame();
+		Point traderEngineLoc = TraderEngine.get().getTraderFrame().getLocationOnScreen();
+		frame.setLocation(traderEngineLoc.x + 50, traderEngineLoc.y + 50);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Order Basket Summary");
 		frame.setSize(600, 400);
@@ -54,7 +58,7 @@ public class BasketSummaryFrame {
 		c.weighty = 1;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
-		BasketSummaryTable basketTable = new BasketSummaryTable(orderBasket);
+		BasketDetailTable basketTable = new BasketDetailTable(orderBasket);
 		panel.add(new JScrollPane(basketTable), c);
 
 	    c.gridy = 1;

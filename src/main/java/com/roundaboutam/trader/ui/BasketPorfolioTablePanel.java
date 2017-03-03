@@ -50,7 +50,8 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
     private final static int NAME = 1;
     private final static int STAGED = 2;
     private final static int LIVE = 3;
-    private final static int TIME = 4;
+    private final static int FILLED = 4;
+    private final static int TIME = 5;
     protected final HashMap<Integer, Date> rowToTimeStamp;
     protected final HashMap<Integer, OrderBasket> rowToOrderBasket;
     private final HashMap<String, Integer> idToRow;
@@ -111,6 +112,8 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
         	return orderBasket.isStaged;
         case LIVE:
         	return orderBasket.isLive;
+        case FILLED:
+        	return orderBasket.isFilled;
         case TIME:
         	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.S");  
         	return sdf.format(timeStamp);
@@ -179,7 +182,7 @@ class BasketPortfolioTable extends JTable implements MouseListener {
         if (orderBasket.isStaged)
             c.setBackground(Color.white);
         else if (orderBasket.isLive)
-            c.setBackground(Color.lightGray);
+            c.setForeground(Color.blue);
         else if (orderBasket.isFilled)
             c.setBackground(Color.lightGray);
         else

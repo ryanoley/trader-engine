@@ -297,6 +297,7 @@ public class TraderApplication implements Application {
     	sessionIDs.add(sessionID);
         observableLogon.logon(sessionID);
 		executionBook.setExecutionLogs(sessionID);
+		// TODO following line is temporary for OrderBasket Dev
         //populateBaskets(sessionID);
     }
 
@@ -321,22 +322,24 @@ public class TraderApplication implements Application {
 		OrderBasket orderBasket = new OrderBasket("QUANT TRADE A");
 		Order order = new Order();
 		OrderSide orderSide = OrderSide.BUY;
-		order.setOrderType(OrderType.MARKET);
-		order.setSymbol("IWM");
+		order.setOrderType(OrderType.LIMIT);
+		order.setSymbol("GLD");
 		order.setQuantity(100);
 		order.setOrderSide(orderSide);
 		order.setOrderTIF(OrderTIF.DAY);
+		order.setLimitPrice(117.75);
 		order.setOrderOpenClose(OrderOpenClose.OPEN);
 		order.setSessionID(sessionID);
 		orderBasket.addOrder(order);
 		
 		Order order2 = new Order();
 		orderSide = OrderSide.BUY;
-		order2.setOrderType(OrderType.MARKET);
-		order2.setSymbol("BAC");
+		order2.setOrderType(OrderType.LIMIT);
+		order2.setSymbol("T");
 		order2.setQuantity(50);
 		order2.setOrderSide(orderSide);
 		order2.setOrderTIF(OrderTIF.DAY);
+		order2.setLimitPrice(41.99);
 		order2.setOrderOpenClose(OrderOpenClose.OPEN);
 		order2.setSessionID(sessionID);
 		orderBasket.addOrder(order2);

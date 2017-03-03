@@ -36,13 +36,13 @@ public class OrderTablePanel extends JPanel {
 class OrderTableModel extends AbstractTableModel implements Observer {
 
     private final static int SYMBOL = 0;
-    private final static int QUANTITY = 1;
-    private final static int OPEN = 2;
-    private final static int EXECUTED = 3;
-    private final static int SIDE = 4;
-    private final static int TYPE = 5;
-    private final static int LIMITPRICE = 6;
-    private final static int STOPPRICE = 7;
+    private final static int SIDE = 1;
+    private final static int QUANTITY = 2;
+    private final static int PARENTBASKET = 3;
+    private final static int OPEN = 4;
+    private final static int EXECUTED = 5;
+    private final static int TYPE = 6;
+    private final static int LIMITPRICE = 7;
     private final static int AVGPX = 8;
     private final static int MESSAGE = 9;
 
@@ -50,8 +50,8 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     private final HashMap<String, Integer> idToRow;
     private final HashMap<String, Order> idToOrder;
 
-    private final String[] headers = new String[] {"Symbol", "Quantity", "Open", 
-    		"Executed", "Side", "Type", "Limit", "Stop", "AvgPx", "Message"};
+    private final String[] headers = new String[] {"Symbol", "Side", "Quantity", 
+    		"Basket", "Open", "Executed", "Type", "Limit", "AvgPx", "Message"};
 
     public OrderTableModel(TraderApplication application) {
     	application.addOrderObserver(this);
@@ -104,20 +104,20 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     	switch (columnIndex) {
         case SYMBOL:
         	return replaceNull(order.getSymbol());
+        case SIDE:
+        	return replaceNull(order.getOrderSide().toString());
         case QUANTITY:
         	return replaceNull(String.valueOf(order.getQuantity()));
+        case PARENTBASKET:
+        	return replaceNull(order.getParentBasket());
         case OPEN:
         	return replaceNull(String.valueOf(order.getLeavesQty()));
         case EXECUTED:
         	return replaceNull(String.valueOf(order.getCumQty()));
-        case SIDE:
-        	return replaceNull(order.getOrderSide().toString());
         case TYPE:
         	return replaceNull(order.getOrderType().toString());
         case LIMITPRICE:
         	return replaceNull(String.valueOf(order.getLimitPrice()));
-        case STOPPRICE:
-        	return replaceNull(String.valueOf(order.getStopPrice()));
         case AVGPX:
         	return replaceNull(String.valueOf(order.getAvgPx()));
         case MESSAGE:

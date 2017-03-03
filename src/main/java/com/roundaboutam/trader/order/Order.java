@@ -24,8 +24,6 @@ public class Order {
 	private OrderOpenClose orderOpenClose = null;
     private OrderType orderType = null;
     private OrderTIF orderTIF = null;
-
-    // Order related fields
     private int quantity = 0;
     private Double limitPrice = null;
     private Double stopPrice = null;
@@ -43,6 +41,7 @@ public class Order {
     private boolean oldSession = false;
 
     private String message = null;
+    private String parentBasket = null;
 
     public Order() {
         orderID = IdGenerator.makeID();
@@ -255,7 +254,14 @@ public class Order {
 	public void setOrderOpenClose(OrderOpenClose orderOpenClose) {
 		this.orderOpenClose = orderOpenClose;
 	}
-	
+
+	public String getParentBasket() {
+		return parentBasket;
+	}
+
+	public void setParentBasket(String parentBasketName) {
+		parentBasket = parentBasketName;
+	}
 	
 	
 }

@@ -159,21 +159,21 @@ class MessageTable extends JTable implements MouseListener {
 	private void initColumnWidths() {
 		TableColumnModel model = this.getColumnModel();
         TableColumn column = model.getColumn(0);
-        column.setPreferredWidth((int) (80));
-        column = model.getColumn(1);
         column.setPreferredWidth((int) (60));
+        column = model.getColumn(1);
+        column.setPreferredWidth((int) (80));
         column = model.getColumn(2);
         column.setPreferredWidth((int) (80));
         column = model.getColumn(3);
-        column.setPreferredWidth((int) (40));
+        column.setPreferredWidth((int) (30));
         column = model.getColumn(4);
         column.setPreferredWidth((int) (50));
         column = model.getColumn(5);
         column.setPreferredWidth((int) (30));
         column = model.getColumn(6);
-        column.setPreferredWidth((int) (30));
+        column.setPreferredWidth((int) (50));
         column = model.getColumn(7);
-        column.setPreferredWidth((int) (200));
+        column.setPreferredWidth((int) (150));
 	}
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {

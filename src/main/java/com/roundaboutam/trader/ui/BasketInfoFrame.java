@@ -115,7 +115,7 @@ public class BasketInfoFrame {
 	}
 
 	private void confirmAndSubmit() {
-		int choice = JOptionPane.showOptionDialog(null, "Submit basket to exchange?", "Confirm?", 
+		int choice = JOptionPane.showOptionDialog(frame, "Submit basket to exchange?", "Confirm?", 
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (choice == JOptionPane.YES_OPTION) {
             application.sendBasket(orderBasket);

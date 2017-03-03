@@ -17,6 +17,7 @@ import com.roundaboutam.trader.ramfix.OrderOpenClose;
 import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderTIF;
 import com.roundaboutam.trader.ramfix.OrderType;
+
 import com.roundaboutam.trader.execution.ExecutionBook;
 
 import quickfix.Application;
@@ -206,6 +207,7 @@ public class TraderApplication implements Application {
     public void sendBasket(OrderBasket orderBasket) {
     	for (Order order : orderBasket.getOrderMap().values()) {
 	    	send(order);
+
     	}
     	observableBasket.update(orderBasket);
     }
@@ -295,7 +297,7 @@ public class TraderApplication implements Application {
     	sessionIDs.add(sessionID);
         observableLogon.logon(sessionID);
 		executionBook.setExecutionLogs(sessionID);
-        //populateBaskets(sessionID);
+        populateBaskets(sessionID);
     }
 
     public void onLogout(SessionID sessionID) {
@@ -316,11 +318,11 @@ public class TraderApplication implements Application {
     
     
     public void populateBaskets(SessionID sessionID) {
-		OrderBasket orderBasket = new OrderBasket("Basket1");
+		OrderBasket orderBasket = new OrderBasket("QUANT TRADE A");
 		Order order = new Order();
 		OrderSide orderSide = OrderSide.BUY;
 		order.setOrderType(OrderType.MARKET);
-		order.setSymbol("GLD");
+		order.setSymbol("IWM");
 		order.setQuantity(100);
 		order.setOrderSide(orderSide);
 		order.setOrderTIF(OrderTIF.DAY);
@@ -331,7 +333,7 @@ public class TraderApplication implements Application {
 		Order order2 = new Order();
 		orderSide = OrderSide.BUY;
 		order2.setOrderType(OrderType.MARKET);
-		order2.setSymbol("XOP");
+		order2.setSymbol("BAC");
 		order2.setQuantity(50);
 		order2.setOrderSide(orderSide);
 		order2.setOrderTIF(OrderTIF.DAY);
@@ -340,7 +342,7 @@ public class TraderApplication implements Application {
 		orderBasket.addOrder(order2);
 		observableBasket.update(orderBasket);
 
-		OrderBasket orderBasket2 = new OrderBasket("Basket2");
+		OrderBasket orderBasket2 = new OrderBasket("QUANT TRADE B");
 		Order order3 = new Order();
 		orderSide = OrderSide.SELL;
 		order3.setOrderType(OrderType.MARKET);

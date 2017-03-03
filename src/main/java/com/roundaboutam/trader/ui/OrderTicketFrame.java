@@ -237,21 +237,7 @@ public class OrderTicketFrame {
         field.setForeground(labelColor);
     }
 
-	private void confirmAndSubmit(Order order) {
-		StringJoiner joiner = new StringJoiner(" ");
-		joiner.add(order.getOrderSide().toString().toUpperCase());
-		joiner.add("(" + order.getOrderOpenClose().toString() + ")");
-		joiner.add(order.getOrderType().toString().toUpperCase());
-		joiner.add(Integer.toString(order.getQuantity()));
-		joiner.add(order.getSymbol() +"?");
-		int choice = JOptionPane.showOptionDialog(null, joiner.toString(), "Confirm?", 
-				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if (choice == JOptionPane.YES_OPTION) {
-            application.send(order);
-			instance = null;
-			frame.dispose();
-		}
-	}
+
 
     private void activateSubmit() {
         sessionEntered = sessionIDCombo.getSelectedItem() != null;
@@ -357,8 +343,23 @@ public class OrderTicketFrame {
             order.setOrderOpenClose(orderOpenClose);
             confirmAndSubmit(order);
         }
-
         
+	}
+
+	private void confirmAndSubmit(Order order) {
+		StringJoiner joiner = new StringJoiner(" ");
+		joiner.add(order.getOrderSide().toString().toUpperCase());
+		joiner.add("(" + order.getOrderOpenClose().toString() + ")");
+		joiner.add(order.getOrderType().toString().toUpperCase());
+		joiner.add(Integer.toString(order.getQuantity()));
+		joiner.add(order.getSymbol() +"?");
+		int choice = JOptionPane.showOptionDialog(frame, joiner.toString(), "Confirm?", 
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		if (choice == JOptionPane.YES_OPTION) {
+            application.send(order);
+			instance = null;
+			frame.dispose();
+		}
 	}
 
 }

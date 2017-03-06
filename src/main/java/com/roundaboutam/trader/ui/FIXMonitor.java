@@ -32,8 +32,8 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
     private JTextArea seqArea;
     private JTextArea heartbeatArea;
     private Integer seqNum = 0;
-    private String sessionID = "NOT CONNECTED";
     private Date lastContact = new Date();
+    private String sessionID = "NOT CONNECTED";
 
 
 	public FIXMonitor(TraderApplication application) {
@@ -98,10 +98,6 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 				sessionArea.setText("CompID: " + sessionID);
 				seqArea.setText("MsgSeqNum: " + seqNum);
 				heartbeatArea.setText("ContactDiff: " + contactDiff);
-				if (contactDiff > 60000)
-					heartbeatArea.setForeground(Color.RED);
-				else
-					heartbeatArea.setForeground(Color.BLUE);
 
 	            if (sessionID.equals("ROUNDPROD01")){
 	            	Font sessionFont = sessionArea.getFont();
@@ -112,8 +108,10 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 	            	sessionArea.setForeground(Color.RED);
 	            	sessionArea.setFont(sessionFont.deriveFont(attributes));
 	            }
-	            
-	            if (contactDiff > 120000 && contactDiff < 122000){
+
+				if (contactDiff > 60000)
+					heartbeatArea.setForeground(Color.RED);
+				else if (contactDiff > 120000 && contactDiff < 122000 && !sessionID.equals("NOT CONNECTED")){
 	            	alertFrame = new JFrame();
 	            	alertFrame.setLocation(500, 400);
 	        		alertFrame.setVisible(true);
@@ -126,17 +124,20 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 	        				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
 	        		alertFrame.dispose();
 	            }
+				else
+					heartbeatArea.setForeground(Color.BLUE);
 
 	            Thread.sleep(1000);
-
 	         }
 	      }
 	      catch (Exception e) {
 	    	  e.printStackTrace();
 	      }
 	}
-
 	
-}
+	public void setSessionID(String sessionID) {
+		this.sessionID = sessionID;
+	}
 
+}
 

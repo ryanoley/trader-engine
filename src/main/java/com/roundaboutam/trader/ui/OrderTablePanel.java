@@ -16,6 +16,8 @@ import javax.swing.JTable;
 import javax.swing.border.MatteBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
@@ -156,9 +158,34 @@ class OrderTable extends JTable implements MouseListener {
     public OrderTable(TraderApplication application) {
         super(new OrderTableModel(application));
         this.application = application;
+        initColumnWidths();
         addMouseListener(this);
         this.setAutoCreateRowSorter(true);
     }
+
+	private void initColumnWidths() {
+		TableColumnModel model = this.getColumnModel();
+        TableColumn column = model.getColumn(0);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(1);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(2);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(3);
+        column.setPreferredWidth((int) (70));
+        column = model.getColumn(4);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(5);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(6);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(7);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(8);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(9);
+        column.setPreferredWidth((int) (70));
+	}
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 

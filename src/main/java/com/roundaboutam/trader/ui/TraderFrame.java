@@ -27,6 +27,7 @@ import com.roundaboutam.trader.TraderEngine;
 public class TraderFrame extends JFrame {
 
 	private transient TraderApplication application = null;
+	private FIXMonitor fixMonitor;
 	
 	public TraderFrame(TraderApplication application) {
 		super();
@@ -60,7 +61,7 @@ public class TraderFrame extends JFrame {
 	public void addPanels() {
 		getContentPane().add(makeBanner(), BorderLayout.NORTH);
 		getContentPane().add(makeMainPanel(), BorderLayout.CENTER);
-		FIXMonitor fixMonitor = new FIXMonitor(application);
+		fixMonitor = new FIXMonitor(application);
 		Thread t = new Thread(fixMonitor);
 		t.start();
 		getContentPane().add(fixMonitor, BorderLayout.SOUTH);
@@ -143,6 +144,7 @@ public class TraderFrame extends JFrame {
 				if (TraderEngine.get().getInitiatorState()){
 					TraderEngine.get().stopInitiator();
 					btnFIX.setText("Start FIX");
+					fixMonitor.setSessionID("NOT CONNECTED");
 				} else {
 					TraderEngine.get().logon();
 					btnFIX.setText("Stop FIX");

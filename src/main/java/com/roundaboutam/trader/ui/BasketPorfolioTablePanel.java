@@ -177,16 +177,12 @@ class BasketPortfolioTable extends JTable implements MouseListener {
     	OrderBasket orderBasket = ((BasketPortfolioTableModel) getModel()).getOrderBasket(modelIdx);
         Component c = super.prepareRenderer(renderer, row, column); 
         c.setForeground(Color.black);
+        c.setBackground(Color.white);
 
-        c.setForeground(Color.black);
-        if (orderBasket.isStaged)
-            c.setBackground(Color.white);
-        else if (orderBasket.isLive)
+        if (orderBasket.isLive)
             c.setForeground(Color.blue);
         else if (orderBasket.isFilled)
             c.setBackground(Color.lightGray);
-        else
-        	c.setBackground(Color.white);
 
         JComponent jc = (JComponent) c;
         if (isRowSelected(row)){

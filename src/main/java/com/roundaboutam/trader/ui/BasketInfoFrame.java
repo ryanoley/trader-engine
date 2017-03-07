@@ -119,7 +119,8 @@ public class BasketInfoFrame {
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (choice == JOptionPane.YES_OPTION) {
             application.sendBasket(orderBasket);
-			orderBasket.logSend();
+			orderBasket.setStaged(false);
+			orderBasket.setLive(true);
 			instance = null;
 			frame.dispose();
 		}

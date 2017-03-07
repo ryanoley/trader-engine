@@ -22,12 +22,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
-import com.roundaboutam.trader.TraderEngine;
-import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderBasket;
-
-import quickfix.Message;
-
 
 
 
@@ -109,11 +104,11 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
         case NAME:
         	return replaceNull(orderBasket.getBasketName());
         case STAGED:
-        	return orderBasket.isStaged;
+        	return orderBasket.isStaged();
         case LIVE:
-        	return orderBasket.isLive;
+        	return orderBasket.isLive();
         case FILLED:
-        	return orderBasket.isFilled;
+        	return orderBasket.isFilled();
         case TIME:
         	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.S");  
         	return sdf.format(timeStamp);
@@ -175,14 +170,15 @@ class BasketPortfolioTable extends JTable implements MouseListener {
 
         int modelIdx = convertRowIndexToModel(row);
     	OrderBasket orderBasket = ((BasketPortfolioTableModel) getModel()).getOrderBasket(modelIdx);
+    	orderBasket.getSummary();
         Component c = super.prepareRenderer(renderer, row, column); 
         c.setForeground(Color.black);
         c.setBackground(Color.white);
 
-        if (orderBasket.isLive)
+		if (orderBasket.isFilled())
+			c.setBackground(Color.lightGray);
+		else if (orderBasket.isLive())
             c.setForeground(Color.blue);
-        else if (orderBasket.isFilled)
-            c.setBackground(Color.lightGray);
 
         JComponent jc = (JComponent) c;
         if (isRowSelected(row)){
@@ -201,7 +197,7 @@ class BasketPortfolioTable extends JTable implements MouseListener {
 		    int row = rowAtPoint(e.getPoint());
 		    int modelIdx = convertRowIndexToModel(row);
 		    OrderBasket orderBasket = ((BasketPortfolioTableModel) dataModel).getOrderBasket(modelIdx);
-		    orderBasket.summarizeBasket();
+		    orderBasket.getSummary();
 		    BasketInfoFrame.getInstance(orderBasket, application);
 	    }
     	

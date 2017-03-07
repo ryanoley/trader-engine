@@ -111,7 +111,7 @@ class OrderTableModel extends AbstractTableModel implements Observer {
         case QUANTITY:
         	return replaceNull(String.valueOf(order.getQuantity()));
         case PARENTBASKET:
-        	return replaceNull(order.getParentBasket());
+        	return replaceNull(order.getOrderBasketName());
         case OPEN:
         	return replaceNull(String.valueOf(order.getLeavesQty()));
         case EXECUTED:

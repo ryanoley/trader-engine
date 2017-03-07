@@ -2,6 +2,7 @@
 package com.roundaboutam.trader.order;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
@@ -18,9 +19,9 @@ public class OrderBasket {
 	private HashMap<String, Order> orderMap;
 	private String basketName;
 	private String basketID;
-	public boolean isStaged = false;
-	public boolean isLive = false;
-	public boolean isFilled = false;
+	public boolean staged = false;
+	public boolean live = false;
+	public boolean filled = false;
 	public int nBY = 0;
 	public int nSL = 0;
 	public int nSS = 0;
@@ -33,26 +34,29 @@ public class OrderBasket {
 	public OrderBasket() {
 		orderMap = new HashMap<String, Order>();
 		basketID = IdGenerator.makeID();
-		isStaged = true;
+		setStaged(true);
 	}
 	
 	public OrderBasket(String name) {
 		orderMap = new HashMap<String, Order>();
 		basketID = IdGenerator.makeID();
 		basketName = name;
-		isStaged = true;
+		setStaged(true);
 	}
 
 	public void addOrder(Order order) {
-		order.setParentBasket(basketName);
+		order.setOrderBasketID(basketID);
+		order.setOrderBasketName(basketName);
 		orderMap.put(order.getOrderID(), order);
 	}
 
 	public void removeOrder(Order order) {
 		orderMap.remove(order.getOrderID());
+		order.setOrderBasketID(null);
+		order.setOrderBasketName(null);
 	}
 
-	public void summarizeBasket() {
+	public void getSummary() {
 		nBY = 0;
 		nSL = 0;
 		nSS = 0;
@@ -62,9 +66,7 @@ public class OrderBasket {
 		shrSS = 0;
 		shrBTC = 0;
 
-		if (orderMap.size() == 0)
-			return;
-		
+		int leavesShares = 0;
 		for (Order order : orderMap.values()) {
 			OrderSide orderSide = order.getOrderSide();
 			OrderOpenClose orderOpenClose = order.getOrderOpenClose();
@@ -83,16 +85,16 @@ public class OrderBasket {
 				nSL ++;
 				shrSL += orderQty;
 			}
+			leavesShares += order.getLeavesQty();
 		}
+		if (leavesShares == 0  && live)
+			setFilled(true);
+		else 
+			setFilled(false);			
 	}
 
 	public HashMap<String, Order> getOrderMap() {
 		return orderMap;
-	}
-	
-	public void logSend() {
-		isStaged = false;
-		isLive = true;
 	}
 	
 	public String getBasketId() {
@@ -106,7 +108,47 @@ public class OrderBasket {
 	public void setBasketName(String basketName) {
 		this.basketName = basketName;
 	}
+	
+	public boolean isStaged() {
+		return staged;
+	}
 
+	public void setStaged(boolean staged) {
+		this.staged = staged;
+	}
+
+	public boolean isLive() {
+		return live;
+	}
+
+	public void setLive(boolean live) {
+		this.live = live;
+	}
+
+	public boolean isFilled() {
+		return filled;
+	}
+
+	public void setFilled(boolean filled) {
+		this.filled = filled;
+	}
+	
+	public ArrayList<Order> getAllOrders() {
+		ArrayList<Order> allOrders = new ArrayList<Order>();
+		for (Order o : orderMap.values()) {
+			allOrders.add(o);
+		}
+		return allOrders;
+	}
+
+	public ArrayList<Order> getAllOpenOrders() {
+		ArrayList<Order> openOrders = new ArrayList<Order>();
+		for (Order o : orderMap.values()) {
+			if (o.getLeavesQty() > 0)
+				openOrders.add(o);
+		}
+		return openOrders;
+	}
 	
 }
 

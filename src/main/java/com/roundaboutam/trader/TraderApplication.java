@@ -9,6 +9,7 @@ import javax.swing.SwingUtilities;
 
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.OrderBasket;
+import com.roundaboutam.trader.order.OrderBasketBook;
 import com.roundaboutam.trader.order.OrderBook;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.ReplaceOrder;
@@ -57,6 +58,7 @@ public class TraderApplication implements Application {
 
     private final OrderBook orderBook;
 	private final ExecutionBook executionBook;
+	private final OrderBasketBook orderBasketBook;
 
     private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
@@ -68,6 +70,7 @@ public class TraderApplication implements Application {
 	public TraderApplication(SessionSettings settings) throws ConfigError, FieldConvertError {
 		orderBook = new OrderBook();
 		executionBook = new ExecutionBook(settings.getString("CustomLogPath"));
+		orderBasketBook = new OrderBasketBook();
 	}
 	
     // Main message handler
@@ -149,8 +152,11 @@ public class TraderApplication implements Application {
         else {
         	orderBook.processExecutionReport(messageContainer, sessionID);
         }
-        observableOrder.update(orderBook.getOrder(orderID));
+        Order order = orderBook.getOrder(orderID);
+        observableOrder.update(order);
         executionBook.processExecutionReport(messageContainer, orderBook.getOrder(orderID));
+        if (order.getOrderBasketID()!=null)
+        	observableBasket.update(orderBasketBook.getBasket(order.getOrderBasketID()));        
     }
 
     private void orderCancelReject(Message message, SessionID sessionID) throws FieldNotFound {
@@ -205,11 +211,9 @@ public class TraderApplication implements Application {
     }
     
     public void sendBasket(OrderBasket orderBasket) {
-    	for (Order order : orderBasket.getOrderMap().values()) {
+    	for (Order order : orderBasket.getAllOrders()) {
 	    	send(order);
-
     	}
-    	observableBasket.update(orderBasket);
     }
 
     // Various observable and getter functionality
@@ -265,14 +269,6 @@ public class TraderApplication implements Application {
         }
     }
 
-    private static class ObservableBasket extends Observable {
-        public void update(OrderBasket orderBasket) {
-            setChanged();
-            notifyObservers(orderBasket);
-            clearChanged();
-        }
-    }
-
     private static class ObservableLogon extends Observable {
         private final HashSet<SessionID> set = new HashSet<SessionID>();
 
@@ -291,6 +287,14 @@ public class TraderApplication implements Application {
         }
     }
 
+    private static class ObservableBasket extends Observable {
+        public void update(OrderBasket orderBasket) {
+            setChanged();
+            notifyObservers(orderBasket);
+            clearChanged();
+        }
+    }
+ 
     public void onCreate(SessionID sessionID) { }
 
     public void onLogon(SessionID sessionID) {
@@ -316,8 +320,8 @@ public class TraderApplication implements Application {
     	System.out.println(message.toString());
     	observableMessage.update(message);
     }
-    
-    
+
+
     public void populateBaskets(SessionID sessionID) {
 		OrderBasket orderBasket = new OrderBasket("QUANT TRADE A");
 		Order order = new Order();
@@ -343,6 +347,7 @@ public class TraderApplication implements Application {
 		order2.setOrderOpenClose(OrderOpenClose.OPEN);
 		order2.setSessionID(sessionID);
 		orderBasket.addOrder(order2);
+		orderBasketBook.addBasket(orderBasket);
 		observableBasket.update(orderBasket);
 
 		OrderBasket orderBasket2 = new OrderBasket("QUANT TRADE B");
@@ -369,7 +374,7 @@ public class TraderApplication implements Application {
 		order4.setOrderOpenClose(OrderOpenClose.OPEN);
 		order4.setSessionID(sessionID);
 		orderBasket2.addOrder(order4);
-
+		orderBasketBook.addBasket(orderBasket2);
 		observableBasket.update(orderBasket2);
     }
 

@@ -41,7 +41,8 @@ public class Order {
     private boolean oldSession = false;
 
     private String message = null;
-    private String parentBasket = null;
+    private String orderBasketName = null;
+    private String orderBasketID = null;
 
     public Order() {
         orderID = IdGenerator.makeID();
@@ -255,13 +256,19 @@ public class Order {
 		this.orderOpenClose = orderOpenClose;
 	}
 
-	public String getParentBasket() {
-		return parentBasket;
+	public String getOrderBasketName() {
+		return orderBasketName;
 	}
 
-	public void setParentBasket(String parentBasketName) {
-		parentBasket = parentBasketName;
+	public void setOrderBasketName(String orderBasketName) {
+		this.orderBasketName = orderBasketName;
 	}
 	
-	
+	public String getOrderBasketID() {
+		return orderBasketID;
+	}
+
+	public void setOrderBasketID(String orderBasketID) {
+		this.orderBasketID = orderBasketID;
+	}	
 }

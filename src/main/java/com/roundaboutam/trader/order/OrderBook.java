@@ -10,8 +10,6 @@ import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderType;
 
 import quickfix.SessionID;
-import quickfix.field.OrdType;
-import quickfix.field.Side;
 
 public class OrderBook {
 

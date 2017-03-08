@@ -26,6 +26,8 @@ public class BasketInfoFrame {
 	private static JPanel panel;
 	private static BasketInfoFrame instance = null;
 	private OrderBasket orderBasket;
+    JButton submitButton;
+    JButton cancelAllButton;
 
 	public static BasketInfoFrame getInstance(OrderBasket orderBasket, TraderApplication application) {
 		if (instance == null) {
@@ -40,6 +42,7 @@ public class BasketInfoFrame {
 		this.orderBasket = orderBasket;
 		this.application = application;
 		makeOrderBasketFrame();
+		activateButtons();
 	}
 
 	private void makeOrderBasketFrame() {
@@ -54,7 +57,7 @@ public class BasketInfoFrame {
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx=0;
 		c.gridy=0;
-		c.gridwidth = 2;
+		c.gridwidth = 3;
 		c.weighty = 1;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
@@ -71,15 +74,35 @@ public class BasketInfoFrame {
 	    c.gridy = 2;
 		c.weighty = .1;
 		c.weightx = 1;
-	    JButton submitButton = getSubmitButton();
+	    submitButton = getSubmitButton();
 	    panel.add(submitButton, c);
 
 	    c.gridx = 1;
 	    JButton closeButton = getCloseButton();
 	    panel.add(closeButton, c);
 
+	    c.gridx = 2;
+	    cancelAllButton = getCancelAllButton();
+	    panel.add(cancelAllButton, c);
+
 	    frame.add(panel);
 	    frame.setVisible(true);
+	}
+	
+	private void activateButtons() {
+		if (orderBasket.isFilled()) {
+			submitButton.setEnabled(false);
+			cancelAllButton.setEnabled(false);
+		} else if (orderBasket.isLive()) {
+			submitButton.setEnabled(false);
+			cancelAllButton.setEnabled(true);
+		} else if (orderBasket.isStaged()) {
+			submitButton.setEnabled(true);
+			cancelAllButton.setEnabled(false);
+		} else {
+			submitButton.setEnabled(false);
+			cancelAllButton.setEnabled(false);
+		}
 	}
 
 	private JTable basketSummaryPanel(OrderBasket orderBasket) {
@@ -105,13 +128,13 @@ public class BasketInfoFrame {
 	}
 	
 	private JButton getSubmitButton() {
-	    JButton btnSubmit = new JButton("Submit");
-	    btnSubmit.addActionListener(new ActionListener() {
+		submitButton = new JButton("Submit");
+		submitButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				confirmAndSubmit();
 			}
 		});
-	    return btnSubmit;
+	    return submitButton;
 	}
 
 	private void confirmAndSubmit() {
@@ -125,8 +148,27 @@ public class BasketInfoFrame {
 			frame.dispose();
 		}
 	}
-
-
+	
+	private JButton getCancelAllButton() {
+		cancelAllButton = new JButton("Cancel All Trades");
+		cancelAllButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				cancelAllTrades();
+			}
+		});
+	    return cancelAllButton;
+	}
+	
+	private void cancelAllTrades() {
+		int choice = JOptionPane.showOptionDialog(frame, "Cancel All Orders in Basket", "Confirm?", 
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		if (choice == JOptionPane.YES_OPTION) {
+			application.cancelBasket(orderBasket);
+			instance = null;
+			frame.dispose();
+		}
+	}
+	
 }
 
 

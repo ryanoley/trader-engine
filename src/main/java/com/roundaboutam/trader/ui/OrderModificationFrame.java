@@ -3,6 +3,7 @@ package com.roundaboutam.trader.ui;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -13,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.TraderEngine;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.ReplaceOrder;
@@ -50,6 +52,8 @@ public class OrderModificationFrame {
 	private void makeOrderModiciationFrame() {
 
 		frame = new JFrame();
+		Point traderEngineLoc = TraderEngine.get().getTraderFrame().getLocationOnScreen();
+		frame.setLocation(traderEngineLoc.x + 50, traderEngineLoc.y + 50);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Order Modification Ticket");
 		frame.setSize(400, 600);

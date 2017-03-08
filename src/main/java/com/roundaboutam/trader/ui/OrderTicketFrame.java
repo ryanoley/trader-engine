@@ -237,8 +237,6 @@ public class OrderTicketFrame {
         field.setForeground(labelColor);
     }
 
-
-
     private void activateSubmit() {
         sessionEntered = sessionIDCombo.getSelectedItem() != null;
         String orderType = (String) orderTypesCombo.getSelectedItem();

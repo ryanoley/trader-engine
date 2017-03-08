@@ -22,6 +22,9 @@ public class OrderBasket {
 	public boolean staged = false;
 	public boolean live = false;
 	public boolean filled = false;
+	private int totalShares = 0;
+	private int openShares = 0;
+	private int execShares = 0;
 	public int nBY = 0;
 	public int nSL = 0;
 	public int nSS = 0;
@@ -30,6 +33,10 @@ public class OrderBasket {
 	public int shrSL = 0;
 	public int shrSS = 0;
 	public int shrBTC = 0;
+	public int shrBYExec = 0;
+	public int shrSLExec = 0;
+	public int shrSSExec = 0;
+	public int shrBTCExec = 0;
 
 	public OrderBasket() {
 		orderMap = new HashMap<String, Order>();
@@ -57,6 +64,45 @@ public class OrderBasket {
 	}
 
 	public void getSummary() {
+		resetAttr();
+		int ackSum = 0;
+		for (Order order : orderMap.values()) {
+			OrderSide orderSide = order.getOrderSide();
+			OrderOpenClose orderOpenClose = order.getOrderOpenClose();
+			int orderQty = order.getQuantity();	
+			int orderQtyExec = order.getCumQty();
+
+			if (orderSide == OrderSide.BUY && orderOpenClose == OrderOpenClose.OPEN) {
+				nBY ++;
+				shrBY += orderQty;
+				shrBYExec += orderQtyExec;
+			} else if (orderSide == OrderSide.BUY && orderOpenClose == OrderOpenClose.CLOSE) {
+				nBTC ++;
+				shrBTC += orderQty;
+				shrBTCExec += orderQtyExec;
+			} else if (orderSide == OrderSide.SHORT_SELL) {
+				nSS ++;
+				shrSS += orderQty;
+				shrSSExec += orderQtyExec;
+			} else if (orderSide == OrderSide.SELL) {
+				nSL ++;
+				shrSL += orderQty;
+				shrSLExec += orderQtyExec;
+			}
+			totalShares += orderQty;
+			openShares += order.getLeavesQty();
+			execShares += orderQtyExec;
+			ackSum += order.isAcknowledged() ? 1 : 0;
+		}
+		if (openShares == 0  && live && ackSum == orderMap.size()) {
+			setFilled(true);
+		}
+	}
+
+	public void resetAttr() {
+		totalShares = 0;
+		openShares = 0;
+		execShares = 0;
 		nBY = 0;
 		nSL = 0;
 		nSS = 0;
@@ -65,32 +111,27 @@ public class OrderBasket {
 		shrSL = 0;
 		shrSS = 0;
 		shrBTC = 0;
-
-		int leavesShares = 0;
-		for (Order order : orderMap.values()) {
-			OrderSide orderSide = order.getOrderSide();
-			OrderOpenClose orderOpenClose = order.getOrderOpenClose();
-			int orderQty = order.getQuantity();	
-
-			if (orderSide == OrderSide.BUY && orderOpenClose == OrderOpenClose.OPEN) {
-				nBY ++;
-				shrBY += orderQty;
-			} else if (orderSide == OrderSide.BUY && orderOpenClose == OrderOpenClose.CLOSE) {
-				nBTC ++;
-				shrBTC += orderQty;
-			} else if (orderSide == OrderSide.SHORT_SELL) {
-				nSS ++;
-				shrSS += orderQty;
-			} else if (orderSide == OrderSide.SELL) {
-				nSL ++;
-				shrSL += orderQty;
-			}
-			leavesShares += order.getLeavesQty();
+		shrBYExec = 0;
+		shrSLExec = 0;
+		shrSSExec = 0;
+		shrBTCExec = 0;
+	}
+	
+	public ArrayList<Order> getAllOrders() {
+		ArrayList<Order> allOrders = new ArrayList<Order>();
+		for (Order o : orderMap.values()) {
+			allOrders.add(o);
 		}
-		if (leavesShares == 0  && live)
-			setFilled(true);
-		else 
-			setFilled(false);			
+		return allOrders;
+	}
+
+	public ArrayList<Order> getAllOpenOrders() {
+		ArrayList<Order> openOrders = new ArrayList<Order>();
+		for (Order o : orderMap.values()) {
+			if (o.getLeavesQty() > 0)
+				openOrders.add(o);
+		}
+		return openOrders;
 	}
 
 	public HashMap<String, Order> getOrderMap() {
@@ -132,22 +173,17 @@ public class OrderBasket {
 	public void setFilled(boolean filled) {
 		this.filled = filled;
 	}
-	
-	public ArrayList<Order> getAllOrders() {
-		ArrayList<Order> allOrders = new ArrayList<Order>();
-		for (Order o : orderMap.values()) {
-			allOrders.add(o);
-		}
-		return allOrders;
-	}
 
-	public ArrayList<Order> getAllOpenOrders() {
-		ArrayList<Order> openOrders = new ArrayList<Order>();
-		for (Order o : orderMap.values()) {
-			if (o.getLeavesQty() > 0)
-				openOrders.add(o);
-		}
-		return openOrders;
+	public int getOpenShares() {
+		return openShares;
+	}
+	
+	public int getExecShares() {
+		return execShares;
+	}
+	
+	public int getTotalShares() {
+		return totalShares;
 	}
 	
 }

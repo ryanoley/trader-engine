@@ -43,16 +43,18 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
 
     private final static int ID = 0;
     private final static int NAME = 1;
-    private final static int STAGED = 2;
-    private final static int LIVE = 3;
-    private final static int FILLED = 4;
-    private final static int TIME = 5;
+    private final static int TOTALSHARES = 2;
+    private final static int OPENSHARES = 3;
+    private final static int EXECSHARES = 4;
+    private final static int STATUS = 5;
+    private final static int TIME = 6;
     protected final HashMap<Integer, Date> rowToTimeStamp;
     protected final HashMap<Integer, OrderBasket> rowToOrderBasket;
     private final HashMap<String, Integer> idToRow;
     private final HashMap<String, OrderBasket> idToOrderBasket;
 
-    public final String[] headers = new String[] {"BasketID", "Name", "Staged", "Live", "Filled", "CreateTime"};
+    public final String[] headers = new String[] {"BasketID", "Name", "Total Shares", 
+    		"Open Shares", "Exec Shares", "Status", "CreateTime"};
 
     public BasketPortfolioTableModel(TraderApplication application) {
     	application.addOrderBasketObserver(this);
@@ -103,12 +105,19 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
         	return orderBasket.getBasketId();
         case NAME:
         	return replaceNull(orderBasket.getBasketName());
-        case STAGED:
-        	return orderBasket.isStaged();
-        case LIVE:
-        	return orderBasket.isLive();
-        case FILLED:
-        	return orderBasket.isFilled();
+        case TOTALSHARES:
+        	return orderBasket.getTotalShares();
+        case OPENSHARES:
+        	return orderBasket.getOpenShares();
+        case EXECSHARES:
+        	return orderBasket.getExecShares();
+        case STATUS:
+        	if (orderBasket.isFilled())
+        		return "FILLED";
+        	else if (orderBasket.isLive())
+        		return "LIVE";
+        	else if (orderBasket.isStaged())
+        		return "STAGED";
         case TIME:
         	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.S");  
         	return sdf.format(timeStamp);
@@ -128,7 +137,7 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
 	@Override
 	public void update(Observable arg0, Object arg) {
 		OrderBasket orderBasket = (OrderBasket) arg;
-
+		orderBasket.getSummary();
     	if (!idToOrderBasket.containsKey(orderBasket.getBasketId())) {
 			addOrderBasket(orderBasket);
     		return;
@@ -159,10 +168,14 @@ class BasketPortfolioTable extends JTable implements MouseListener {
         column = model.getColumn(1);
         column.setPreferredWidth((int) (50));
         column = model.getColumn(2);
-        column.setPreferredWidth((int) (50));
+        column.setPreferredWidth((int) (40));
         column = model.getColumn(3);
-        column.setPreferredWidth((int) (50));
+        column.setPreferredWidth((int) (40));
         column = model.getColumn(4);
+        column.setPreferredWidth((int) (40));
+        column = model.getColumn(5);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(6);
         column.setPreferredWidth((int) (50));
 	}
 
@@ -170,7 +183,6 @@ class BasketPortfolioTable extends JTable implements MouseListener {
 
         int modelIdx = convertRowIndexToModel(row);
     	OrderBasket orderBasket = ((BasketPortfolioTableModel) getModel()).getOrderBasket(modelIdx);
-    	orderBasket.getSummary();
         Component c = super.prepareRenderer(renderer, row, column); 
         c.setForeground(Color.black);
         c.setBackground(Color.white);

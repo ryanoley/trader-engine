@@ -155,8 +155,11 @@ public class TraderApplication implements Application {
         Order order = orderBook.getOrder(orderID);
         observableOrder.update(order);
         executionBook.processExecutionReport(messageContainer, orderBook.getOrder(orderID));
-        if (order.getOrderBasketID()!=null)
-        	observableBasket.update(orderBasketBook.getBasket(order.getOrderBasketID()));        
+
+        if (order.getOrderBasketID() != null){
+        	OrderBasket ob = orderBasketBook.getBasket(order.getOrderBasketID());
+        	observableBasket.update(ob);
+        }
     }
 
     private void orderCancelReject(Message message, SessionID sessionID) throws FieldNotFound {
@@ -215,7 +218,13 @@ public class TraderApplication implements Application {
 	    	send(order);
     	}
     }
-
+    
+    public void cancelBasket(OrderBasket orderBasket) {
+    	for (Order order : orderBasket.getAllOpenOrders()) {
+            cancel(new CancelOrder(order));
+    	}
+    }
+    
     // Various observable and getter functionality
     public HashSet<SessionID> getSessionIDs() {
     	return sessionIDs;
@@ -323,7 +332,7 @@ public class TraderApplication implements Application {
 
 
     public void populateBaskets(SessionID sessionID) {
-		OrderBasket orderBasket = new OrderBasket("QUANT TRADE A");
+		OrderBasket orderBasket = new OrderBasket("BASKET A");
 		Order order = new Order();
 		OrderSide orderSide = OrderSide.BUY;
 		order.setOrderType(OrderType.LIMIT);
@@ -331,7 +340,7 @@ public class TraderApplication implements Application {
 		order.setQuantity(100);
 		order.setOrderSide(orderSide);
 		order.setOrderTIF(OrderTIF.DAY);
-		order.setLimitPrice(117.75);
+		order.setLimitPrice(113.75);
 		order.setOrderOpenClose(OrderOpenClose.OPEN);
 		order.setSessionID(sessionID);
 		orderBasket.addOrder(order);
@@ -350,7 +359,7 @@ public class TraderApplication implements Application {
 		orderBasketBook.addBasket(orderBasket);
 		observableBasket.update(orderBasket);
 
-		OrderBasket orderBasket2 = new OrderBasket("QUANT TRADE B");
+		OrderBasket orderBasket2 = new OrderBasket("BASKET B");
 		Order order3 = new Order();
 		orderSide = OrderSide.SELL;
 		order3.setOrderType(OrderType.MARKET);

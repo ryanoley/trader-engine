@@ -43,18 +43,19 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
 
     private final static int ID = 0;
     private final static int NAME = 1;
-    private final static int TOTALSHARES = 2;
-    private final static int OPENSHARES = 3;
-    private final static int EXECSHARES = 4;
-    private final static int STATUS = 5;
-    private final static int TIME = 6;
+    private final static int TOTALORDERS = 2;
+    private final static int TOTALSHARES = 3;
+    private final static int OPENSHARES = 4;
+    private final static int EXECSHARES = 5;
+    private final static int STATUS = 6;
+    private final static int TIME = 7;
     protected final HashMap<Integer, Date> rowToTimeStamp;
     protected final HashMap<Integer, OrderBasket> rowToOrderBasket;
     private final HashMap<String, Integer> idToRow;
     private final HashMap<String, OrderBasket> idToOrderBasket;
 
-    public final String[] headers = new String[] {"BasketID", "Name", "Total Shares", 
-    		"Open Shares", "Exec Shares", "Status", "CreateTime"};
+    public final String[] headers = new String[] {"BasketID", "Name", "Total Orders", 
+    		"Total Shares", "Open Shares", "Exec Shares", "Status", "CreateTime"};
 
     public BasketPortfolioTableModel(TraderApplication application) {
     	application.addOrderBasketObserver(this);
@@ -105,6 +106,8 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
         	return orderBasket.getBasketId();
         case NAME:
         	return replaceNull(orderBasket.getBasketName());
+        case TOTALORDERS:
+        	return orderBasket.getAllOrders().size();
         case TOTALSHARES:
         	return orderBasket.getTotalShares();
         case OPENSHARES:
@@ -174,8 +177,10 @@ class BasketPortfolioTable extends JTable implements MouseListener {
         column = model.getColumn(4);
         column.setPreferredWidth((int) (40));
         column = model.getColumn(5);
-        column.setPreferredWidth((int) (50));
+        column.setPreferredWidth((int) (40));
         column = model.getColumn(6);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(7);
         column.setPreferredWidth((int) (50));
 	}
 

@@ -111,6 +111,7 @@ public class BasketInfoFrame {
 		Object[][] data = new Object[][] {
 			{"Orders", orderBasket.nBY, orderBasket.nSS, orderBasket.nBTC, orderBasket.nSL },
 			{"Shares", orderBasket.shrBY, orderBasket.shrSS, orderBasket.shrBTC, orderBasket.shrSL },
+			{"ExecShares", orderBasket.shrBYExec, orderBasket.shrSSExec, orderBasket.shrBTCExec, orderBasket.shrSLExec },
 			};
 		JTable table = new JTable(data, columns);
 		return table;

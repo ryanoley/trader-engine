@@ -29,7 +29,7 @@ public class MessageType {
 
     private MessageType(String name) {
         this.name = name;
-        synchronized (ExecutionType.class) {
+        synchronized (MessageType.class) {
             known.put(name, this);
         }
     }

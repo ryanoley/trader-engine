@@ -16,7 +16,7 @@ public class OrderOpenClose {
     
     private OrderOpenClose(String name) {
         this.name = name;
-        synchronized (OrderSide.class) {
+        synchronized (OrderOpenClose.class) {
             known.put(name, this);
         }
     }

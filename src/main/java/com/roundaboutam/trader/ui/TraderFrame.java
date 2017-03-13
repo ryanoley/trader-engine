@@ -175,17 +175,13 @@ public class TraderFrame extends JFrame {
 		c.insets = new Insets(20, 4, 0, 4);
 		panel.add(btnOrderTicket, c);
 
-		JButton btnImportBasket = new JButton("Import Basket");
-		c.gridy = 3;
-		panel.add(btnImportBasket, c);
-
 		JButton btnZmq = new JButton("ZMQ");
 		btnZmq.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				ZMQFrame.getInstance();
 			}
 		});
-		c.gridy = 4;
+		c.gridy = 3;
 		panel.add(btnZmq, c);
 
 		JButton btnCancelAllTrades = new JButton("Cancel All Trades");
@@ -198,7 +194,7 @@ public class TraderFrame extends JFrame {
 					application.cancelAllOpenOrders();
 			}
 		});
-		c.gridy = 5;
+		c.gridy = 4;
 		c.insets = new Insets(60, 4, 00, 4);
 		panel.add(btnCancelAllTrades, c);
 

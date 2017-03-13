@@ -7,11 +7,6 @@ import java.util.HashMap;
 
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
 import com.roundaboutam.trader.ramfix.OrderSide;
-import com.roundaboutam.trader.ramfix.OrderTIF;
-import com.roundaboutam.trader.ramfix.OrderType;
-import com.roundaboutam.trader.ui.BasketInfoFrame;
-
-import quickfix.SessionID;
 
 
 public class OrderBasket {

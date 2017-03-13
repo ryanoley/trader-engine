@@ -152,7 +152,7 @@ public class TraderEngine {
 		}
 		if (launchEnv.equals("prod")){
 			logon();
-			frame.btnFIX.setText("Stop FIX");
+			frame.setFixButtonText("Stop FIX");
 			Thread t = new Thread(new LogOnMonitor());
 			t.start();
 		}

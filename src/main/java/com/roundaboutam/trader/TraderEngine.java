@@ -115,7 +115,7 @@ public class TraderEngine {
     	System.out.println("TraderEngine.shutdown() invoked");
     	if (initiatorStarted)
     		stopInitiator();
-        while (application.getSessionIDs().size() > 0) {
+        while (application.getSessionID() != null) {
         	try { Thread.sleep(1000); } catch (InterruptedException e) { }
         }
         shutdownLatch.countDown();
@@ -167,7 +167,7 @@ public class TraderEngine {
         String launchArg;
         if (args.length == 0)
         	launchArg = "uat";
-        else if (args[0].equals("PROD"))
+        else if (args[0].toUpperCase().equals("PROD"))
         	launchArg = "prod";
         else
         	launchArg = "uat";

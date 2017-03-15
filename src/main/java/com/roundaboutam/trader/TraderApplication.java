@@ -15,10 +15,12 @@ import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.ReplaceOrder;
 import com.roundaboutam.trader.ramfix.FIXOrder;
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
-import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderTIF;
-import com.roundaboutam.trader.ramfix.OrderType;
-
+import com.roundaboutam.trader.rmp.MessageClass;
+import com.roundaboutam.trader.rmp.Parser.ParsedRMPObject;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.Parser;
+import com.roundaboutam.trader.rmp.PriceType;
 import com.roundaboutam.trader.execution.ExecutionBook;
 
 import quickfix.Application;
@@ -57,15 +59,16 @@ public class TraderApplication implements Application {
     private final ObservableBasket observableBasket = new ObservableBasket();
 
     private final OrderBook orderBook;
-	private final ExecutionBook executionBook;
 	private final OrderBasketBook orderBasketBook;
+	private final ExecutionBook executionBook;
 
     private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
-	static private final HashMap<SessionID, HashSet<ExecID>> execIDs =  
+    private SessionID sessionID = null;
+	static private final HashMap<SessionID, HashSet<ExecID>> execIDs = 
 			new HashMap<SessionID, HashSet<ExecID>>();
 
-	static private final HashSet<SessionID> sessionIDs = new HashSet<SessionID>();
+	
 
 	public TraderApplication(SessionSettings settings) throws ConfigError, FieldConvertError {
 		orderBook = new OrderBook();
@@ -124,15 +127,15 @@ public class TraderApplication implements Application {
         System.out.println("sendBusinessReject: " + reply.toString());  // Debugging
     }
 
+    private Message createMessage(Message message, String msgType) throws FieldNotFound {
+        return messageFactory.create(message.getHeader().getString(BeginString.FIELD), msgType);
+    }
+
     private void reverseRoute(Message message, Message reply) throws FieldNotFound {
         reply.getHeader().setString(SenderCompID.FIELD,
                 message.getHeader().getString(TargetCompID.FIELD));
         reply.getHeader().setString(TargetCompID.FIELD,
                 message.getHeader().getString(SenderCompID.FIELD));
-    }
-
-    private Message createMessage(Message message, String msgType) throws FieldNotFound {
-        return messageFactory.create(message.getHeader().getString(BeginString.FIELD), msgType);
     }
 
     private void executionReport(Message message, SessionID sessionID) throws FieldNotFound {
@@ -212,22 +215,26 @@ public class TraderApplication implements Application {
             cancel(new CancelOrder(o));
     	}
     }
-    
+
     public void sendBasket(OrderBasket orderBasket) {
     	for (Order order : orderBasket.getAllOrders()) {
 	    	send(order);
     	}
     }
-    
+
     public void cancelBasket(OrderBasket orderBasket) {
     	for (Order order : orderBasket.getAllOpenOrders()) {
             cancel(new CancelOrder(order));
     	}
     }
-    
+
     // Various observable and getter functionality
-    public HashSet<SessionID> getSessionIDs() {
-    	return sessionIDs;
+    public SessionID getSessionID() {
+    	return sessionID;
+    }
+
+    private void setSessionID(SessionID sessionID) {
+    	this.sessionID = sessionID;
     }
 
     public void addLogonObserver(Observer observer) {
@@ -307,15 +314,15 @@ public class TraderApplication implements Application {
     public void onCreate(SessionID sessionID) { }
 
     public void onLogon(SessionID sessionID) {
-    	sessionIDs.add(sessionID);
+    	setSessionID(sessionID);
         observableLogon.logon(sessionID);
 		executionBook.setExecutionLogs(sessionID);
 		// TODO following line is temporary for OrderBasket Dev
-        //populateBaskets(sessionID);
+        // application.testRMP();
     }
 
     public void onLogout(SessionID sessionID) {
-    	sessionIDs.remove(sessionID);
+    	setSessionID(null);
     	observableLogon.logoff(sessionID);
     	executionBook.closeExecutionLogs(sessionID);
     }
@@ -331,60 +338,61 @@ public class TraderApplication implements Application {
     }
 
 
-    public void populateBaskets(SessionID sessionID) {
-		OrderBasket orderBasket = new OrderBasket("BASKET A");
-		Order order = new Order();
-		OrderSide orderSide = OrderSide.BUY;
-		order.setOrderType(OrderType.LIMIT);
-		order.setSymbol("GLD");
-		order.setQuantity(100);
-		order.setOrderSide(orderSide);
-		order.setOrderTIF(OrderTIF.DAY);
-		order.setLimitPrice(113.75);
-		order.setOrderOpenClose(OrderOpenClose.OPEN);
-		order.setSessionID(sessionID);
-		orderBasket.addOrder(order);
-		
-		Order order2 = new Order();
-		orderSide = OrderSide.BUY;
-		order2.setOrderType(OrderType.LIMIT);
-		order2.setSymbol("T");
-		order2.setQuantity(50);
-		order2.setOrderSide(orderSide);
-		order2.setOrderTIF(OrderTIF.DAY);
-		order2.setLimitPrice(41.99);
-		order2.setOrderOpenClose(OrderOpenClose.OPEN);
-		order2.setSessionID(sessionID);
-		orderBasket.addOrder(order2);
+    // Functionality for parsing messages from other RAM Apps
+    public void fromRMP(String rmpMessage) {
+    	ParsedRMPObject parsedRMPObject = Parser.parseMessage(rmpMessage);
+    	MessageClass messaggeClass = parsedRMPObject.messageClass;
+
+    	if (messaggeClass == MessageClass.NEW_BASKET) {
+    		newRMPOrderBasket(parsedRMPObject);
+    	}
+    	else if (messaggeClass == MessageClass.NEW_ORDER) {
+    		newRMPOrder(parsedRMPObject);
+    	}
+    }
+
+    private void newRMPOrderBasket(ParsedRMPObject parsedRMPObject) {
+		OrderBasket orderBasket = (OrderBasket) parsedRMPObject.object;
+		String basketName = orderBasket.getBasketName();
+		if (orderBasketBook.basketExists(basketName)) {
+			throw new IllegalArgumentException("RMP - Order Basket " + basketName + 
+					" exists. Cannot create multiple baskets with same name");
+		}
 		orderBasketBook.addBasket(orderBasket);
 		observableBasket.update(orderBasket);
+    }
 
-		OrderBasket orderBasket2 = new OrderBasket("BASKET B");
-		Order order3 = new Order();
-		orderSide = OrderSide.SELL;
-		order3.setOrderType(OrderType.MARKET);
-		order3.setSymbol("GOOGL");
-		order3.setQuantity(400);
-		order3.setLimitPrice(3.50);
-		order3.setOrderSide(orderSide);
-		order3.setOrderTIF(OrderTIF.DAY);
-		order3.setOrderOpenClose(OrderOpenClose.OPEN);
-		order3.setSessionID(sessionID);
-		orderBasket2.addOrder(order3);
-		
-		Order order4 = new Order();
-		orderSide = OrderSide.BUY;
-		order4.setOrderType(OrderType.MARKET);
-		order4.setSymbol("FB");
-		order4.setQuantity(500);
-		order4.setLimitPrice(4.50);
-		order4.setOrderSide(orderSide);
-		order4.setOrderTIF(OrderTIF.DAY);
-		order4.setOrderOpenClose(OrderOpenClose.OPEN);
-		order4.setSessionID(sessionID);
-		orderBasket2.addOrder(order4);
-		orderBasketBook.addBasket(orderBasket2);
-		observableBasket.update(orderBasket2);
+    private void newRMPOrder (ParsedRMPObject parsedRMPObject) {
+		Order order = (Order) parsedRMPObject.object;
+		//checkSession();
+		SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
+		order.setSessionID(sessionID);
+		String basketName = order.getOrderBasketName(); 
+		if (basketName != null) {
+			OrderBasket orderBasket = orderBasketBook.getBasketbyName(basketName);
+			orderBasket.addOrder(order);
+			observableBasket.update(orderBasket);
+		} else {
+			System.out.println("No Basket information provided for New " + order.getSymbol() 
+			+ " order. Order discarded.");
+		}
+    }
+
+    private void checkSession() {
+    	if (sessionID == null) {
+        	throw new IllegalStateException("Active Session required. No sessions exists.");
+    	}
+    }
+
+    public void testRMP() {
+		String newBasketString = "1=RAMFIX|2=20170313-13:54:44|3=NB|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket";
+		fromRMP(newBasketString);
+		String newOrderString = "1=RAMFIX|2=20170313-13:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20";
+		fromRMP(newOrderString);
+		String newLimitOrderString = "1=RAMFIX|2=20170313-13:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=BY|10=175|11=L|12=115.75";
+		fromRMP(newLimitOrderString);
+		String newToConsoleString = "1=RAMFIX|2=20170313-13:54:44|3=C|4=TESTSENDER|5=TRADERENGINE";
+		fromRMP(newToConsoleString);
     }
 
 }

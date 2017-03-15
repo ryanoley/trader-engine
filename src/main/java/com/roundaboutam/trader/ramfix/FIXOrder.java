@@ -8,6 +8,8 @@ import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.ReplaceOrder;
 import com.roundaboutam.trader.order.VwapOrder;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import quickfix.field.ClOrdID;
 import quickfix.field.HandlInst;
@@ -42,7 +44,7 @@ public class FIXOrder {
 
 	private static Message formatVwapOrder(VwapOrder vwapOrder) {
 		// Force OrderType to Market
-		vwapOrder.setOrderType(OrderType.MARKET);
+		vwapOrder.setPriceType(PriceType.MARKET);
 
 		NewOrderSingle fixOrder = getNewOrderSingle(vwapOrder);
 
@@ -73,7 +75,7 @@ public class FIXOrder {
     			new Symbol(order.getSymbol()),
     			FIXMessage.orderSideToFIXSide(order.getOrderSide()),
     			new TransactTime(), 
-    			FIXMessage.orderTypeToFIXOrdType(order.getOrderType()));
+    			FIXMessage.priceTypeToFIXOrdType(order.getPriceType()));
 
     	if (order.getSuffix() != null) {
     		fixOrder.setField(new SymbolSfx(order.getSuffix()));
@@ -88,7 +90,7 @@ public class FIXOrder {
         	fixOrder.setString(5700, "BAML");
         }
 
-        if (order.getOrderType() == OrderType.LIMIT) {
+        if (order.getPriceType() == PriceType.LIMIT) {
         	fixOrder.setField(new Price(order.getLimitPrice()));
         }
         
@@ -118,11 +120,11 @@ public class FIXOrder {
                 new Symbol(replaceOrder.getSymbol()), 
                 FIXMessage.orderSideToFIXSide(replaceOrder.getOrderSide()),
                 new TransactTime(),
-                FIXMessage.orderTypeToFIXOrdType(replaceOrder.getOrderType()));
+                FIXMessage.priceTypeToFIXOrdType(replaceOrder.getPriceType()));
 
 		fixOrder.setField(new OrderQty(replaceOrder.getQuantity()));
 
-		if (replaceOrder.getOrderType() == OrderType.LIMIT) {
+		if (replaceOrder.getPriceType() == PriceType.LIMIT) {
 			fixOrder.setField(new Price(replaceOrder.getLimitPrice()));
     	}
 

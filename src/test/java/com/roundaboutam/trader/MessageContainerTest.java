@@ -3,10 +3,10 @@ package com.roundaboutam.trader;
 
 import com.roundaboutam.trader.ramfix.ExecutionType;
 import com.roundaboutam.trader.ramfix.MessageType;
-import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderStatus;
 import com.roundaboutam.trader.ramfix.OrderTIF;
-import com.roundaboutam.trader.ramfix.OrderType;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import junit.framework.TestCase;
 import quickfix.InvalidMessage;
@@ -42,7 +42,7 @@ public class MessageContainerTest extends TestCase {
 		assertEquals(partialFillContainer.getOrderSide(), OrderSide.BUY);
 		assertEquals(partialFillContainer.getOrderStatus(), OrderStatus.PARTIAL_FILL);
 		assertEquals(partialFillContainer.getExecutionType(), ExecutionType.PARTIAL_FILL);
-		assertEquals(partialFillContainer.getOrderType(), OrderType.MARKET);
+		assertEquals(partialFillContainer.getPriceType(), PriceType.MARKET);
 		assertEquals(partialFillContainer.getOrderTIF(), OrderTIF.DAY);
 
 		assertEquals(partialFillContainer.getClOrdID(), "1488291259344");

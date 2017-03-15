@@ -3,7 +3,7 @@ package com.roundaboutam.trader.execution;
 import java.util.StringJoiner;
 
 import com.roundaboutam.trader.ramfix.ExecutionType;
-import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.rmp.OrderSide;
 
 
 public class Execution {

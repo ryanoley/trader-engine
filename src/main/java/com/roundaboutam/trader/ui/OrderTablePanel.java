@@ -117,7 +117,7 @@ class OrderTableModel extends AbstractTableModel implements Observer {
         case EXECUTED:
         	return replaceNull(String.valueOf(order.getCumQty()));
         case TYPE:
-        	return replaceNull(order.getOrderType().toString());
+        	return replaceNull(order.getPriceType().toString());
         case LIMITPRICE:
         	return replaceNull(String.valueOf(order.getLimitPrice()));
         case AVGPX:

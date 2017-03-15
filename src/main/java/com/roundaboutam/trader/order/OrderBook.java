@@ -6,8 +6,8 @@ import java.util.StringJoiner;
 
 import com.roundaboutam.trader.MessageContainer;
 import com.roundaboutam.trader.ramfix.ExecutionType;
-import com.roundaboutam.trader.ramfix.OrderSide;
-import com.roundaboutam.trader.ramfix.OrderType;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import quickfix.SessionID;
 
@@ -85,12 +85,12 @@ public class OrderBook {
 		} else {
 			order = new Order(orderID);
 			OrderSide orderSide = messageContainer.getOrderSide();
-			OrderType orderType = messageContainer.getOrderType();
+			PriceType priceType = messageContainer.getPriceType();
 			order.setSymbol(messageContainer.getSymbol());
 			order.setOrderID(orderID);
 			order.setOrderSide(orderSide);
 			order.setQuantity(orderQty);
-			order.setOrderType(orderType);
+			order.setPriceType(priceType);
 			order.setSessionID(sessionID);
 			order.setOldSession(true);
 			order.setAcknowledged(true);

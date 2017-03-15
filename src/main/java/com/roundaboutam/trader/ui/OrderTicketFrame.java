@@ -25,15 +25,14 @@ import com.roundaboutam.trader.TraderEngine;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.VwapOrder;
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
-import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderTIF;
-import com.roundaboutam.trader.ramfix.OrderType;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import quickfix.SessionID;
 
 public class OrderTicketFrame {
 
-	private static String[] allowableOrderSides = {"BUY", "BUYTOCOVER", "SELL", "SHORT"};
 	private static String[] allowableOrderTypes = {"LIMIT", "VWAP", "MARKET"};
 
 	private static JFrame frame;
@@ -49,7 +48,7 @@ public class OrderTicketFrame {
 	JTextField startTimeField = new JTextField("14:32:00");
 	JTextField endTimeField = new JTextField("20:58:00");
 	JTextField customTagField = new JTextField("");
-	JComboBox<String> orderSideCombo = new JComboBox<String>(allowableOrderSides);
+	JComboBox<OrderSide> orderSideCombo = new JComboBox(OrderSide.toArray());
 	JComboBox<String> orderTypesCombo = new JComboBox<String>(allowableOrderTypes);
 	JComboBox<SessionID> sessionIDCombo = new JComboBox<SessionID>();
 
@@ -206,8 +205,7 @@ public class OrderTicketFrame {
 	private void checkFields() {
 		// Populate SessionID
 		sessionIDCombo.removeAllItems();
-		for (SessionID s : application.getSessionIDs())
-			sessionIDCombo.addItem(s);
+		sessionIDCombo.addItem(application.getSessionID());
 		// Enable certain fields dependent on OrderType
         String item = (String) orderTypesCombo.getSelectedItem();
         if (item == "MARKET") {
@@ -239,13 +237,13 @@ public class OrderTicketFrame {
 
     private void activateSubmit() {
         sessionEntered = sessionIDCombo.getSelectedItem() != null;
-        String orderType = (String) orderTypesCombo.getSelectedItem();
+        String priceType = (String) orderTypesCombo.getSelectedItem();
         boolean activate = symbolEntered && quantityEntered && sessionEntered;
-        if (orderType == "MARKET")
+        if (priceType == "MARKET")
             submitButton.setEnabled(activate);
-        else if (orderType == "LIMIT")
+        else if (priceType == "LIMIT")
             submitButton.setEnabled(activate && limitEntered);
-        else if (orderType == "VWAP")
+        else if (priceType == "VWAP")
             submitButton.setEnabled(activate);
     }
 	
@@ -284,28 +282,18 @@ public class OrderTicketFrame {
         int quantity = Integer.parseInt(quantityField.getText());
         String customTag = customTagField.getText();
 
-        String orderSideText = (String) orderSideCombo.getSelectedItem();
-        OrderSide orderSide = null;
+        OrderSide orderSide = (OrderSide) orderSideCombo.getSelectedItem();
         OrderOpenClose orderOpenClose = null;
-        if (orderSideText == "SHORT") {
-        	orderSide = OrderSide.SHORT_SELL;
+        if (orderSide == OrderSide.BUY | orderSide == OrderSide.SHORT_SELL) {
         	orderOpenClose = OrderOpenClose.OPEN;
-        } else if (orderSideText == "SELL") {
-        	orderSide = OrderSide.SELL;
+        } else if (orderSide == OrderSide.BUY_TO_COVER | orderSide == OrderSide.SELL) {
         	orderOpenClose = OrderOpenClose.CLOSE;
-        } else if (orderSideText == "BUYTOCOVER") {
-        	orderSide = OrderSide.BUY;
-        	orderOpenClose = OrderOpenClose.CLOSE;
-        } else {
-        	orderSide = OrderSide.BUY;
-        	orderOpenClose = OrderOpenClose.OPEN;
         }
 
         String orderTypeText = (String) orderTypesCombo.getSelectedItem();
-
-        if (orderTypeText == "VWAP") {
+        if (orderTypeText.equals("VWAP")) {
         	VwapOrder order = new VwapOrder();
-            order.setOrderType(OrderType.MARKET);
+            order.setPriceType(PriceType.MARKET);
             order.setStartTime(startTimeField.getText());
             order.setEndTime(endTimeField.getText());
             order.setParticipationRate(Integer.parseInt(participationRateField.getText()));
@@ -317,10 +305,10 @@ public class OrderTicketFrame {
             order.setSessionID(sessionID);
             order.setOrderOpenClose(orderOpenClose);
             confirmAndSubmit(order);
-        } else if (orderTypeText == "LIMIT") {
+        } else if (orderTypeText.equals("LIMIT")) {
         	Order order = new Order();
             order.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
-            order.setOrderType(OrderType.LIMIT);
+            order.setPriceType(PriceType.LIMIT);
             order.setSymbol(ticker);
             order.setQuantity(quantity);
             order.setOrderSide(orderSide);
@@ -329,9 +317,9 @@ public class OrderTicketFrame {
             order.setSessionID(sessionID);
             order.setOrderOpenClose(orderOpenClose);
             confirmAndSubmit(order);
-        } else if (orderTypeText == "MARKET") {
+        } else if (orderTypeText.equals("MARKET")) {
         	Order order = new Order();
-            order.setOrderType(OrderType.MARKET);
+            order.setPriceType(PriceType.MARKET);
             order.setSymbol(ticker);
             order.setQuantity(quantity);
             order.setOrderSide(orderSide);
@@ -341,14 +329,13 @@ public class OrderTicketFrame {
             order.setOrderOpenClose(orderOpenClose);
             confirmAndSubmit(order);
         }
-        
 	}
 
 	private void confirmAndSubmit(Order order) {
 		StringJoiner joiner = new StringJoiner(" ");
-		joiner.add(order.getOrderSide().toString().toUpperCase());
+		joiner.add(order.getOrderSide().toString());
 		joiner.add("(" + order.getOrderOpenClose().toString() + ")");
-		joiner.add(order.getOrderType().toString().toUpperCase());
+		joiner.add("(" + order.getPriceType().toString() + ")");
 		joiner.add(Integer.toString(order.getQuantity()));
 		joiner.add(order.getSymbol() +"?");
 		int choice = JOptionPane.showOptionDialog(frame, joiner.toString(), "Confirm?", 

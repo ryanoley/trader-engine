@@ -1,8 +1,8 @@
 package com.roundaboutam.trader.order;
 
-import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderTIF;
-import com.roundaboutam.trader.ramfix.OrderType;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import junit.framework.TestCase;
 import quickfix.SessionID;
@@ -16,7 +16,7 @@ public class OrderBookTest extends TestCase {
 		Order order = new Order();
 		order.setSymbol("AAPL");
 		order.setOrderSide(OrderSide.BUY);
-        order.setOrderType(OrderType.LIMIT);
+        order.setPriceType(PriceType.LIMIT);
         order.setOrderTIF(OrderTIF.DAY);
         order.setQuantity(200);
         order.setLimitPrice(100.0);        
@@ -45,7 +45,7 @@ public class OrderBookTest extends TestCase {
 		Order order = new Order();
 		order.setSymbol("AAPL");
 		order.setOrderSide(OrderSide.BUY);
-        order.setOrderType(OrderType.LIMIT);
+        order.setPriceType(PriceType.LIMIT);
         order.setOrderTIF(OrderTIF.DAY);
         order.setQuantity(200);
         order.setLimitPrice(100.0);        
@@ -76,7 +76,7 @@ public class OrderBookTest extends TestCase {
 		Order order = new Order();
 		order.setSymbol("AAPL");
 		order.setOrderSide(OrderSide.BUY);
-        order.setOrderType(OrderType.LIMIT);
+        order.setPriceType(PriceType.LIMIT);
         order.setOrderTIF(OrderTIF.DAY);
         order.setQuantity(200);
         order.setLimitPrice(100.0);        

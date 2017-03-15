@@ -1,6 +1,9 @@
 package com.roundaboutam.trader.ramfix;
 
 
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
+
 import quickfix.field.ExecType;
 import quickfix.field.MsgType;
 import quickfix.field.OpenClose;
@@ -56,13 +59,13 @@ public class FIXMessage {
         return (OrderSide) sideMap.getSecond(side);
     }
 
-    public static OrdType orderTypeToFIXOrdType(OrderType type) {
+    public static OrdType priceTypeToFIXOrdType(PriceType type) {
         return (OrdType) ordTypeMap.getFirst(type);
     }
 
-    public static OrderType FIXOrdTypeToOrderType(OrdType type) {
+    public static PriceType FIXOrdTypeToPriceType(OrdType type) {
     	checkNull(ordTypeMap.getSecond(type), type);
-        return (OrderType) ordTypeMap.getSecond(type);
+        return (PriceType) ordTypeMap.getSecond(type);
     }
 
     public static TimeInForce orderTifToFIXTif(OrderTIF tif) {
@@ -132,10 +135,10 @@ public class FIXMessage {
     	sideMap.put(OrderSide.SELL, new Side(Side.SELL));
     	sideMap.put(OrderSide.SHORT_SELL, new Side(Side.SELL_SHORT));
 
-    	ordTypeMap.put(OrderType.MARKET, new OrdType(OrdType.MARKET));
-    	ordTypeMap.put(OrderType.LIMIT, new OrdType(OrdType.LIMIT));
-    	ordTypeMap.put(OrderType.MOC, new OrdType(OrdType.MARKET_ON_CLOSE));
-    	ordTypeMap.put(OrderType.LOC, new OrdType(OrdType.LIMIT_ON_CLOSE));
+    	ordTypeMap.put(PriceType.MARKET, new OrdType(OrdType.MARKET));
+    	ordTypeMap.put(PriceType.LIMIT, new OrdType(OrdType.LIMIT));
+    	ordTypeMap.put(PriceType.MARKET_ON_CLOSE, new OrdType(OrdType.MARKET_ON_CLOSE));
+    	ordTypeMap.put(PriceType.LIMIT_ON_CLOSE, new OrdType(OrdType.LIMIT_ON_CLOSE));
 
 	    tifMap.put(OrderTIF.DAY, new TimeInForce(TimeInForce.DAY));
 	    tifMap.put(OrderTIF.IOC, new TimeInForce(TimeInForce.IMMEDIATE_OR_CANCEL));

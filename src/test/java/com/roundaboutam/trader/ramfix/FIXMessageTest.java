@@ -4,6 +4,8 @@ import com.roundaboutam.trader.ramfix.ExecutionType;
 import com.roundaboutam.trader.ramfix.FIXMessage;
 import com.roundaboutam.trader.ramfix.MessageType;
 import com.roundaboutam.trader.ramfix.OrderStatus;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import junit.framework.TestCase;
 import quickfix.field.ExecType;
@@ -41,7 +43,7 @@ public class FIXMessageTest extends TestCase {
 
 	public void testOrdTypeMap() {	
     	assertEquals(FIXMessage.getOrdTypeMap().getFirstToSecondSize(), FIXMessage.getOrdTypeMap().getSecondToFirstSize());
-    	assertEquals(FIXMessage.getOrdTypeMap().getFirstToSecondSize(), OrderType.toArray().length);
+    	assertEquals(FIXMessage.getOrdTypeMap().getFirstToSecondSize(), PriceType.toArray().length);
 	}
 
 	public void testTimeInForceMap() {

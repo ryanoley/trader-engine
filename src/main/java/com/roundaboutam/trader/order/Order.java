@@ -1,9 +1,9 @@
 package com.roundaboutam.trader.order;
 
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
-import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderTIF;
-import com.roundaboutam.trader.ramfix.OrderType;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import quickfix.SessionID;
 
@@ -22,7 +22,7 @@ public class Order {
     // Order related fields
     private OrderSide orderSide = null;
 	private OrderOpenClose orderOpenClose = null;
-    private OrderType orderType = null;
+    private PriceType priceType = null;
     private OrderTIF orderTIF = null;
     private int quantity = 0;
     private Double limitPrice = null;
@@ -128,12 +128,12 @@ public class Order {
 		this.orderSide = orderSide;
 	}
 
-	public OrderType getOrderType() {
-		return orderType;
+	public PriceType getPriceType() {
+		return priceType;
 	}
 
-	public void setOrderType(OrderType orderType) {
-		this.orderType = orderType;
+	public void setPriceType(PriceType priceType) {
+		this.priceType = priceType;
 	}
 
 	public OrderTIF getOrderTIF() {

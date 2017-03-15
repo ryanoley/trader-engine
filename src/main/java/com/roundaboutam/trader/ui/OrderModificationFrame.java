@@ -18,7 +18,7 @@ import com.roundaboutam.trader.TraderEngine;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.ReplaceOrder;
-import com.roundaboutam.trader.ramfix.OrderType;
+import com.roundaboutam.trader.rmp.PriceType;
 
 
 public class OrderModificationFrame {
@@ -86,7 +86,7 @@ public class OrderModificationFrame {
 	    panel.add(new JLabel("Limit Price:"), c);
 	    c.gridx = 0;
 	    c.gridy = 5;
-	    if (order.getOrderType() == OrderType.LIMIT)
+	    if (order.getPriceType() == PriceType.LIMIT)
 	    	limitPriceField.setText(String.valueOf(order.getLimitPrice()));
 	    else
 	    	enableTextField(limitPriceField, false);
@@ -144,7 +144,7 @@ public class OrderModificationFrame {
 	private void makeModifyTransmitOrder() {
 		ReplaceOrder replaceOrder = new ReplaceOrder(order);
 		replaceOrder.setQuantity(Integer.parseInt(quantityField.getText()));
-        if (order.getOrderType() == OrderType.LIMIT) {
+        if (order.getPriceType() == PriceType.LIMIT) {
     		replaceOrder.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
         }
         application.replace(replaceOrder);

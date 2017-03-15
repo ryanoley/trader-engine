@@ -1,17 +1,19 @@
-package com.roundaboutam.trader.ramfix;
+package com.roundaboutam.trader.rmp;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class OrderSide {
+	
+	static public final int RMPFieldID = 9;
+	
 	static private final Map<String, OrderSide> known = new HashMap<>();
+	static public final OrderSide BUY = new OrderSide("BY");
+	static public final OrderSide BUY_TO_COVER = new OrderSide("BTC");
+    static public final OrderSide SELL = new OrderSide("SL");
+    static public final OrderSide SHORT_SELL = new OrderSide("SS");
 
-	// Trader Engine Types
-	static public final OrderSide BUY = new OrderSide("Buy");
-    static public final OrderSide SELL = new OrderSide("Sell");
-    static public final OrderSide SHORT_SELL = new OrderSide("Short Sell");
-
-    static private final OrderSide[] array = { BUY, SELL, SHORT_SELL };
+    static private final OrderSide[] array = { BUY, BUY_TO_COVER, SELL, SHORT_SELL };
 
 	private final String name;
     

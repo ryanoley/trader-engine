@@ -136,7 +136,7 @@ class BasketTableModel extends AbstractTableModel {
         case ORDID:
         	return order.getOrderID();
         case TYPE:
-        	return order.getOrderType().toString();
+        	return order.getPriceType().toString();
         case LIMIT:
         	return String.valueOf(order.getLimitPrice());
         case SHARES:

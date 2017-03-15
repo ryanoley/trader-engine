@@ -4,10 +4,10 @@ import com.roundaboutam.trader.ramfix.ExecutionType;
 import com.roundaboutam.trader.ramfix.FIXMessage;
 import com.roundaboutam.trader.ramfix.MessageType;
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
-import com.roundaboutam.trader.ramfix.OrderSide;
 import com.roundaboutam.trader.ramfix.OrderStatus;
 import com.roundaboutam.trader.ramfix.OrderTIF;
-import com.roundaboutam.trader.ramfix.OrderType;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import quickfix.FieldNotFound;
 import quickfix.Message;
@@ -30,7 +30,7 @@ public class MessageContainer {
 	private OrderStatus orderStatus;
 	private ExecutionType executionType;
 	private OrderSide orderSide;
-	private OrderType orderType;
+	private PriceType priceType;
 	private OrderOpenClose orderOpenClose;
 	private OrderTIF orderTIF;
 
@@ -63,7 +63,7 @@ public class MessageContainer {
 		resolveExecType(message);
 		resolveOrdStatus(message);
 		resolveSide(message);
-		resolveOrderType(message);
+		resolvePriceType(message);
 		resolveOpenClose(message);
 		resolveOrderTIF(message);
 	
@@ -126,12 +126,12 @@ public class MessageContainer {
 		}
 	}
 
-	private void resolveOrderType(Message message) {
+	private void resolvePriceType(Message message) {
         try {
         	OrdType fixOrdType = (OrdType) message.getField(new OrdType());
-        	this.orderType = FIXMessage.FIXOrdTypeToOrderType(fixOrdType);
+        	this.priceType = FIXMessage.FIXOrdTypeToPriceType(fixOrdType);
 		} catch (FieldNotFound e) {
-			this.orderType = null;
+			this.priceType = null;
 		}
 	}
 
@@ -257,8 +257,8 @@ public class MessageContainer {
     	return lastShares;
     }
 
-    public OrderType getOrderType() {
-    	return orderType;
+    public PriceType getPriceType() {
+    	return priceType;
     }
 
     public String getText() {

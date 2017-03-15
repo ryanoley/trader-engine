@@ -1,6 +1,6 @@
 package com.roundaboutam.trader.order;
 
-import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.rmp.OrderSide;
 
 import quickfix.SessionID;
 

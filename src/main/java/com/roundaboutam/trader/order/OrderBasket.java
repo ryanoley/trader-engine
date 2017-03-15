@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
-import com.roundaboutam.trader.ramfix.OrderSide;
+import com.roundaboutam.trader.rmp.OrderSide;
 
 
 public class OrderBasket {

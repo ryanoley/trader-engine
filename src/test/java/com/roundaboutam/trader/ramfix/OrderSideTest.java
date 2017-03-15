@@ -10,9 +10,10 @@ public class OrderSideTest extends TestCase {
 
 	public void testOrderSide() {		
 
-		assertEquals(OrderSide.BUY.toString(), "Buy");
-		assertEquals(OrderSide.SELL.toString(), "Sell");
-		assertEquals(OrderSide.SHORT_SELL.toString(), "Short Sell");
+		assertEquals(OrderSide.BUY.toString(), "BY");
+		assertEquals(OrderSide.SELL.toString(), "SL");
+		assertEquals(OrderSide.SHORT_SELL.toString(), "SS");
+		assertEquals(OrderSide.BUY_TO_COVER.toString(), "BTC");
 
 		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.BUY), new Side(Side.BUY));
 		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.SELL), new Side(Side.SELL));
@@ -22,7 +23,7 @@ public class OrderSideTest extends TestCase {
 		assertEquals(FIXMessage.FIXSideToOrderSide(new Side(Side.SELL)), OrderSide.SELL);
 		assertEquals(FIXMessage.FIXSideToOrderSide(new Side(Side.SELL_SHORT)), OrderSide.SHORT_SELL);
 
-		assertEquals(OrderSide.toArray().length, 3);
+		assertEquals(OrderSide.toArray().length, 4);
 
 	}
 

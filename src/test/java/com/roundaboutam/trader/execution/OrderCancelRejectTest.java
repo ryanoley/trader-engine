@@ -11,7 +11,7 @@ public class OrderCancelRejectTest extends TestCase {
     			"1234", "1234", "BRK", "20160101-14:45:64", 
     			OrderSide.BUY, "Reject Reason");
 		orderCancelReject.setSuffix("B");
-        assertEquals(orderCancelReject.getLogEntry(), "1,1234,1234,BRK/B,20160101-14:45:64,Buy,null,Reject Reason");
+        assertEquals(orderCancelReject.getLogEntry(), "1,1234,1234,BRK/B,20160101-14:45:64,BY,null,Reject Reason");
 	}
 
 }

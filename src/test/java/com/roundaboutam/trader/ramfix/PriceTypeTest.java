@@ -26,7 +26,7 @@ public class PriceTypeTest extends TestCase {
 		assertEquals(FIXMessage.FIXOrdTypeToPriceType(new OrdType(OrdType.MARKET_ON_CLOSE)), PriceType.MARKET_ON_CLOSE);
 		assertEquals(FIXMessage.FIXOrdTypeToPriceType(new OrdType(OrdType.LIMIT_ON_CLOSE)), PriceType.LIMIT_ON_CLOSE);
 
-		assertEquals(PriceType.toArray().length, 4);
+		assertEquals(PriceType.toArray().length, 5);
 
 	}
 

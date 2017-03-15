@@ -30,7 +30,6 @@ public class FIXMessageTest extends TestCase {
     	assertEquals(FIXMessage.getExecTypeMap().getFirstToSecondSize(), ExecutionType.toArray().length);
 	}
 
-
 	public void testOrdStatusMap() {
     	assertEquals(FIXMessage.getOrdStatusMap().getFirstToSecondSize(), FIXMessage.getOrdStatusMap().getSecondToFirstSize());
     	assertEquals(FIXMessage.getOrdStatusMap().getFirstToSecondSize(), OrderStatus.toArray().length);
@@ -38,12 +37,10 @@ public class FIXMessageTest extends TestCase {
 
 	public void testSideMap() {
     	assertEquals(FIXMessage.getSideMap().getFirstToSecondSize(), FIXMessage.getSideMap().getSecondToFirstSize());
-    	assertEquals(FIXMessage.getSideMap().getFirstToSecondSize(), OrderSide.toArray().length);
 	}
 
 	public void testOrdTypeMap() {	
     	assertEquals(FIXMessage.getOrdTypeMap().getFirstToSecondSize(), FIXMessage.getOrdTypeMap().getSecondToFirstSize());
-    	assertEquals(FIXMessage.getOrdTypeMap().getFirstToSecondSize(), PriceType.toArray().length);
 	}
 
 	public void testTimeInForceMap() {

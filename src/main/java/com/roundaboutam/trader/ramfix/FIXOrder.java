@@ -36,7 +36,8 @@ public class FIXOrder {
 	}
 
 	private static Message formatNormalOrder(Order order) {
-		NewOrderSingle fixOrder = getNewOrderSingle(order);		
+		NewOrderSingle fixOrder = getNewOrderSingle(order);
+		// TODO ML_SMARTDMA rejects in UAT, maybe should be used in PROD
 		fixOrder.setString(TargetSubID.FIELD, "ML_ARCA");
 		return fixOrder;
 	}

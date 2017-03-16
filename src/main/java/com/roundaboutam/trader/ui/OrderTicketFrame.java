@@ -283,11 +283,14 @@ public class OrderTicketFrame {
 
         OrderSide orderSide = (OrderSide) orderSideCombo.getSelectedItem();
         OrderOpenClose orderOpenClose = null;
-        if (orderSide == OrderSide.BUY | orderSide == OrderSide.SHORT_SELL) {
-        	orderOpenClose = OrderOpenClose.OPEN;
-        } else if (orderSide == OrderSide.BUY_TO_COVER | orderSide == OrderSide.SELL) {
-        	orderOpenClose = OrderOpenClose.CLOSE;
-        }
+		if (orderSide == OrderSide.BUY | orderSide == OrderSide.SHORT_SELL) {
+			orderOpenClose = OrderOpenClose.OPEN;
+		} else if (orderSide == OrderSide.BUY_TO_COVER) {
+			orderSide = OrderSide.BUY;
+			orderOpenClose = OrderOpenClose.CLOSE;
+		} else if (orderSide == OrderSide.SELL) {
+			orderOpenClose = OrderOpenClose.CLOSE;		
+		}
 
         String orderTypeText = (String) orderTypesCombo.getSelectedItem();
         Order order = new Order();
@@ -296,7 +299,7 @@ public class OrderTicketFrame {
             order.setStartTime(startTimeField.getText());
             order.setEndTime(endTimeField.getText());
             order.setParticipationRate(Integer.parseInt(participationRateField.getText()));
-            order.setPriceType(PriceType.MARKET);
+            order.setPriceType(PriceType.VWAP);
         } else if (orderTypeText.equals("LIMIT")) {
             order.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
             order.setPriceType(PriceType.LIMIT);

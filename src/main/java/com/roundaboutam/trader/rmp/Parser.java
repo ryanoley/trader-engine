@@ -39,7 +39,7 @@ public class Parser {
 		MessageClass msgClass = MessageClass.parse(fieldMap.get(MessageClass.RMPFieldID));
 
 		if (msgClass == MessageClass.TO_CONSOLE) {
-			System.out.println(Message);
+			System.out.println("RMP - " + Message);
 			return new ParsedRMPObject(msgClass, Message);
 		} 
 		else if (msgClass == MessageClass.NEW_BASKET) {
@@ -85,7 +85,10 @@ public class Parser {
 	}
 
 	private static Order newOrder(HashMap<Integer, String> fieldMap) {
-		Order order = new Order();
+		Order order = new Order();		
+		// TODO This is a hard coded TIF as this is all that is used
+		order.setOrderTIF(OrderTIF.DAY);
+		
 		PriceType priceType = PriceType.parse(fieldMap.get(PriceType.RMPFieldID));
 		OrderSide orderSide = OrderSide.parse(fieldMap.get(OrderSide.RMPFieldID));
 		BasketFlag basketFlag = BasketFlag.parse(fieldMap.get(BasketFlag.RMPFieldID));
@@ -97,9 +100,6 @@ public class Parser {
 		order.setSymbol(symbol.toString());
 		order.setQuantity(quantity.getQuantity());
 
-		// TODO This is a hard coded TIF as this is all that is used
-		order.setOrderTIF(OrderTIF.DAY);
-
 		// Interpret Order Side
 		if (orderSide == OrderSide.BUY | orderSide == OrderSide.SHORT_SELL) {
 			order.setOrderOpenClose(OrderOpenClose.OPEN);
@@ -110,16 +110,26 @@ public class Parser {
 			order.setOrderOpenClose(OrderOpenClose.CLOSE);			
 		}
 		
-		// Interpret PriceType
-		// TODO null handling so this can be set regardless
+		// Interpret PriceType, set VWAP fields depending
 		if (priceType == PriceType.LIMIT) {
 			PriceLimit priceLimit = PriceLimit.parse(fieldMap.get(PriceLimit.RMPFieldID));
 			order.setLimitPrice(priceLimit.getPriceLimit());
 		} else if (priceType == PriceType.VWAP) {
 			order.setVwapFlag(true);
+			String startTimeString = fieldMap.get(StartTime.RMPFieldID);
+			startTimeString = (startTimeString == null) ? order.getStartTime() : startTimeString;
+			order.setStartTime(startTimeString);
+
+			String endTimeString = fieldMap.get(StartTime.RMPFieldID);
+			endTimeString = (endTimeString == null) ? order.getEndTime() : endTimeString;
+			order.setStartTime(endTimeString);
+			
+			String prtString = fieldMap.get(Participation.RMPFieldID);
+			Integer prtInt = (prtString == null) ? order.getParticipationRate() : Integer.parseInt(prtString);
+			order.setParticipationRate(prtInt);
 		}
 
-		// Get Basket Info - can this be done regardless as well?
+		// Interpret Basket information
 		if (basketFlag == BasketFlag.TRUE) {
 			BasketName basketName = BasketName.parse(fieldMap.get(BasketName.RMPFieldID));
 			order.setOrderBasketName(basketName.toString());
@@ -142,6 +152,3 @@ public class Parser {
 
 	
 }
-
-
-

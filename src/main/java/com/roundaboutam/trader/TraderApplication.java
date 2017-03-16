@@ -364,8 +364,8 @@ public class TraderApplication implements Application {
 
     private void newRMPOrder (ParsedRMPObject parsedRMPObject) {
 		Order order = (Order) parsedRMPObject.object;
-		checkSession();
-		//SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
+		//checkSession();
+		SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
 		order.setSessionID(sessionID);
 		String basketName = order.getOrderBasketName(); 
 		if (basketName != null) {
@@ -393,6 +393,8 @@ public class TraderApplication implements Application {
 		fromRMP(newLimitOrderString);
 		String newVWapOrderString = "1=RAMFIX|2=20170313-16:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|10=500|11=V";
 		fromRMP(newVWapOrderString);
+		String newVWapOrder2String = "1=RAMFIX|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|10=500|11=V|13=16:00:00|14=17:00:00|15=4";
+		fromRMP(newVWapOrder2String);
 		String newToConsoleString = "1=RAMFIX|2=20170313-17:54:44|3=C|4=TESTSENDER|5=TRADERENGINE";
 		fromRMP(newToConsoleString);
     }

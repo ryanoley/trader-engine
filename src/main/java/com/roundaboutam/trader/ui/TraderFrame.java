@@ -72,9 +72,6 @@ public class TraderFrame extends JFrame {
 
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.LIGHT_GRAY);
-		JTextArea area = new JTextArea("Roundabout AM  - ");
-		area.setBackground(Color.LIGHT_GRAY);
-		panel.add(area, BorderLayout.LINE_START);
 
 		class DigitalClock implements Runnable {
 			JTextArea area;
@@ -84,9 +81,9 @@ public class TraderFrame extends JFrame {
 			public void run() {
 				try {
 					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+					formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 					while (true) {
-			            area.setText(formatter.format(new Date()) + " (UTC)");
+			            area.setText(formatter.format(new Date()) + " (New York Local Time)");
 			            Thread.sleep(1000);
 			         }
 			      }
@@ -97,7 +94,7 @@ public class TraderFrame extends JFrame {
 		clockArea.setBackground(Color.LIGHT_GRAY);
 		Thread t = new Thread(new DigitalClock(clockArea));
 		t.start();
-		panel.add(clockArea, BorderLayout.LINE_END);
+		panel.add(clockArea, BorderLayout.LINE_START);
 
 		return panel;
 	}

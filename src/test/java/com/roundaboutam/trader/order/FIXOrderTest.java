@@ -29,8 +29,9 @@ public class FIXOrderTest extends TestCase {
 
 	public void testFIXOrderVwap() {
 
-		Order order = new VwapOrder();
-
+		Order order = new Order();
+		
+		order.setVwapFlag(true);
 		order.setSymbol("AAPL");
 		order.setOrderSide(OrderSide.BUY);
 		order.setPriceType(PriceType.MARKET);

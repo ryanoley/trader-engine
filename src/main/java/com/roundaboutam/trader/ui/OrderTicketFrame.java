@@ -23,7 +23,6 @@ import javax.swing.JTextField;
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.TraderEngine;
 import com.roundaboutam.trader.order.Order;
-import com.roundaboutam.trader.order.VwapOrder;
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
 import com.roundaboutam.trader.ramfix.OrderTIF;
 import com.roundaboutam.trader.rmp.OrderSide;
@@ -291,44 +290,27 @@ public class OrderTicketFrame {
         }
 
         String orderTypeText = (String) orderTypesCombo.getSelectedItem();
+        Order order = new Order();
         if (orderTypeText.equals("VWAP")) {
-        	VwapOrder order = new VwapOrder();
-            order.setPriceType(PriceType.MARKET);
+            order.setVwapFlag(true);
             order.setStartTime(startTimeField.getText());
             order.setEndTime(endTimeField.getText());
             order.setParticipationRate(Integer.parseInt(participationRateField.getText()));
-            order.setSymbol(ticker);
-            order.setQuantity(quantity);
-            order.setOrderSide(orderSide);
-            order.setCustomTag(customTag);
-            order.setOrderTIF(OrderTIF.DAY);
-            order.setSessionID(sessionID);
-            order.setOrderOpenClose(orderOpenClose);
-            confirmAndSubmit(order);
+            order.setPriceType(PriceType.MARKET);
         } else if (orderTypeText.equals("LIMIT")) {
-        	Order order = new Order();
             order.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
             order.setPriceType(PriceType.LIMIT);
-            order.setSymbol(ticker);
-            order.setQuantity(quantity);
-            order.setOrderSide(orderSide);
-            order.setCustomTag(customTag);
-            order.setOrderTIF(OrderTIF.DAY);
-            order.setSessionID(sessionID);
-            order.setOrderOpenClose(orderOpenClose);
-            confirmAndSubmit(order);
         } else if (orderTypeText.equals("MARKET")) {
-        	Order order = new Order();
             order.setPriceType(PriceType.MARKET);
-            order.setSymbol(ticker);
-            order.setQuantity(quantity);
-            order.setOrderSide(orderSide);
-            order.setCustomTag(customTag);
-            order.setOrderTIF(OrderTIF.DAY);
-            order.setSessionID(sessionID);
-            order.setOrderOpenClose(orderOpenClose);
-            confirmAndSubmit(order);
         }
+        order.setSymbol(ticker);
+        order.setQuantity(quantity);
+        order.setOrderSide(orderSide);
+        order.setCustomTag(customTag);
+        order.setOrderTIF(OrderTIF.DAY);
+        order.setSessionID(sessionID);
+        order.setOrderOpenClose(orderOpenClose);
+        confirmAndSubmit(order);
 	}
 
 	private void confirmAndSubmit(Order order) {

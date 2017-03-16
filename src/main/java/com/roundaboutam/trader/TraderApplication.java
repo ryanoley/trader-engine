@@ -318,7 +318,7 @@ public class TraderApplication implements Application {
         observableLogon.logon(sessionID);
 		executionBook.setExecutionLogs(sessionID);
 		// TODO following line is temporary for OrderBasket Dev
-        // application.testRMP();
+        // testRMP();
     }
 
     public void onLogout(SessionID sessionID) {
@@ -364,8 +364,8 @@ public class TraderApplication implements Application {
 
     private void newRMPOrder (ParsedRMPObject parsedRMPObject) {
 		Order order = (Order) parsedRMPObject.object;
-		//checkSession();
-		SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
+		checkSession();
+		//SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
 		order.setSessionID(sessionID);
 		String basketName = order.getOrderBasketName(); 
 		if (basketName != null) {
@@ -380,18 +380,20 @@ public class TraderApplication implements Application {
 
     private void checkSession() {
     	if (sessionID == null) {
-        	throw new IllegalStateException("Active Session required. No sessions exists.");
+        	throw new IllegalStateException("Active Session required. No session exists.");
     	}
     }
 
     public void testRMP() {
 		String newBasketString = "1=RAMFIX|2=20170313-13:54:44|3=NB|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket";
 		fromRMP(newBasketString);
-		String newOrderString = "1=RAMFIX|2=20170313-13:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20";
+		String newOrderString = "1=RAMFIX|2=20170313-14:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20";
 		fromRMP(newOrderString);
-		String newLimitOrderString = "1=RAMFIX|2=20170313-13:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=BY|10=175|11=L|12=115.75";
+		String newLimitOrderString = "1=RAMFIX|2=20170313-15:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=SL|10=175|11=L|12=116.75";
 		fromRMP(newLimitOrderString);
-		String newToConsoleString = "1=RAMFIX|2=20170313-13:54:44|3=C|4=TESTSENDER|5=TRADERENGINE";
+		String newVWapOrderString = "1=RAMFIX|2=20170313-16:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|10=500|11=V";
+		fromRMP(newVWapOrderString);
+		String newToConsoleString = "1=RAMFIX|2=20170313-17:54:44|3=C|4=TESTSENDER|5=TRADERENGINE";
 		fromRMP(newToConsoleString);
     }
 

@@ -7,7 +7,6 @@ import java.util.Date;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
 import com.roundaboutam.trader.order.ReplaceOrder;
-import com.roundaboutam.trader.order.VwapOrder;
 import com.roundaboutam.trader.rmp.OrderSide;
 import com.roundaboutam.trader.rmp.PriceType;
 
@@ -29,8 +28,8 @@ import quickfix.fix42.OrderCancelRequest;
 public class FIXOrder {
 
 	public static Message formatNewOrder(Order order) {
-		if (VwapOrder.class.isInstance(order)) {
-			return formatVwapOrder((VwapOrder) order);
+		if (order.getVwapFlag()) {
+			return formatVwapOrder(order);
 		} else {
 			return formatNormalOrder(order);
 		}
@@ -42,7 +41,7 @@ public class FIXOrder {
 		return fixOrder;
 	}
 
-	private static Message formatVwapOrder(VwapOrder vwapOrder) {
+	private static Message formatVwapOrder(Order vwapOrder) {
 		// Force OrderType to Market
 		vwapOrder.setPriceType(PriceType.MARKET);
 

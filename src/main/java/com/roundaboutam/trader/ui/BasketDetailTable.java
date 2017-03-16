@@ -43,7 +43,7 @@ class BasketDetailTable extends JTable implements MouseListener {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
         int modelIdx = convertRowIndexToModel(row);
-    	//Order order = ((BasketTableModel) getModel()).getOrder(modelIdx);
+    	Order order = ((BasketTableModel) getModel()).getOrder(modelIdx);
         Component c = super.prepareRenderer(renderer, row, column);
         
         JComponent jc = (JComponent) c;
@@ -56,6 +56,9 @@ class BasketDetailTable extends JTable implements MouseListener {
         }
         else
           jc.setBorder(null);
+        
+        if (order.getLeavesQty() == 0)
+        	c.setBackground(Color.LIGHT_GRAY);
 
         return c;
     }

@@ -15,8 +15,6 @@ import com.roundaboutam.trader.order.OrderBasket;
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
 import com.roundaboutam.trader.ramfix.OrderTIF;
 
-import quickfix.SessionID;
-
 
 
 public class Parser {
@@ -36,7 +34,7 @@ public class Parser {
 	public static ParsedRMPObject parseMessage(String Message) {
 		if (checkString(Message) == false)
 			return new ParsedRMPObject(MessageClass.BAD_RMP_SYNTAX, Message);
-		
+
 		HashMap<Integer, String> fieldMap = getFieldMap(Message);
 		MessageClass msgClass = MessageClass.parse(fieldMap.get(MessageClass.RMPFieldID));
 
@@ -57,7 +55,6 @@ public class Parser {
 	
 	}
 
-	
 	private static boolean checkString(String inString) {
 		Pattern p = Pattern.compile(SEP);
 		String[] items = p.split(inString);
@@ -72,7 +69,6 @@ public class Parser {
 		return true;
 	}
 
-	
 	private static HashMap<Integer, String> getFieldMap(String inString) {
 		HashMap<Integer, String> fieldMap = new HashMap<Integer, String>();
 		Pattern p = Pattern.compile(SEP);
@@ -95,32 +91,40 @@ public class Parser {
 		BasketFlag basketFlag = BasketFlag.parse(fieldMap.get(BasketFlag.RMPFieldID));
 		Symbol symbol = Symbol.parse(fieldMap.get(Symbol.RMPFieldID));
 		Quantity quantity = Quantity.parse(fieldMap.get(Quantity.RMPFieldID));
-		
 
 		order.setOrderSide(orderSide);
 		order.setPriceType(priceType);
 		order.setSymbol(symbol.toString());
 		order.setQuantity(quantity.getQuantity());
+
 		// TODO This is a hard coded TIF as this is all that is used
 		order.setOrderTIF(OrderTIF.DAY);
 
+		// Interpret Order Side
+		if (orderSide == OrderSide.BUY | orderSide == OrderSide.SHORT_SELL) {
+			order.setOrderOpenClose(OrderOpenClose.OPEN);
+		} else if (orderSide == OrderSide.BUY_TO_COVER) {
+			order.setOrderSide(OrderSide.BUY);
+			order.setOrderOpenClose(OrderOpenClose.CLOSE);
+		} else if (orderSide == OrderSide.SELL) {
+			order.setOrderOpenClose(OrderOpenClose.CLOSE);			
+		}
+		
+		// Interpret PriceType
+		// TODO null handling so this can be set regardless
 		if (priceType == PriceType.LIMIT) {
 			PriceLimit priceLimit = PriceLimit.parse(fieldMap.get(PriceLimit.RMPFieldID));
 			order.setLimitPrice(priceLimit.getPriceLimit());
+		} else if (priceType == PriceType.VWAP) {
+			order.setVwapFlag(true);
 		}
-		
-		if (orderSide == OrderSide.BUY | orderSide == OrderSide.SHORT_SELL) {
-			order.setOrderOpenClose(OrderOpenClose.OPEN);
-		}
-		else if (orderSide == OrderSide.BUY_TO_COVER | orderSide == OrderSide.SELL) {
-			order.setOrderOpenClose(OrderOpenClose.OPEN);
-		}
-		
+
+		// Get Basket Info - can this be done regardless as well?
 		if (basketFlag == BasketFlag.TRUE) {
 			BasketName basketName = BasketName.parse(fieldMap.get(BasketName.RMPFieldID));
 			order.setOrderBasketName(basketName.toString());
 		}
-
+		
 		TimeStamp timeStamp = TimeStamp.parse(fieldMap.get(TimeStamp.RMPFieldID));
 		System.out.println("RMP - new order " + symbol + " at " + timeStamp);
 
@@ -138,10 +142,6 @@ public class Parser {
 
 	
 }
-
-
-
-
 
 
 

@@ -13,6 +13,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.MatteBorder;
+import javax.swing.table.JTableHeader;
 
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.TraderEngine;
@@ -67,7 +69,6 @@ public class BasketInfoFrame {
 	    c.gridy = 1;
 		c.weighty = .25;
 	    JTable summaryTable = basketSummaryPanel(orderBasket);
-	    summaryTable.setBackground(Color.LIGHT_GRAY);
 	    panel.add(new JScrollPane(summaryTable), c);
 
 	    c = new GridBagConstraints();
@@ -114,6 +115,10 @@ public class BasketInfoFrame {
 			{"ExecShares", orderBasket.shrBYExec, orderBasket.shrSSExec, orderBasket.shrBTCExec, orderBasket.shrSLExec },
 			};
 		JTable table = new JTable(data, columns);
+		JTableHeader header = table.getTableHeader();
+		header.setOpaque(false);
+		header.setBackground(Color.lightGray);
+		header.setBorder(new MatteBorder(0, 0, 1, 0, Color.black));
 		return table;
 	}
 	

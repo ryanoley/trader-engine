@@ -13,6 +13,7 @@ public class Order {
     private String customTag = null;
 	private String symbol = null;
     private String suffix = null;
+    private Boolean vwapFlag = false;
 
     // Trading Session related fields
 	private SessionID sessionID = null;
@@ -27,6 +28,9 @@ public class Order {
     private int quantity = 0;
     private Double limitPrice = null;
     private Double stopPrice = null;
+	private String startTime = "14:32:00";
+	private String endTime = "20:58:00";
+	private int participationRate = 12;
 
     // Execution related fields - Same names as FIX fields
     private int leavesQty = 0;
@@ -270,5 +274,31 @@ public class Order {
 
 	public void setOrderBasketID(String orderBasketID) {
 		this.orderBasketID = orderBasketID;
+	}
+	
+	// Vwap order realated fields
+	public Boolean getVwapFlag() {
+		return vwapFlag;
+	}
+	public void setVwapFlag(Boolean vwapFlag) {
+		this.vwapFlag = vwapFlag;
+	}
+	public String getStartTime() {
+		return startTime;
+	}
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+	public String getEndTime() {
+		return endTime;
+	}
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+	public int getParticipationRate() {
+		return participationRate;
+	}
+	public void setParticipationRate(int participationRate) {
+		this.participationRate = participationRate;
 	}	
 }

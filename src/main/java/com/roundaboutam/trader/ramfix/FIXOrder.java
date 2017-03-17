@@ -155,7 +155,6 @@ public class FIXOrder {
 		}
 	    // Convert to target and return formatted string
 	    dateTimeFormat.setTimeZone(tzTarget);
-	    System.out.println(dateTimeFormat.format(localDateTime));
 	    return dateTimeFormat.format(localDateTime);
 	}
 

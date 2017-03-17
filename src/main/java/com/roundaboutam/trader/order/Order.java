@@ -28,8 +28,8 @@ public class Order {
     private int quantity = 0;
     private Double limitPrice = null;
     private Double stopPrice = null;
-	private String startTime = "14:32:00";
-	private String endTime = "20:58:00";
+	private String startTime = "09:32:00";
+	private String endTime = "15:58:00";
 	private int participationRate = 12;
 
     // Execution related fields - Same names as FIX fields

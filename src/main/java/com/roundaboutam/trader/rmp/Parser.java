@@ -61,8 +61,7 @@ public class Parser {
 		for(String s : items) {
         	boolean match = Pattern.matches("\\s*\\d+=\\S+\\s*", s);
             if (match==false) {
-            	System.out.println("RMP - Unknown char sequence: " + s + 
-            			" in message: " + inString);
+            	System.out.println("RMP - Unknown char sequence: " + s + " in message: " + inString);
             	return false;
             }
         }
@@ -120,9 +119,9 @@ public class Parser {
 			startTimeString = (startTimeString == null) ? order.getStartTime() : startTimeString;
 			order.setStartTime(startTimeString);
 
-			String endTimeString = fieldMap.get(StartTime.RMPFieldID);
+			String endTimeString = fieldMap.get(EndTime.RMPFieldID);
 			endTimeString = (endTimeString == null) ? order.getEndTime() : endTimeString;
-			order.setStartTime(endTimeString);
+			order.setEndTime(endTimeString);
 			
 			String prtString = fieldMap.get(Participation.RMPFieldID);
 			Integer prtInt = (prtString == null) ? order.getParticipationRate() : Integer.parseInt(prtString);

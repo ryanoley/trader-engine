@@ -318,7 +318,7 @@ public class TraderApplication implements Application {
         observableLogon.logon(sessionID);
 		executionBook.setExecutionLogs(sessionID);
 		// TODO following line is temporary for OrderBasket Dev
-        // testRMP();
+        //testRMP();
     }
 
     public void onLogout(SessionID sessionID) {
@@ -338,7 +338,7 @@ public class TraderApplication implements Application {
     }
 
 
-    // Functionality for parsing messages from other RAM Apps
+    // Functionality for parsing messages from other RAM App
     public void fromRMP(String rmpMessage) {
     	ParsedRMPObject parsedRMPObject = Parser.parseMessage(rmpMessage);
     	MessageClass messaggeClass = parsedRMPObject.messageClass;
@@ -364,8 +364,8 @@ public class TraderApplication implements Application {
 
     private void newRMPOrder (ParsedRMPObject parsedRMPObject) {
 		Order order = (Order) parsedRMPObject.object;
-		//checkSession();
-		SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
+		checkSession();
+		//SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
 		order.setSessionID(sessionID);
 		String basketName = order.getOrderBasketName(); 
 		if (basketName != null) {
@@ -388,13 +388,17 @@ public class TraderApplication implements Application {
 		String newBasketString = "1=RAMFIX|2=20170313-13:54:44|3=NB|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket";
 		fromRMP(newBasketString);
 		String newOrderString = "1=RAMFIX|2=20170313-14:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20";
-		fromRMP(newOrderString);
-		String newLimitOrderString = "1=RAMFIX|2=20170313-15:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=SL|10=175|11=L|12=116.75";
-		fromRMP(newLimitOrderString);
-		String newVWapOrderString = "1=RAMFIX|2=20170313-16:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|10=500|11=V";
+		//fromRMP(newOrderString);
+		String newLimitOrderString = "1=RAMFIX|2=20170313-15:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=SL|10=175|11=L|12=117.05";
+		//fromRMP(newLimitOrderString);
+		String newVWapOrderString = "1=RAMFIX|2=20170313-16:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|10=400|11=V";
 		fromRMP(newVWapOrderString);
-		String newVWapOrder2String = "1=RAMFIX|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|10=500|11=V|13=16:00:00|14=17:00:00|15=4";
+		String newVWapOrder2String = "1=RAMFIX|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IWM|8=T|9=SL|10=500|11=V|13=10:15:00|14=10:30:00|15=20";
 		fromRMP(newVWapOrder2String);
+		//String newVWapOrder3String = "1=RAMFIX|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=BAC|8=T|9=BY|10=600|11=V|13=10:00:00|14=10:10:00|15=20";
+		//fromRMP(newVWapOrder3String);
+		//String newVWapOrder4String = "1=RAMFIX|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=FB|8=T|9=SL|10=700|11=V|13=10:00:00|14=10:30:00|15=20";
+		////fromRMP(newVWapOrder4String);
 		String newToConsoleString = "1=RAMFIX|2=20170313-17:54:44|3=C|4=TESTSENDER|5=TRADERENGINE";
 		fromRMP(newToConsoleString);
     }

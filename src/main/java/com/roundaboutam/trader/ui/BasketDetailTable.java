@@ -59,6 +59,8 @@ class BasketDetailTable extends JTable implements MouseListener {
         
         if (order.getLeavesQty() == 0)
         	c.setBackground(Color.LIGHT_GRAY);
+        else
+        	c.setBackground(Color.white);
 
         return c;
     }

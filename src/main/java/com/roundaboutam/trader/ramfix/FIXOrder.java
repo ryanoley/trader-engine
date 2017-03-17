@@ -1,8 +1,10 @@
 package com.roundaboutam.trader.ramfix;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
@@ -51,15 +53,15 @@ public class FIXOrder {
         // Destination
 		fixOrder.setString(TargetSubID.FIELD, "ML_ALGO_US");
 
-		// Current date is automatically generated for start/stop date
-		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-    	String currentDate = dateFormat.format(new Date());
+		// Get UTC dateTime strings for start/stop time
+    	String startTimeString = getUTCDateTimeString(vwapOrder.getStartTime());
+    	String endTimeString = getUTCDateTimeString(vwapOrder.getEndTime());
 
     	// Additional VWAP tags proprietary to BAML
     	String algoParams = "6401=1";
     	algoParams = algoParams + ";6403=" + vwapOrder.getParticipationRate();
-    	algoParams = algoParams + ";6168=" + currentDate + "-" + vwapOrder.getStartTime();
-    	algoParams = algoParams + ";126=" + currentDate + "-" + vwapOrder.getEndTime();
+    	algoParams = algoParams + ";6168=" + startTimeString;
+    	algoParams = algoParams + ";126=" + endTimeString;
     	algoParams = algoParams + ";9682=v4.3.0BRT;";
     	fixOrder.setString(9999, algoParams);
 
@@ -131,8 +133,33 @@ public class FIXOrder {
 		return fixOrder;
 
 	}
+	
+	public static String getUTCDateTimeString(String localTimeString) {
+		// Set local and target time zones
+	    TimeZone tzLocal = TimeZone.getTimeZone("America/New_York");
+	    TimeZone tzTarget = TimeZone.getTimeZone("UTC");
+		
+	    // Get todays date and build datetime string
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		dateFormat.setTimeZone(tzLocal);
+		String todayString = dateFormat.format(new Date());
+		
+	    DateFormat dateTimeFormat = new SimpleDateFormat("yyyyMMdd-HH:mm:ss");
+	    dateTimeFormat.setTimeZone(tzLocal);
+	    Date localDateTime = null;
+		try {
+			localDateTime = dateTimeFormat.parse(todayString + "-" + localTimeString);
+		} catch (ParseException e) {
+			System.err.println("Bad Time string (required format HH:mm:ss): " + localTimeString);
+			e.printStackTrace();
+		}
+	    // Convert to target and return formatted string
+	    dateTimeFormat.setTimeZone(tzTarget);
+	    System.out.println(dateTimeFormat.format(localDateTime));
+	    return dateTimeFormat.format(localDateTime);
+	}
 
-  
+
 }
 
 

@@ -21,6 +21,7 @@ import com.roundaboutam.trader.rmp.Parser.ParsedRMPObject;
 import com.roundaboutam.trader.rmp.OrderSide;
 import com.roundaboutam.trader.rmp.Parser;
 import com.roundaboutam.trader.rmp.PriceType;
+import com.roundaboutam.trader.zmq.ZMQServer;
 import com.roundaboutam.trader.execution.ExecutionBook;
 
 import quickfix.Application;
@@ -317,7 +318,7 @@ public class TraderApplication implements Application {
     	setSessionID(sessionID);
         observableLogon.logon(sessionID);
 		executionBook.setExecutionLogs(sessionID);
-        //testRMP();  // TODO This line is temporary for OrderBasket Dev
+        //testRMPZMQ();  // TODO This line is temporary for Parsing dev
     }
 
     public void onLogout(SessionID sessionID) {
@@ -336,15 +337,17 @@ public class TraderApplication implements Application {
     	observableMessage.update(message);
     }
 
-    // Functionality for parsing messages from other RAM App
+    
+    
+    // Functionality for parsing messages from other RAM Apps
     public void fromRMP(String rmpMessage) {
     	ParsedRMPObject parsedRMPObject = Parser.parseMessage(rmpMessage);
-    	MessageClass messaggeClass = parsedRMPObject.messageClass;
+    	MessageClass messageClass = parsedRMPObject.messageClass;
 
-    	if (messaggeClass == MessageClass.NEW_BASKET) {
+    	if (messageClass == MessageClass.NEW_BASKET) {
     		newRMPOrderBasket(parsedRMPObject);
     	}
-    	else if (messaggeClass == MessageClass.NEW_ORDER) {
+    	else if (messageClass == MessageClass.NEW_ORDER) {
     		newRMPOrder(parsedRMPObject);
     	}
     }
@@ -363,7 +366,7 @@ public class TraderApplication implements Application {
     private void newRMPOrder (ParsedRMPObject parsedRMPObject) {
 		Order order = (Order) parsedRMPObject.object;
 		checkSession();
-		//SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
+		//SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN"); // TODO This line is temporary for Parsing dev
 		order.setSessionID(sessionID);
 		String basketName = order.getOrderBasketName(); 
 		if (basketName != null) {
@@ -384,23 +387,28 @@ public class TraderApplication implements Application {
     	}
     }
 
-    public void testRMP() {
-		String newBasketString = "1=RAMFIX|2=20170313-13:54:44|3=NB|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket";
+    public void testRMPZMQ() {
+    	ZMQServer zmqServer = new ZMQServer(this, 5555);
+    	Thread t = new Thread(zmqServer);
+    	t.start();
+    	/*
+    	String newBasketString = "1=RMP|2=20170313-13:54:44|3=NB|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket";
 		fromRMP(newBasketString);
-		String newOrderString = "1=RAMFIX|2=20170313-14:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20";
+		String newOrderString = "1=RMP|2=20170313-14:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20";
 		fromRMP(newOrderString);
-		String newLimitOrderString = "1=RAMFIX|2=20170313-15:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=SL|10=175|11=L|12=117.05";
+		String newLimitOrderString = "1=RMP|2=20170313-15:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=SL|10=175|11=L|12=117.05";
 		fromRMP(newLimitOrderString);
-		String newVWapOrderString = "1=RAMFIX|2=20170313-16:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|10=400|11=V";
+		String newVWapOrderString = "1=RMP|2=20170313-16:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|10=400|11=V";
 		fromRMP(newVWapOrderString);
-		String newVWapOrder2String = "1=RAMFIX|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IWM|8=T|9=SL|10=500|11=V|13=11:15:00|14=11:30:00|15=20";
+		String newVWapOrder2String = "1=RMP|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IWM|8=T|9=SL|10=500|11=V|13=11:15:00|14=11:30:00|15=20";
 		fromRMP(newVWapOrder2String);
-		String newVWapOrder3String = "1=RAMFIX|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=BAC|8=T|9=BY|10=600|11=V|13=11:17:00|14=11:25:00|15=20";
+		String newVWapOrder3String = "1=RMP|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=BAC|8=T|9=BY|10=600|11=V|13=11:17:00|14=11:25:00|15=20";
 		fromRMP(newVWapOrder3String);
-		String newVWapOrder4String = "1=RAMFIX|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=FB|8=T|9=SL|10=700|11=V|13=11:12:00|14=11:20:00|15=20";
+		String newVWapOrder4String = "1=RMP|2=20170313-16:33:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=FB|8=T|9=SL|10=700|11=V|13=11:12:00|14=11:20:00|15=20";
 		fromRMP(newVWapOrder4String);
-		String newToConsoleString = "1=RAMFIX|2=20170313-17:54:44|3=C|4=TESTSENDER|5=TRADERENGINE";
+		String newToConsoleString = "1=RMP|2=20170313-17:54:44|3=TC|4=TESTSENDER|5=TRADERENGINE";
 		fromRMP(newToConsoleString);
+		*/
     }
 
 }

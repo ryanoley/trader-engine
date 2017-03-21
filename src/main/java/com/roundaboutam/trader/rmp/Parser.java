@@ -48,8 +48,11 @@ public class Parser {
 		else if (msgClass == MessageClass.NEW_ORDER) {
 			return new ParsedRMPObject(msgClass, newOrder(fieldMap));
 		}
+		else if (msgClass == MessageClass.OPEN_RMP_CONNECTION | msgClass == MessageClass.CLOSE_RMP_CONNECTION) {
+			return new ParsedRMPObject(msgClass, fieldMap);
+		}
 		else{
-			System.out.println(Message);
+			System.out.println("RMP - parseMessage SINK: " + Message);
 			return new ParsedRMPObject(msgClass, Message);
 		}
 	
@@ -68,7 +71,8 @@ public class Parser {
 		return true;
 	}
 
-	private static HashMap<Integer, String> getFieldMap(String inString) {
+	public static HashMap<Integer, String> getFieldMap(String inString) {
+		checkString(inString);
 		HashMap<Integer, String> fieldMap = new HashMap<Integer, String>();
 		Pattern p = Pattern.compile(SEP);
 		String[] items = p.split(inString);

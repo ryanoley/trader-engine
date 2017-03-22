@@ -29,6 +29,7 @@ public class TraderFrame extends JFrame {
 	private transient TraderApplication application = null;
 	private FIXMonitor fixMonitor;
 	private JButton btnFIX;
+	private JButton btnZMQ;
 	
 	public TraderFrame(TraderApplication application) {
 		super();
@@ -210,10 +211,10 @@ public class TraderFrame extends JFrame {
 	}
 	
 	private JButton getZMQButton() {
-		JButton btnZMQ = new JButton("ZMQ");
+		btnZMQ = new JButton("Start ZMQ");
 		btnZMQ.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ZMQFrame.getInstance();
+				ZMQFrame.getInstance(btnZMQ, application);
 			}
 		});
 		return btnZMQ;
@@ -222,5 +223,4 @@ public class TraderFrame extends JFrame {
 	public void setFixButtonText(String text) {
 		btnFIX.setText(text);
 	}
-
 }

@@ -3,6 +3,7 @@ package com.roundaboutam.trader.ui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -14,26 +15,22 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.TraderEngine;
+
 public class ZMQFrame {
 
 	private static JFrame frame;
 	private static JPanel panel;
-
-	private static JTextField subPortField = new JTextField("5556");
-	private static JRadioButton subButtonOn = new JRadioButton("On");
-	private static JRadioButton subButtonOff = new JRadioButton("Off");
-	private static ButtonGroup subButtonGroup = new ButtonGroup();
-
-	private static JTextField pubPortField = new JTextField("5557");
-	private static JRadioButton pubButtonOn = new JRadioButton("On");
-	private static JRadioButton pubButtonOff = new JRadioButton("Off");
-	private static ButtonGroup pubButtonGroup = new ButtonGroup();
-
+	private static JTextField portField = new JTextField("5555");
 	private static ZMQFrame instance = null;
+	private transient TraderApplication application = null;
+	private JButton zmqButton= null;
 
-	public static ZMQFrame getInstance() {
+	
+	public static ZMQFrame getInstance(JButton zmqButton, TraderApplication application) {
 		if (instance == null) {
-			instance = new ZMQFrame();
+			instance = new ZMQFrame(zmqButton, application);
 			return instance;
 		}
 		if (!frame.isVisible())
@@ -41,95 +38,78 @@ public class ZMQFrame {
 		return instance;
 	}
 
-	private ZMQFrame() {
+	private ZMQFrame(JButton zmqButton, TraderApplication application) {
+		this.application = application;
+		this.zmqButton = zmqButton;
 		makeZMQFrame();
 	}
 
 
 	private void makeZMQFrame() {
-
 		frame = new JFrame();
+		Point traderEngineLoc = TraderEngine.get().getTraderFrame().getLocationOnScreen();
+		frame.setLocation(traderEngineLoc.x + 250, traderEngineLoc.y + 300);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("ZMQ");
-		frame.setSize(400, 600);
+		frame.setSize(200, 200);
 		frame.setResizable(false);
 
 		panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.PAGE_START;
-		
-		c.gridx = 0;
-		c.gridy = 0;
-		panel.add(new JLabel("Subscriber:"), c);
-		c.gridx = 1;
-		c.gridy = 0;
-		panel.add(subButtonOn, c);
-		c.gridx = 2;
-		c.gridy = 0;
-		panel.add(subButtonOff, c);
 
 		c.gridx = 0;
-		c.gridy = 1;
-		panel.add(new JLabel("Publisher:"), c);
+		c.gridy = 0;
+		panel.add(new JLabel("Port:"), c);
+	    c.insets = new Insets(0, 5, 0, 0);
 		c.gridx = 1;
-		c.gridy = 1;
-		panel.add(pubButtonOn, c);
-		c.gridx = 2;
-		c.gridy = 1;
-		c.insets = new Insets(0, 0, 8, 0);
-		panel.add(pubButtonOff, c);
-
-		c.gridx = 0;
-		c.gridy = 2;
-		c.insets = new Insets(0, 0, 0, 0);
-		panel.add(new JLabel("Subscribe Port:"), c);
-		c.gridx = 1;
-		c.gridy = 2;
+		c.gridy = 0;
 		c.gridwidth = 2;
-		panel.add(subPortField, c);
-
-		c.gridx = 0;
-		c.gridy = 3;
-		panel.add(new JLabel("Publisher Port:"), c);
-		c.gridx = 1;
-		c.gridy = 3;
-		c.gridwidth = 2;
-		c.insets = new Insets(0, 0, 10, 0);
-		panel.add(pubPortField, c);
-
-		subButtonGroup.add(subButtonOn);
-		subButtonGroup.add(subButtonOff);
-		subButtonOff.setSelected(true);
-		pubButtonGroup.add(pubButtonOn);
-		pubButtonGroup.add(pubButtonOff);
-		pubButtonOff.setSelected(true);
+		panel.add(portField, c);
 
 	    c.gridx = 0;
-	    c.gridy = 4;
+	    c.gridy = 3;
 	    c.gridwidth = 3;
-	    c.insets = new Insets(0, 0, 5, 0);
-	    JButton btnSubmit = new JButton("Okay");
-	    btnSubmit.addActionListener(new ActionListener() {
+	    c.insets = new Insets(20, 0, 5, 0);
+	    JButton btnStart = new JButton("Start Server");
+	    btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//makeTransmitOrder();
+				int port = Integer.parseInt(portField.getText());
+				startZMQ(port);
 			}
 		});
-	    panel.add(btnSubmit, c);
+	    panel.add(btnStart, c);
 
+	    c.insets = new Insets(10, 0, 0, 0);
 	    c.gridx = 0;
 	    c.gridy = 5;
-	    JButton btnClose = new JButton("Close");
-	    btnClose.addActionListener(new ActionListener() {
+	    JButton btnStop = new JButton("Stop Server");
+	    btnStop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				instance = null;
-				frame.dispose();
+				stopZMQ();
 			}
 		});
-	    panel.add(btnClose, c);
-
-	    frame.add(panel);	    
+	    panel.add(btnStop, c);
+	    frame.add(panel);
+	    if (application.getZMQServerStatus())
+	    	btnStart.setEnabled(false);
+	    else
+	    	btnStop.setEnabled(false);
 	    frame.setVisible(true);
 	}
-
+	
+	private void startZMQ(Integer port){
+		application.startZMQServer(port);
+		zmqButton.setText("Stop ZMQ");
+		instance = null;
+		frame.dispose();
+	}
+	
+	private void stopZMQ(){
+		application.stopZMQServer();
+		zmqButton.setText("Start ZMQ");
+		instance = null;
+		frame.dispose();
+	}
 }

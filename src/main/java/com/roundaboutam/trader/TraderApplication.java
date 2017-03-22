@@ -14,13 +14,9 @@ import com.roundaboutam.trader.order.OrderBook;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.ReplaceOrder;
 import com.roundaboutam.trader.ramfix.FIXOrder;
-import com.roundaboutam.trader.ramfix.OrderOpenClose;
-import com.roundaboutam.trader.ramfix.OrderTIF;
 import com.roundaboutam.trader.rmp.MessageClass;
 import com.roundaboutam.trader.rmp.Parser.ParsedRMPObject;
-import com.roundaboutam.trader.rmp.OrderSide;
 import com.roundaboutam.trader.rmp.Parser;
-import com.roundaboutam.trader.rmp.PriceType;
 import com.roundaboutam.trader.zmq.ZMQServer;
 import com.roundaboutam.trader.execution.ExecutionBook;
 
@@ -62,6 +58,7 @@ public class TraderApplication implements Application {
     private final OrderBook orderBook;
 	private final OrderBasketBook orderBasketBook;
 	private final ExecutionBook executionBook;
+	private ZMQServer zmqServer = null;
 
     private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
@@ -337,8 +334,7 @@ public class TraderApplication implements Application {
     	observableMessage.update(message);
     }
 
-    
-    
+
     // Functionality for parsing messages from other RAM Apps
     public void fromRMP(String rmpMessage) {
     	ParsedRMPObject parsedRMPObject = Parser.parseMessage(rmpMessage);
@@ -356,8 +352,7 @@ public class TraderApplication implements Application {
 		OrderBasket orderBasket = (OrderBasket) parsedRMPObject.object;
 		String basketName = orderBasket.getBasketName();
 		if (orderBasketBook.basketExists(basketName)) {
-			throw new IllegalArgumentException("RMP - Order Basket " + basketName + 
-					" exists. Cannot create multiple baskets with same name");
+			throw new IllegalArgumentException("RMP - " + basketName + "exists, cannot create");
 		}
 		orderBasketBook.addBasket(orderBasket);
 		observableBasket.update(orderBasket);
@@ -376,8 +371,7 @@ public class TraderApplication implements Application {
 				observableBasket.update(orderBasket);
 			}
 		} else {
-			System.out.println("No Basket information provided for New " + order.getSymbol() 
-			+ " order. Order discarded.");
+			System.out.println("RMP - No Basket information proviced for :" + order.getSymbol());
 		}
     }
 
@@ -387,10 +381,30 @@ public class TraderApplication implements Application {
     	}
     }
 
+    public void startZMQServer(Integer port) {
+    	if (zmqServer == null) {
+        	zmqServer = new ZMQServer(this, 5555);
+        	Thread zmqThread = new Thread(zmqServer);
+        	zmqThread.start();
+    	}
+    }
+
+    public void stopZMQServer() {
+    	if (zmqServer != null) {
+    		zmqServer.shutdown();
+    		zmqServer = null;
+    	}
+    }
+    
+    public Boolean getZMQServerStatus() {
+    	if (zmqServer == null)
+    		return false;
+    	else 
+    		return zmqServer.isStarted();
+    }
+
+
     public void testRMPZMQ() {
-    	ZMQServer zmqServer = new ZMQServer(this, 5555);
-    	Thread t = new Thread(zmqServer);
-    	t.start();
     	/*
     	String newBasketString = "1=RMP|2=20170313-13:54:44|3=NB|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket";
 		fromRMP(newBasketString);

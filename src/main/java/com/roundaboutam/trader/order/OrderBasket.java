@@ -47,9 +47,14 @@ public class OrderBasket {
 	}
 
 	public void addOrder(Order order) {
-		order.setOrderBasketID(basketID);
-		order.setOrderBasketName(basketName);
-		orderMap.put(order.getOrderID(), order);
+		if (isStaged()) {
+			order.setOrderBasketID(basketID);
+			order.setOrderBasketName(basketName);
+			orderMap.put(order.getOrderID(), order);
+		} else {
+			System.out.println("Cannot add " + order.getSymbol() + " to Basket " 
+		+ basketName + ". No longer staged");
+		}
 	}
 
 	public void removeOrder(Order order) {

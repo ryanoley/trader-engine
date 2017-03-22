@@ -25,7 +25,7 @@ def sendSocketMessage(socket, msgString):
     print message
     return message
 
-def sendTestStrings():
+def sendTestStrings(socket):
     newBasketString = "1=RMP|2=20170313-13:54:44|3=NB|4=PYSENDER|5=TRADERENGINE|6=ParseBasket"
     sendSocketMessage(socket, newBasketString)
 
@@ -58,7 +58,7 @@ def main():
 
     socket = getZMQSocket(ZmqContext)
 
-    #sendTestStrings()
+    #sendTestStrings(socket)
 
     socket.close()
     ZmqContext.term()

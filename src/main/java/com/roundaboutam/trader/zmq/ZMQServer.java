@@ -20,10 +20,11 @@ import com.roundaboutam.trader.rmp.SourceApp;
 
 public class ZMQServer implements Runnable{
 
-	public Boolean started = false;
-	public Boolean connected = false;
+	private Boolean started = false;
+	private Boolean connected = false;
 	private ZMQ.Context context = null;
 	private ZMQ.Socket responder = null;
+	volatile boolean shutdown;
 	private HashSet<String> rmpConnections;
 	private transient TraderApplication application = null;
 	private Integer port = new Integer(5555);
@@ -37,22 +38,25 @@ public class ZMQServer implements Runnable{
 
 
 	public void run() {
-
 		if (isStarted() == true) {
 			throw new IllegalStateException("ZMQ Server aleady started.");
 		}
 		responder = context.socket(ZMQ.REP);
+		responder.setReceiveTimeOut(5000);
 	    responder.bind("tcp://*:" + port);
 	    setStarted(true);
+	    shutdown = false;
 	    System.out.println("ZMQ - ZMQ Socket listening on port:" + port);
 
-		while (!Thread.currentThread().isInterrupted()) {
+		while (!shutdown) {
 	        // Wait for next request from the client
 			String replyString = "";
 	        byte[] request = responder.recv(0);
+	        if (request == null)
+	        	continue;
+	        
 	        String requestString = new String(request);
 	        System.out.println("ZMQ - " + requestString);
-
 	    	HashMap<Integer, String> fieldMap = Parser.getFieldMap(requestString);
 	    	MessageClass messageClass = MessageClass.parse(fieldMap.get(MessageClass.RMPFieldID));
 	    	String sourceApp = fieldMap.get(SourceApp.RMPFieldID);
@@ -73,22 +77,12 @@ public class ZMQServer implements Runnable{
 	    		System.out.println("ZMQ - Message from unknown source: " + sourceApp);
 	    		replyString = "UNKNOWN SOURCE";
 	    	}
-	    	
 	    	setConnected(rmpConnections.size() > 0 ? true : false);
 	    	// Send reply back to client
-	        responder.send(replyString.getBytes(), 0);  
+	        responder.send(replyString.getBytes(), 0);
 	    }
-	}
-
-	public void stopServer() {
-		if (isConnected() == true) {
-			rmpConnections = new HashSet<String>();
-			setConnected(false);
-		}
-		if (isStarted()) {
-			responder.close();
-	    	setStarted(false);
-		}
+	    System.out.println("ZMQ Server shutdown");
+		responder.close();
 	    context.term();
 	}
 	
@@ -107,6 +101,9 @@ public class ZMQServer implements Runnable{
 	private void setStarted(Boolean bool) {
 		started = bool;
 	}
-
+	
+    public void shutdown() {
+        shutdown = true;
+    }
 
 }

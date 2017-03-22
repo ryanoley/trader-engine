@@ -54,7 +54,7 @@ public class TraderApplication implements Application {
     private final ObservableMessage observableMessage = new ObservableMessage();
     private final ObservableLogon observableLogon = new ObservableLogon();
     private final ObservableBasket observableBasket = new ObservableBasket();
-
+    private final SessionSettings settings;
     private final OrderBook orderBook;
 	private final OrderBasketBook orderBasketBook;
 	private final ExecutionBook executionBook;
@@ -69,6 +69,7 @@ public class TraderApplication implements Application {
 	
 
 	public TraderApplication(SessionSettings settings) throws ConfigError, FieldConvertError {
+		this.settings = settings;
 		orderBook = new OrderBook();
 		executionBook = new ExecutionBook(settings.getString("CustomLogPath"));
 		orderBasketBook = new OrderBasketBook();
@@ -226,6 +227,8 @@ public class TraderApplication implements Application {
     	}
     }
 
+
+    
     // Various observable and getter functionality
     public SessionID getSessionID() {
     	return sessionID;
@@ -234,7 +237,36 @@ public class TraderApplication implements Application {
     private void setSessionID(SessionID sessionID) {
     	this.sessionID = sessionID;
     }
+   
+    public SessionSettings getSessionSettings(){
+    	return settings;
+    }
+     
+    public void onCreate(SessionID sessionID) { }
 
+    public void onLogon(SessionID sessionID) {
+    	setSessionID(sessionID);
+        observableLogon.logon(sessionID);
+		executionBook.setExecutionLogs(sessionID);
+    }
+
+    public void onLogout(SessionID sessionID) {
+    	setSessionID(null);
+    	observableLogon.logoff(sessionID);
+    	executionBook.closeExecutionLogs(sessionID);
+    }
+
+    public void toAdmin(Message message, SessionID sessionID) { }
+
+    public void toApp(Message message, SessionID sessionID) throws DoNotSend { }
+
+    public void fromAdmin(Message message, SessionID sessionID) throws FieldNotFound,
+    	IncorrectDataFormat, IncorrectTagValue, RejectLogon {
+    	System.out.println(message.toString());
+    	observableMessage.update(message);
+    }
+
+    // Observable classes
     public void addLogonObserver(Observer observer) {
         observableLogon.addObserver(observer);
     }
@@ -308,32 +340,6 @@ public class TraderApplication implements Application {
             clearChanged();
         }
     }
- 
-    public void onCreate(SessionID sessionID) { }
-
-    public void onLogon(SessionID sessionID) {
-    	setSessionID(sessionID);
-        observableLogon.logon(sessionID);
-		executionBook.setExecutionLogs(sessionID);
-        //testRMPZMQ();  // TODO This line is temporary for Parsing dev
-    }
-
-    public void onLogout(SessionID sessionID) {
-    	setSessionID(null);
-    	observableLogon.logoff(sessionID);
-    	executionBook.closeExecutionLogs(sessionID);
-    }
-
-    public void toAdmin(Message message, SessionID sessionID) { }
-
-    public void toApp(Message message, SessionID sessionID) throws DoNotSend { }
-
-    public void fromAdmin(Message message, SessionID sessionID) throws FieldNotFound,
-    	IncorrectDataFormat, IncorrectTagValue, RejectLogon {
-    	System.out.println(message.toString());
-    	observableMessage.update(message);
-    }
-
 
     // Functionality for parsing messages from other RAM Apps
     public void fromRMP(String rmpMessage) {
@@ -383,7 +389,11 @@ public class TraderApplication implements Application {
 
     public void startZMQServer(Integer port) {
     	if (zmqServer == null) {
-        	zmqServer = new ZMQServer(this, 5555);
+        	try {
+				zmqServer = new ZMQServer(this, port, settings.getString("CustomLogPath"));
+			} catch (ConfigError | FieldConvertError e) {
+				e.printStackTrace();
+			}
         	Thread zmqThread = new Thread(zmqServer);
         	zmqThread.start();
     	}

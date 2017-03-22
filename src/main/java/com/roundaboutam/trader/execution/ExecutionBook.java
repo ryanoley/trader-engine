@@ -31,7 +31,6 @@ public class ExecutionBook {
 		executionMap = new HashMap<String, Execution>();
 		orderCancelRejectMap = new HashMap<String, OrderCancelReject>();
 		this.logFilePath = filePath;
-
 	}
 
 	public void setExecutionLogs(SessionID sessionID) {

@@ -1,16 +1,21 @@
 package com.roundaboutam.trader.zmq;
 
+/*
+ *  zmq docs: http://zguide.zeromq.org/page:all
+ */
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-
-/*
- * 
- */
-
 
 import org.zeromq.ZMQ;
 
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.execution.Execution;
 import com.roundaboutam.trader.rmp.MessageClass;
 import com.roundaboutam.trader.rmp.Parser;
 import com.roundaboutam.trader.rmp.SourceApp;
@@ -19,34 +24,34 @@ import com.roundaboutam.trader.rmp.SourceApp;
 
 
 public class ZMQServer implements Runnable{
-
+	private static final char Inbound = 'I'; 
+	private static final char Outbound = 'O'; 
+	
+	private ZMQ.Context context = null;
 	private Boolean started = false;
 	private Boolean connected = false;
-	private ZMQ.Context context = null;
-	private ZMQ.Socket responder = null;
-	volatile boolean shutdown;
+	volatile Boolean shutdown = false;
 	private HashSet<String> rmpConnections;
+	private BufferedWriter zmqLogFile;
 	private transient TraderApplication application = null;
 	private Integer port = new Integer(5555);
 
-	public ZMQServer(TraderApplication application, Integer port) {
+	public ZMQServer(TraderApplication application, Integer port, String logFilePath) {
 		context = ZMQ.context(1);
 		rmpConnections = new HashSet<String>();
 		this.application = application;
 		this.port = port;
+		setLogFile(logFilePath);
 	}
-
 
 	public void run() {
 		if (isStarted() == true) {
 			throw new IllegalStateException("ZMQ Server aleady started.");
 		}
-		responder = context.socket(ZMQ.REP);
+		ZMQ.Socket responder = context.socket(ZMQ.REP);
 		responder.setReceiveTimeOut(5000);
 	    responder.bind("tcp://*:" + port);
 	    setStarted(true);
-	    shutdown = false;
-	    System.out.println("ZMQ - ZMQ Socket listening on port:" + port);
 
 		while (!shutdown) {
 	        // Wait for next request from the client
@@ -56,7 +61,6 @@ public class ZMQServer implements Runnable{
 	        	continue;
 	        
 	        String requestString = new String(request);
-	        System.out.println("ZMQ - " + requestString);
 	    	HashMap<Integer, String> fieldMap = Parser.getFieldMap(requestString);
 	    	MessageClass messageClass = MessageClass.parse(fieldMap.get(MessageClass.RMPFieldID));
 	    	String sourceApp = fieldMap.get(SourceApp.RMPFieldID);
@@ -71,7 +75,7 @@ public class ZMQServer implements Runnable{
 	    		}
 	    	} else if (rmpConnections.contains(sourceApp)) {
 	    		application.fromRMP(requestString);
-	    		replyString = "KNOWN SOURCE";
+	    		replyString = "RMP PARSING";
 	    	}
 	    	else {
 	    		System.out.println("ZMQ - Message from unknown source: " + sourceApp);
@@ -80,12 +84,42 @@ public class ZMQServer implements Runnable{
 	    	setConnected(rmpConnections.size() > 0 ? true : false);
 	    	// Send reply back to client
 	        responder.send(replyString.getBytes(), 0);
+	        toLog(requestString, Inbound);
+	        toLog(replyString, Outbound);	
 	    }
 	    System.out.println("ZMQ Server shutdown");
 		responder.close();
 	    context.term();
 	}
+
+	public void setLogFile(String filePath) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		Date date = new Date();
+		String zmqLogPath = filePath + "\\zmq\\" + dateFormat.format(date) + ".zmq.txt";
+		try {
+			zmqLogFile = new BufferedWriter(new FileWriter(zmqLogPath, true));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
+	public void closeZMQLogs() {
+		try {
+			zmqLogFile.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void toLog(String zmqString, char dir) {
+		try {
+			zmqLogFile.write(dir + "|"+ zmqString + "\n");
+			zmqLogFile.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public Boolean isConnected() {
 		return connected;
 	}
@@ -103,6 +137,7 @@ public class ZMQServer implements Runnable{
 	}
 	
     public void shutdown() {
+    	closeZMQLogs();
         shutdown = true;
     }
 

@@ -39,7 +39,7 @@ public class Parser {
 		MessageClass msgClass = MessageClass.parse(fieldMap.get(MessageClass.RMPFieldID));
 
 		if (msgClass == MessageClass.TO_CONSOLE) {
-			System.out.println("RMP - " + Message);
+			System.out.println("Parser - " + Message);
 			return new ParsedRMPObject(msgClass, Message);
 		} 
 		else if (msgClass == MessageClass.NEW_BASKET) {
@@ -52,7 +52,7 @@ public class Parser {
 			return new ParsedRMPObject(msgClass, fieldMap);
 		}
 		else{
-			System.out.println("RMP - parseMessage SINK: " + Message);
+			System.out.println("Parser - parseMessage SINK: " + Message);
 			return new ParsedRMPObject(msgClass, Message);
 		}
 	
@@ -64,7 +64,7 @@ public class Parser {
 		for(String s : items) {
         	boolean match = Pattern.matches("\\s*\\d+=\\S+\\s*", s);
             if (match==false) {
-            	System.out.println("RMP - Unknown char sequence: " + s + " in message: " + inString);
+            	System.out.println("Parser - Unknown char sequence: " + s + " in message: " + inString);
             	return false;
             }
         }
@@ -137,9 +137,6 @@ public class Parser {
 			BasketName basketName = BasketName.parse(fieldMap.get(BasketName.RMPFieldID));
 			order.setOrderBasketName(basketName.toString());
 		}
-		
-		TimeStamp timeStamp = TimeStamp.parse(fieldMap.get(TimeStamp.RMPFieldID));
-		System.out.println("RMP - new order " + symbol + " at " + timeStamp);
 
 		return order;
 	}
@@ -147,11 +144,8 @@ public class Parser {
 
 	private static OrderBasket newBasket(HashMap<Integer, String> fieldMap) {
 		BasketName basketName = BasketName.parse(fieldMap.get(BasketName.RMPFieldID));
-		TimeStamp timeStamp = TimeStamp.parse(fieldMap.get(TimeStamp.RMPFieldID));
 		OrderBasket orderBasket = new OrderBasket(basketName.toString());
-		System.out.println("RMP - new basket " + basketName + " at " + timeStamp);
 		return orderBasket;
 	}
 
-	
 }

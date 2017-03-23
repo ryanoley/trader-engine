@@ -51,9 +51,6 @@ public class OrderBasket {
 			order.setOrderBasketID(basketID);
 			order.setOrderBasketName(basketName);
 			orderMap.put(order.getOrderID(), order);
-		} else {
-			System.out.println("Cannot add " + order.getSymbol() + " to Basket " 
-		+ basketName + ". No longer staged");
 		}
 	}
 

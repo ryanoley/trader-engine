@@ -137,10 +137,10 @@ public class TraderEngine {
 			}
 			public void run() {
 				try {
-					SimpleDateFormat formatter = new SimpleDateFormat("HHmm");
-					formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+					SimpleDateFormat timeFormat = new SimpleDateFormat("HHmm");
+					timeFormat.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 					while (true) {
-						currentTime = Integer.parseInt(formatter.format(new Date()));
+						currentTime = Integer.parseInt(timeFormat.format(new Date()));
 						if (currentTime >= 1730 && getInitiatorState()) {
 							shutdown();
 						}

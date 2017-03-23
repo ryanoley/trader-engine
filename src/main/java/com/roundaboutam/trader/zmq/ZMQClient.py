@@ -8,7 +8,6 @@ def getZMQSocket(ZmqContext, addr="tcp://localhost", port=5555):
     Returns a smq socket connected to the Trader Endinge application
     that can send/recieve messages.
     """
-    print("Connecting to Trader Engine") 
     socket = ZmqContext.socket(zmq.REQ)
     socket.connect(addr + ":" + str(port))
     print("Sending Connect Request")
@@ -17,7 +16,6 @@ def getZMQSocket(ZmqContext, addr="tcp://localhost", port=5555):
     if (message ==  b"1=RMP|3=ORC|4=TRADERENGINE|5=PYSENDER"):
         print("Succefull Connection Established")
     return socket
-
 
 def sendSocketMessage(socket, msgString):
     socket.send(msgString)

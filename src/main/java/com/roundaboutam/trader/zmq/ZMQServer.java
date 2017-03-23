@@ -11,21 +11,21 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.TimeZone;
 
 import org.zeromq.ZMQ;
 
 import com.roundaboutam.trader.TraderApplication;
-import com.roundaboutam.trader.execution.Execution;
 import com.roundaboutam.trader.rmp.MessageClass;
 import com.roundaboutam.trader.rmp.Parser;
 import com.roundaboutam.trader.rmp.SourceApp;
 
 
 
-
 public class ZMQServer implements Runnable{
-	private static final char Inbound = 'I'; 
-	private static final char Outbound = 'O'; 
+	public static final char Inbound = 'I';
+	public static final char Outbound = 'O';
+	public static final char Parsing = 'P';
 	
 	private ZMQ.Context context = null;
 	private Boolean started = false;
@@ -34,7 +34,7 @@ public class ZMQServer implements Runnable{
 	private HashSet<String> rmpConnections;
 	private BufferedWriter zmqLogFile;
 	private transient TraderApplication application = null;
-	private Integer port = new Integer(5555);
+	private Integer port;
 
 	public ZMQServer(TraderApplication application, Integer port, String logFilePath) {
 		context = ZMQ.context(1);
@@ -45,22 +45,19 @@ public class ZMQServer implements Runnable{
 	}
 
 	public void run() {
-		if (isStarted() == true) {
-			throw new IllegalStateException("ZMQ Server aleady started.");
-		}
 		ZMQ.Socket responder = context.socket(ZMQ.REP);
 		responder.setReceiveTimeOut(5000);
 	    responder.bind("tcp://*:" + port);
 	    setStarted(true);
-
+	    System.out.println("ZMQ Server listening on port " + port);
 		while (!shutdown) {
 	        // Wait for next request from the client
 			String replyString = "";
 	        byte[] request = responder.recv(0);
 	        if (request == null)
 	        	continue;
-	        
 	        String requestString = new String(request);
+	        toLog(requestString, Inbound);
 	    	HashMap<Integer, String> fieldMap = Parser.getFieldMap(requestString);
 	    	MessageClass messageClass = MessageClass.parse(fieldMap.get(MessageClass.RMPFieldID));
 	    	String sourceApp = fieldMap.get(SourceApp.RMPFieldID);
@@ -73,19 +70,18 @@ public class ZMQServer implements Runnable{
 	    			rmpConnections.remove(sourceApp);
 	    			replyString = "1=RMP|3=CRC|4=TRADERENGINE|5=" + sourceApp;
 	    		}
+	    		toLog(replyString, Outbound);
 	    	} else if (rmpConnections.contains(sourceApp)) {
 	    		application.fromRMP(requestString);
-	    		replyString = "RMP PARSING";
+	    		replyString = "Acked";
 	    	}
 	    	else {
-	    		System.out.println("ZMQ - Message from unknown source: " + sourceApp);
-	    		replyString = "UNKNOWN SOURCE";
+	    		replyString = "Unknown SourceApp: " + sourceApp;
+	    		toLog(replyString, Outbound);
 	    	}
 	    	setConnected(rmpConnections.size() > 0 ? true : false);
 	    	// Send reply back to client
-	        responder.send(replyString.getBytes(), 0);
-	        toLog(requestString, Inbound);
-	        toLog(replyString, Outbound);	
+	        responder.send(replyString.getBytes(), 0);	
 	    }
 	    System.out.println("ZMQ Server shutdown");
 		responder.close();
@@ -113,7 +109,10 @@ public class ZMQServer implements Runnable{
 
 	public void toLog(String zmqString, char dir) {
 		try {
-			zmqLogFile.write(dir + "|"+ zmqString + "\n");
+			SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss:SS");
+			timeFormat.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+			String timeStamp = timeFormat.format(System.currentTimeMillis());
+			zmqLogFile.write(dir + "|"+ timeStamp + "|" + zmqString + "\n");
 			zmqLogFile.flush();
 		} catch (IOException e) {
 			e.printStackTrace();

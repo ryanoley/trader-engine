@@ -11,10 +11,8 @@ import java.util.HashMap;
 import com.roundaboutam.trader.MessageContainer;
 import com.roundaboutam.trader.order.Order;
 
-import quickfix.ConfigError;
-import quickfix.FieldConvertError;
 import quickfix.SessionID;
-import quickfix.SessionSettings;
+
 
 
 public class ExecutionBook {

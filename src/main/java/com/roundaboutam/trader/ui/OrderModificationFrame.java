@@ -28,7 +28,7 @@ public class OrderModificationFrame {
 
 	private static OrderModificationFrame instance = null;
 	private transient TraderApplication application = null;
-	private static Order order = null;
+	private Order order = null;
 
 	JTextField tickerField = new JTextField();
 	JTextField limitPriceField = new JTextField("");

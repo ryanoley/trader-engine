@@ -1,6 +1,9 @@
 #
 #   Connects REQ socket to tcp://localhost:5555
 #
+import zmq
+import pandas as pd
+import datetime as dt
 
 
 def getZMQSocket(ZmqContext, addr="tcp://localhost", port=5555):
@@ -24,40 +27,87 @@ def sendSocketMessage(socket, msgString):
     return message
 
 def sendTestStrings(socket):
-    newBasketString = "1=RMP|2=20170313-13:54:44|3=NB|4=PYSENDER|5=TRADERENGINE|6=ParseBasket"
+    newBasketString = ("1=RMP|2=20170313-13:54:44|3=NB|4=PYSENDER|" +
+                       "5=TRADERENGINE|6=ParseBasket")
     sendSocketMessage(socket, newBasketString)
 
-    newOrderString = "1=RMP|2=20170313-14:54:44|3=NO|4=PYSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20"
+    newOrderString = ("1=RMP|2=20170313-14:54:44|3=NO|4=PYSENDER" +
+                      "5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20")
     sendSocketMessage(socket, newOrderString)
 
-    newLimitOrderString = "1=RMP|2=20170313-15:54:44|3=NO|4=PYSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=SL|10=175|11=L|12=117.75";
-    sendSocketMessage(socket, newLimitOrderString);
+    newLimitOrderString = ("1=RMP|2=20170313-15:54:44|3=NO|4=PYSENDER|" +
+                           "5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=SL|"+
+                           "10=175|11=L|12=117.75")
+    sendSocketMessage(socket, newLimitOrderString)
     
-    newVWapOrderString = "1=RMP|2=20170313-16:54:44|3=NO|4=PYSENDER|5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|10=4000|11=V";
-    sendSocketMessage(socket, newVWapOrderString);
+    newVWapOrderString = ("1=RMP|2=20170313-16:54:44|3=NO|4=PYSENDER|" +
+                          "5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|" +
+                          "10=4000|11=V")
+    sendSocketMessage(socket, newVWapOrderString)
     
-    newVWapOrder2String = "1=RMP|2=20170313-16:33:44|3=NO|4=PYSENDER|5=TRADERENGINE|6=ParseBasket|7=IWM|8=T|9=SL|10=500|11=V|13=11:15:00|14=11:30:00|15=20";
-    sendSocketMessage(socket, newVWapOrder2String);
+    newVWapOrder2String = ("1=RMP|2=20170313-16:33:44|3=NO|4=PYSENDER|" +
+                           "5=TRADERENGINE|6=ParseBasket|7=IWM|8=T|9=SL|" +
+                           "10=500|11=V|13=11:15:00|14=11:30:00|15=20")
+    sendSocketMessage(socket, newVWapOrder2String)
     
-    newVWapOrder3String = "1=RMP|2=20170313-16:33:44|3=NO|4=PYSENDER|5=TRADERENGINE|6=ParseBasket|7=BAC|8=T|9=BY|10=600|11=V|13=11:17:00|14=11:25:00|15=20";
-    sendSocketMessage(socket, newVWapOrder3String);
+    newVWapOrder3String = ("1=RMP|2=20170313-16:33:44|3=NO|4=PYSENDER|" +
+                           "5=TRADERENGINE|6=ParseBasket|7=BAC|8=T|9=BY|" +
+                           "10=600|11=V|13=11:17:00|14=11:25:00|15=20")
+    sendSocketMessage(socket, newVWapOrder3String)
     
-    newVWapOrder4String = "1=RMP|2=20170313-16:33:44|3=NO|4=PYSENDER|5=TRADERENGINE|6=ParseBasket|7=FB|8=T|9=SL|10=700|11=V|13=11:12:00|14=11:20:00|15=20";
-    sendSocketMessage(socket, newVWapOrder4String);
+    newVWapOrder4String = ("1=RMP|2=20170313-16:33:44|3=NO|4=PYSENDER|" +
+                           "5=TRADERENGINE|6=ParseBasket|7=FB|8=T|9=SL|" +
+                           "10=700|11=V|13=11:12:00|14=11:20:00|15=20")
+    sendSocketMessage(socket, newVWapOrder4String)
     
-    newToConsoleString = "1=RMP|2=20170313-17:54:44|3=TC|4=PYSENDER|5=TRADERENGINE";
-    sendSocketMessage(socket, newToConsoleString);
+    newToConsoleString  = ("1=RMP|2=20170313-17:54:44|3=TC|4=PYSENDER|" +
+                           "5=TRADERENGINE")
+    sendSocketMessage(socket, newToConsoleString)
     return
 
 
-def main():
-    import zmq
-    ZmqContext = zmq.Context()
+def getErnPeadBasketStrings(RTBasketPath = "C:/temp/Quant RT Basket.csv",
+                            basketName = "ErnPeadBasket"):
+    basket = pd.read_csv(RTBasketPath)
+    orders = []
+    now = dt.datetime.now().strftime("%Y%m%d-%H:%M:%S")
+    orders.append("1=RMP|2={0}|3=NB|4=PYSENDER|5=TRADERENGINE|6={1}".format(
+        now, basketName))
+    assert(len(basket.ROUTE.unique()) == 1)
+    assert(basket.ROUTE.unique()[0] == "ML_ALGO_US")
+    assert(set(['SYMBOL', 'SIDE', 'QTY']).issubset(set(basket.columns)))
+    for ix, row in basket.iterrows():
+        symbol = row.SYMBOL
+        longSide = row.SIDE
+        qty = row.QTY
+        if longSide == "Buy":
+            side = "BY"
+        elif longSide == "Sell":
+            side = "SL"
+        elif longSide == "SellShort":
+            side = "SS"
+        elif longSide == "BuyToCover":
+            sode ="BTC"
+        else:
+            print "Bad order side from basket" + str(row)
+            continue
+        now = dt.datetime.now().strftime("%Y%m%d-%H:%M:%S:%f")
+        orders.append(("1=RMP|2={0}|3=NO|4=PYSENDER|5=TRADERENGINE|6={1}|" +
+                      "7={2}|8=T|9={3}|10={4}|11=V").format(now, basketName,
+                                                           symbol, side, qty))
+    return orders
 
+
+
+def main():    
+    ZmqContext = zmq.Context()
     socket = getZMQSocket(ZmqContext)
 
-    #sendTestStrings(socket)
-
+    quantOrders = getErnPeadBasketStrings()
+    for order in quantOrders:
+        sendSocketMessage(socket, order)
+        continue
+    
     socket.close()
     ZmqContext.term()
 

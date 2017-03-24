@@ -1,5 +1,6 @@
-package com.roundaboutam.trader.ramfix;
+package com.roundaboutam.trader.rmp;
 
+import com.roundaboutam.trader.ramfix.FIXMessage;
 import com.roundaboutam.trader.rmp.PriceType;
 
 import junit.framework.TestCase;

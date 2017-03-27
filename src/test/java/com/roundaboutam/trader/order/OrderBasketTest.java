@@ -16,9 +16,11 @@ public class OrderBasketTest extends TestCase {
 		Order order2 = new Order();
 		orderBasket.addOrder(order1);
 		orderBasket.addOrder(order2);
-		assertEquals(orderBasket.getAllOpenOrders().size(), 2);
+		assertEquals(orderBasket.getAllOpenOrders().size(), 0);
+		assertEquals(orderBasket.getAllOrders().size(), 2);
 		orderBasket.removeOrder(order1);
-		assertEquals(orderBasket.getAllOpenOrders().size(), 1);
+		assertEquals(orderBasket.getAllOpenOrders().size(), 0);
+		assertEquals(orderBasket.getAllOrders().size(), 1);
 	}
 
 }

@@ -11,7 +11,7 @@ public class SourceAppTest extends TestCase {
 		assertEquals(testSourceApp.toString(), "TESTSOURCE");
 	}
 
-	public void testSourceAppFixTags() {
+	public void testSourceAppRmpTags() {
 		assertEquals(testSourceApp.getRmpTag(), SourceApp.RMPFieldID + "=TESTSOURCE");
 	}
 

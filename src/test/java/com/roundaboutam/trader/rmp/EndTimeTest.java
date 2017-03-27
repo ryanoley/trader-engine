@@ -11,7 +11,7 @@ public class EndTimeTest extends TestCase {
 		assertEquals(testEndTime.toString(), "20170324-15:24:33:010");
 	}
 
-	public void testEndTimeFixTags() {
+	public void testEndTimeRmpTags() {
 		assertEquals(testEndTime.getRmpTag(), EndTime.RMPFieldID + "=20170324-15:24:33:010");
 	}
 

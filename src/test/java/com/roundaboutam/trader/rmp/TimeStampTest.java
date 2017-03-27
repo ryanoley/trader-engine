@@ -11,7 +11,7 @@ public class TimeStampTest extends TestCase {
 		assertEquals(testTimeStamp.toString(), "20170324-17:05:05:010");
 	}
 
-	public void testTimeStampFixTags() {
+	public void testTimeStampRmpTags() {
 		assertEquals(testTimeStamp.getRmpTag(), TimeStamp.RMPFieldID + "=20170324-17:05:05:010");
 	}
 

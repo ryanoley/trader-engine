@@ -13,7 +13,7 @@ public class ParticipationTest extends TestCase {
 		assertEquals(testParticipationStr.toString(), "13");
 	}
 
-	public void testParticipationFixTags() {
+	public void testParticipationRmpTags() {
 		assertEquals(testParticipation.getRmpTag(), Participation.RMPFieldID + "=12");
 		assertEquals(testParticipationStr.getRmpTag(), Participation.RMPFieldID + "=13");
 	}

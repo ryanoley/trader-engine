@@ -11,7 +11,7 @@ public class SymbolTest extends TestCase {
 		assertEquals(testSymbol.toString(), "IBM");
 	}
 
-	public void testSymbolFixTags() {
+	public void testSymbolRmpTags() {
 		assertEquals(testSymbol.getRmpTag(), Symbol.RMPFieldID + "=IBM");
 	}
 

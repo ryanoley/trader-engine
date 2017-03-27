@@ -13,7 +13,7 @@ public class QuantityTest extends TestCase {
 
 	}
 
-	public void testQuantityFixTags() {
+	public void testQuantityRmpTags() {
 		assertEquals(testQuantity.getRmpTag(), Quantity.RMPFieldID + "=50");
 		assertEquals(testQuantityStr.getRmpTag(), Quantity.RMPFieldID + "=200");
 	}

@@ -11,7 +11,7 @@ public class TargetAppTest extends TestCase {
 		assertEquals(testTargetApp.toString(), "TRADERENGINE");
 	}
 
-	public void testTargetAppFixTags() {
+	public void testTargetAppRmpTags() {
 		assertEquals(testTargetApp.getRmpTag(), TargetApp.RMPFieldID + "=TRADERENGINE");
 	}
 

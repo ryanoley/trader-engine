@@ -33,6 +33,10 @@ public class Protocol {
         return array;
     }
 
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + name;
+    }
+
     public static Protocol parse(String type) throws IllegalArgumentException {
     	Protocol result = known.get(type.toUpperCase());
         if (result == null) {

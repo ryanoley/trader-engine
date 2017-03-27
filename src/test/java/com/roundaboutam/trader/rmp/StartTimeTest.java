@@ -11,7 +11,7 @@ public class StartTimeTest extends TestCase {
 		assertEquals(testStartTime.toString(), "20170324-16:56:01:010");
 	}
 
-	public void testStartTimeFixTags() {
+	public void testStartTimeRmpTags() {
 		assertEquals(testStartTime.getRmpTag(), StartTime.RMPFieldID + "=20170324-16:56:01:010");
 	}
 

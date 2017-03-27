@@ -36,6 +36,10 @@ public class PriceType {
         return array;
     }
 
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + name;
+    }
+
     public static PriceType parse(String type) throws IllegalArgumentException {
     	PriceType result = known.get(type.toUpperCase());
         if (result == null) {

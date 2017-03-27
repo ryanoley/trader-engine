@@ -9,8 +9,7 @@ import quickfix.field.OrdType;
 
 public class PriceTypeTest extends TestCase {
 
-	public void testOrderType() {		
-
+	public void testPriceType() {
 		assertEquals(PriceType.MARKET.toString(), "M");
 		assertEquals(PriceType.LIMIT.toString(), "L");
 		assertEquals(PriceType.VWAP.toString(), "V");
@@ -28,16 +27,21 @@ public class PriceTypeTest extends TestCase {
 		assertEquals(FIXMessage.FIXOrdTypeToPriceType(new OrdType(OrdType.LIMIT_ON_CLOSE)), PriceType.LIMIT_ON_CLOSE);
 
 		assertEquals(PriceType.toArray().length, 5);
-
 	}
 
-	public void testOrderTypeFixTags() {
-
+	public void testPriceTypeFixTags() {
 		assertEquals(FIXMessage.priceTypeToFIXOrdType(PriceType.MARKET).toString(), "40=1");
 		assertEquals(FIXMessage.priceTypeToFIXOrdType(PriceType.LIMIT).toString(), "40=2");
 		assertEquals(FIXMessage.priceTypeToFIXOrdType(PriceType.MARKET_ON_CLOSE).toString(), "40=5");
 		assertEquals(FIXMessage.priceTypeToFIXOrdType(PriceType.LIMIT_ON_CLOSE).toString(), "40=B");
-
 	}
 
+	public void testPriceTypeRmpTags() {
+		assertEquals(PriceType.MARKET.getRmpTag(), PriceType.RMPFieldID + "=M");
+		assertEquals(PriceType.LIMIT.getRmpTag(), PriceType.RMPFieldID + "=L");
+		assertEquals(PriceType.VWAP.getRmpTag(), PriceType.RMPFieldID + "=V");
+		assertEquals(PriceType.MARKET_ON_CLOSE.getRmpTag(), PriceType.RMPFieldID + "=MOC");
+		assertEquals(PriceType.LIMIT_ON_CLOSE.getRmpTag(), PriceType.RMPFieldID + "=LOC");
+	}
+	
 }

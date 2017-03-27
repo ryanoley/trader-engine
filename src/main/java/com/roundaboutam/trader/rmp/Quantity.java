@@ -18,7 +18,11 @@ public class Quantity {
     public int getQuantity() {
     	return quantity;
     }
-    
+
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + quantity;
+    }
+
     public static Quantity parse(Integer data) throws IllegalArgumentException {
         return new Quantity(data);
     }

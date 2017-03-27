@@ -31,6 +31,10 @@ public class OrderSide {
     public String toString() {
         return name;
     }
+    
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + name;
+    }
 
     static public Object[] toArray() {
         return array;

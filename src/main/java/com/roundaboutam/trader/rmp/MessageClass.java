@@ -27,8 +27,9 @@ public class MessageClass {
         }
     }
 
-    public String getName() {
-        return name;
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + name;
+    	
     }
     
     public String toString() {

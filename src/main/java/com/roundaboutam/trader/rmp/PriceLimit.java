@@ -19,6 +19,10 @@ public class PriceLimit {
     	return priceLimit;
     }
 
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + priceLimit;    	
+    }
+
     public static PriceLimit parse(Double data) throws IllegalArgumentException {
         return new PriceLimit(data);
     }

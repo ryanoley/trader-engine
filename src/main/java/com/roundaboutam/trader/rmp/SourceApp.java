@@ -15,6 +15,10 @@ public class SourceApp {
     	return sendingApp;
     }
 
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + sendingApp;
+    }
+
     public static SourceApp parse(String data) throws IllegalArgumentException {
         return new SourceApp(data);
     }

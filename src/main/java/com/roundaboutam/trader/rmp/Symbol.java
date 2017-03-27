@@ -15,6 +15,10 @@ public class Symbol {
     	return symbol;
     }
 
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + symbol;
+    }
+
     public static Symbol parse(String data) throws IllegalArgumentException {
         return new Symbol(data);
     }

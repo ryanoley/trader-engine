@@ -18,6 +18,10 @@ public class Participation {
     public int getQuantity() {
     	return participation;
     }
+
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + participation;
+    }
     
     public static Participation parse(Integer data) throws IllegalArgumentException {
         return new Participation(data);

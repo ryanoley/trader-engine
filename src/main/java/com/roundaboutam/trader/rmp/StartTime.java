@@ -14,7 +14,11 @@ public class StartTime {
     public String toString() {
     	return startTime;
     }
-    
+
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + startTime;
+    }
+
     public static StartTime parse(String data) throws IllegalArgumentException {
         return new StartTime(data);
     }

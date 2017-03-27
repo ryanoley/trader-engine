@@ -15,6 +15,10 @@ public class BasketName {
     	return basketName;
     }
 
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + basketName;
+    }
+
     public static BasketName parse(String data) throws IllegalArgumentException {
         return new BasketName(data);
     }

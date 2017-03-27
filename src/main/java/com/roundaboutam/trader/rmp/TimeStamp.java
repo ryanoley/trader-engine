@@ -14,7 +14,11 @@ public class TimeStamp {
     public String toString() {
     	return timeStamp;
     }
-    
+
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + timeStamp;
+    }
+
     public static TimeStamp parse(String data) throws IllegalArgumentException {
         return new TimeStamp(data);
     }

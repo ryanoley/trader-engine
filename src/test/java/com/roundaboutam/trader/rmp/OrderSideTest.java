@@ -25,7 +25,6 @@ public class OrderSideTest extends TestCase {
 		assertEquals(FIXMessage.FIXSideToOrderSide(new Side(Side.SELL_SHORT)), OrderSide.SHORT_SELL);
 
 		assertEquals(OrderSide.toArray().length, 4);
-
 	}
 
 	public void testOrderSideFixTags() {
@@ -33,7 +32,13 @@ public class OrderSideTest extends TestCase {
 		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.BUY).toString(), "54=1");
 		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.SELL).toString(), "54=2");
 		assertEquals(FIXMessage.orderSideToFIXSide(OrderSide.SHORT_SELL).toString(), "54=5");
-
+	}
+	
+	public void testOrderSideRMPTags() {
+		assertEquals(OrderSide.BUY.getRmpTag(), OrderSide.RMPFieldID + "=BY");
+		assertEquals(OrderSide.SELL.getRmpTag(), OrderSide.RMPFieldID + "=SL");
+		assertEquals(OrderSide.SHORT_SELL.getRmpTag(), OrderSide.RMPFieldID + "=SS");
+		assertEquals(OrderSide.BUY_TO_COVER.getRmpTag(), OrderSide.RMPFieldID + "=BTC");
 	}
 
 }

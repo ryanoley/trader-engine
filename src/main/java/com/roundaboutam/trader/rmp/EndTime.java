@@ -10,11 +10,15 @@ public class EndTime {
     private EndTime(String data) {
         this.endTime = data;
     }
-
+    
     public String toString() {
     	return endTime;
     }
-    
+
+    public String getRmpTag() {
+    	return RMPFieldID + "=" + endTime;
+    }
+
     public static EndTime parse(String data) throws IllegalArgumentException {
         return new EndTime(data);
     }

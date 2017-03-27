@@ -94,7 +94,7 @@ public class Parser {
 		
 		PriceType priceType = PriceType.parse(fieldMap.get(PriceType.RMPFieldID));
 		OrderSide orderSide = OrderSide.parse(fieldMap.get(OrderSide.RMPFieldID));
-		BasketFlag basketFlag = BasketFlag.parse(fieldMap.get(BasketFlag.RMPFieldID));
+		BasketName basketName = BasketName.parse(fieldMap.get(BasketName.RMPFieldID));
 		Symbol symbol = Symbol.parse(fieldMap.get(Symbol.RMPFieldID));
 		Quantity quantity = Quantity.parse(fieldMap.get(Quantity.RMPFieldID));
 
@@ -133,8 +133,7 @@ public class Parser {
 		}
 
 		// Interpret Basket information
-		if (basketFlag == BasketFlag.TRUE) {
-			BasketName basketName = BasketName.parse(fieldMap.get(BasketName.RMPFieldID));
+		if (basketName != null) {
 			order.setOrderBasketName(basketName.toString());
 		}
 

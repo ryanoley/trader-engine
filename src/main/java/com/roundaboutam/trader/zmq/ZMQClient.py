@@ -31,7 +31,7 @@ def sendTestStrings(socket):
                        "5=TRADERENGINE|6=ParseBasket")
     sendSocketMessage(socket, newBasketString)
 
-    newOrderString = ("1=RMP|2=20170313-14:54:44|3=NO|4=PYSENDER" +
+    newOrderString = ("1=RMP|2=20170313-14:54:44|3=NO|4=PYSENDER|" +
                       "5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20")
     sendSocketMessage(socket, newOrderString)
 

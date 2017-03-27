@@ -55,15 +55,15 @@ public class Parser {
 			System.out.println("Parser - parseMessage SINK: " + Message);
 			return new ParsedRMPObject(msgClass, Message);
 		}
-	
+
 	}
 
-	private static boolean checkString(String inString) {
+	public static boolean checkString(String inString) {
 		Pattern p = Pattern.compile(SEP);
 		String[] items = p.split(inString);
 		for(String s : items) {
         	boolean match = Pattern.matches("\\s*\\d+=\\S+\\s*", s);
-            if (match==false) {
+            if (match == false) {
             	System.out.println("Parser - Unknown char sequence: " + s + " in message: " + inString);
             	return false;
             }

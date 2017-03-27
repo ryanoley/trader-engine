@@ -9,12 +9,12 @@ public class PriceLimitTest extends TestCase {
 		
 	public void testPriceLimit() {		
 		assertEquals(testPriceLimit.toString(), "199.99");
-		assertEquals(testPriceLimitStr.toString(), "200");
+		assertEquals(testPriceLimitStr.toString(), "200.0");
 	}
 
 	public void testPriceLimitRmpTags() {
 		assertEquals(testPriceLimit.getRmpTag(), PriceLimit.RMPFieldID + "=199.99");
-		assertEquals(testPriceLimitStr.getRmpTag(), PriceLimit.RMPFieldID + "=200");
+		assertEquals(testPriceLimitStr.getRmpTag(), PriceLimit.RMPFieldID + "=200.0");
 	}
 
 }

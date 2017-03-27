@@ -2,10 +2,10 @@ package com.roundaboutam.trader.rmp;
 
 import com.roundaboutam.trader.ramfix.FIXMessage;
 import com.roundaboutam.trader.rmp.PriceType;
+import quickfix.field.OrdType;
 
 import junit.framework.TestCase;
 
-import quickfix.field.OrdType;
 
 public class PriceTypeTest extends TestCase {
 

@@ -95,7 +95,11 @@ public class FIXOrder {
         if (order.getPriceType() == PriceType.LIMIT) {
         	fixOrder.setField(new Price(order.getLimitPrice()));
         }
-        
+
+        if (order.getOrderBasketName() != null) {
+        	fixOrder.setString(1, order.getOrderBasketName());
+        }
+
         return fixOrder;
 	}
 

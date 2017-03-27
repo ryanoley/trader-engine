@@ -1,15 +1,13 @@
 package com.roundaboutam.trader.rmp;
 
-import java.util.HashMap;
-
 import com.roundaboutam.trader.rmp.Parser;
 
+import java.util.HashMap;
 import junit.framework.TestCase;
 
 
 public class ParserTest extends TestCase{
 
-	
 	public void testParserCheckString() {
 		String wellFormed = "1=RMP|2=20170313-13:54:44|3=NB|4=PYSENDER|5=TRADERENGINE|6=ParseBasket";
 		String badFormed = "1=RMP|2=20170313-13:54:44|3=NB4 4=PYSENDER|5=TRADERENGINE|6=ParseBasket";
@@ -29,5 +27,5 @@ public class ParserTest extends TestCase{
 		assertEquals(Parser.getFieldMap(wellFormed), outMap);
 	}
 
-	
+
 }

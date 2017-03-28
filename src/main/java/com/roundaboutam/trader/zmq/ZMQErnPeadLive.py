@@ -67,7 +67,7 @@ def sendTestStrings(socket):
 
 
 def getErnPeadBasketStrings(RTBasketPath = "C:/temp/Quant RT Basket.csv",
-                            basketName = "ErnPeadBasket"):
+                            basketName = "ErnPeadFIX"):
     basket = pd.read_csv(RTBasketPath)
     orders = []
     now = dt.datetime.now().strftime("%Y%m%d-%H:%M:%S")
@@ -93,8 +93,8 @@ def getErnPeadBasketStrings(RTBasketPath = "C:/temp/Quant RT Basket.csv",
             continue
         now = dt.datetime.now().strftime("%Y%m%d-%H:%M:%S:%f")
         orders.append(("1=RMP|2={0}|3=NO|4=PYSENDER|5=TRADERENGINE|6={1}|" +
-                      "7={2}|8=T|9={3}|10={4}|11=V").format(now, basketName,
-                                                           symbol, side, qty))
+                      "7={2}|9={3}|10={4}|11=V").format(now, basketName,
+                                                        symbol, side, qty))
     return orders
 
 

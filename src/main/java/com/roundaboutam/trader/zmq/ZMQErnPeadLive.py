@@ -78,16 +78,15 @@ def getErnPeadBasketStrings(RTBasketPath = "C:/temp/Quant RT Basket.csv",
     assert(set(['SYMBOL', 'SIDE', 'QTY']).issubset(set(basket.columns)))
     for ix, row in basket.iterrows():
         symbol = row.SYMBOL
-        longSide = row.SIDE
         qty = row.QTY
-        if longSide == "Buy":
+        if row.SIDE == "Buy":
             side = "BY"
-        elif longSide == "Sell":
+        elif row.SIDE == "Sell":
             side = "SL"
-        elif longSide == "SellShort":
+        elif row.SIDE == "SellShort":
             side = "SS"
-        elif longSide == "BuyToCover":
-            sode ="BTC"
+        elif row.SIDE == "BuyToCover":
+            side ="BTC"
         else:
             print "Bad order side from basket" + str(row)
             continue

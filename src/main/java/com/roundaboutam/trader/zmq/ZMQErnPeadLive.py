@@ -32,33 +32,23 @@ def sendTestStrings(socket):
     sendSocketMessage(socket, newBasketString)
 
     newOrderString = ("1=RMP|2=20170313-14:54:44|3=NO|4=PYSENDER|" +
-                      "5=TRADERENGINE|6=ParseBasket|7=IBM|8=T|9=BY|10=100|11=M|12=115.20")
+                      "5=TRADERENGINE|6=ParseBasket|7=IBM|9=BY|10=100|11=M|12=115.20")
     sendSocketMessage(socket, newOrderString)
 
     newLimitOrderString = ("1=RMP|2=20170313-15:54:44|3=NO|4=PYSENDER|" +
-                           "5=TRADERENGINE|6=ParseBasket|7=GLD|8=T|9=SL|"+
+                           "5=TRADERENGINE|6=ParseBasket|7=GLD|9=SL|"+
                            "10=175|11=L|12=117.75")
     sendSocketMessage(socket, newLimitOrderString)
     
     newVWapOrderString = ("1=RMP|2=20170313-16:54:44|3=NO|4=PYSENDER|" +
-                          "5=TRADERENGINE|6=ParseBasket|7=SPY|8=T|9=BY|" +
+                          "5=TRADERENGINE|6=ParseBasket|7=SPY|9=BY|" +
                           "10=4000|11=V")
     sendSocketMessage(socket, newVWapOrderString)
     
     newVWapOrder2String = ("1=RMP|2=20170313-16:33:44|3=NO|4=PYSENDER|" +
-                           "5=TRADERENGINE|6=ParseBasket|7=IWM|8=T|9=SL|" +
+                           "5=TRADERENGINE|6=ParseBasket|7=IWM|9=SL|" +
                            "10=500|11=V|13=11:15:00|14=11:30:00|15=20")
     sendSocketMessage(socket, newVWapOrder2String)
-    
-    newVWapOrder3String = ("1=RMP|2=20170313-16:33:44|3=NO|4=PYSENDER|" +
-                           "5=TRADERENGINE|6=ParseBasket|7=BAC|8=T|9=BY|" +
-                           "10=600|11=V|13=11:17:00|14=11:25:00|15=20")
-    sendSocketMessage(socket, newVWapOrder3String)
-    
-    newVWapOrder4String = ("1=RMP|2=20170313-16:33:44|3=NO|4=PYSENDER|" +
-                           "5=TRADERENGINE|6=ParseBasket|7=FB|8=T|9=SL|" +
-                           "10=700|11=V|13=11:12:00|14=11:20:00|15=20")
-    sendSocketMessage(socket, newVWapOrder4String)
     
     newToConsoleString  = ("1=RMP|2=20170313-17:54:44|3=TC|4=PYSENDER|" +
                            "5=TRADERENGINE")
@@ -98,15 +88,30 @@ def getErnPeadBasketStrings(RTBasketPath = "C:/temp/Quant RT Basket.csv",
 
 
 
-def main():    
+def main():
+
+    import argparse
+
+    ###########################################################################
+    #   Command line arguments
+    ###########################################################################
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-p', '--port', default=5555,
+        help='Port to establish REQ/REP ZMQ connection on')
+    args = parser.parse_args()
+
+    #########################################
+
     ZmqContext = zmq.Context()
-    socket = getZMQSocket(ZmqContext)
+    socket = getZMQSocket(ZmqContext, port=args.port)
 
     quantOrders = getErnPeadBasketStrings()
     for order in quantOrders:
         sendSocketMessage(socket, order)
         continue
-    
+
     socket.close()
     ZmqContext.term()
 

@@ -38,6 +38,14 @@ class BasketDetailTable extends JTable implements MouseListener {
         column.setPreferredWidth((int) (100));
         column = model.getColumn(3);
         column.setPreferredWidth((int) (100));
+        column = model.getColumn(4);
+        column.setPreferredWidth((int) (100));
+        column = model.getColumn(5);
+        column.setPreferredWidth((int) (100));
+        column = model.getColumn(6);
+        column.setPreferredWidth((int) (100));
+        column = model.getColumn(7);
+        column.setPreferredWidth((int) (100));
 	}
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
@@ -88,12 +96,13 @@ class BasketTableModel extends AbstractTableModel {
     private final static int LIMIT = 4;
     private final static int SHARES = 5;
     private final static int SHARESEXEC = 6;
+    private final static int PERCENTEXEC = 7;
 
     protected final HashMap<Integer, Order> rowToOrder;
     protected final HashMap<Integer, String> rowToOrderID;
 
     public final String[] headers = new String[] {"OrdID", "Side", "Sym", "Type", "Limit",
-    		"Shares", "Shares Exec"};
+    		"Shares", "Shares Exec", "% Exec"};
 
     public BasketTableModel(OrderBasket orderBasket) {
     	rowToOrder = new HashMap<Integer, Order>();
@@ -148,6 +157,8 @@ class BasketTableModel extends AbstractTableModel {
         	return String.valueOf(order.getQuantity());
         case SHARESEXEC:
         	return String.valueOf(order.getCumQty());
+        case PERCENTEXEC:
+        	return String.valueOf(100 * order.getCumQty() / order.getQuantity()) + "%";
         }
         return "#NA";
     }

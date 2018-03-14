@@ -27,19 +27,19 @@ import com.roundaboutam.trader.order.OrderBasket;
 
 
 @SuppressWarnings("serial")
-public class BasketPorfolioTablePanel extends JPanel {
+public class BasketTablePanel extends JPanel {
 
-	public BasketPorfolioTablePanel(TraderApplication application) {
+	public BasketTablePanel(TraderApplication application) {
 		setLayout(new BorderLayout());
-		BasketPortfolioTable basketPortfolioTable = new BasketPortfolioTable(application);
-		add(new JScrollPane(basketPortfolioTable));
+		BasketTable basketTable = new BasketTable(application);
+		add(new JScrollPane(basketTable));
     }
 
 }
 
 
 @SuppressWarnings("serial")
-class BasketPortfolioTableModel extends AbstractTableModel implements Observer  {
+class BasketTableModel extends AbstractTableModel implements Observer  {
 
     private final static int ID = 0;
     private final static int NAME = 1;
@@ -57,7 +57,7 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
     public final String[] headers = new String[] {"BasketID", "Name", "Total Orders", 
     		"Total Shares", "Open Shares", "Exec Shares", "Status", "CreateTime"};
 
-    public BasketPortfolioTableModel(TraderApplication application) {
+    public BasketTableModel(TraderApplication application) {
     	application.addOrderBasketObserver(this);
     	rowToOrderBasket = new HashMap<Integer, OrderBasket>();
     	idToRow = new HashMap<String, Integer>();
@@ -69,13 +69,22 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
         return false;
     }
 
-    private void addOrderBasket(OrderBasket orderBasket) {
+    private void addBasketToTable(OrderBasket orderBasket) {
     	int row = getRowCount();
     	rowToOrderBasket.put(row, orderBasket);
     	rowToTimeStamp.put(row, new Date(System.currentTimeMillis()));
     	idToOrderBasket.put(orderBasket.getBasketId(), orderBasket);
     	idToRow.put(orderBasket.getBasketId(), row);
         fireTableRowsInserted(row, row);
+    }
+ 
+    private void removeBasketFromTable(OrderBasket orderBasket) {
+    	int row = idToRow.get(orderBasket.getBasketId());
+    	rowToOrderBasket.remove(row);
+    	rowToTimeStamp.remove(row);
+    	idToOrderBasket.remove(orderBasket.getBasketId());
+    	idToRow.remove(orderBasket.getBasketId());
+        fireTableRowsDeleted(row, row);
     }
   
     public Class<String> getColumnClass(int columnIndex) {
@@ -141,23 +150,26 @@ class BasketPortfolioTableModel extends AbstractTableModel implements Observer  
 	public void update(Observable arg0, Object arg) {
 		OrderBasket orderBasket = (OrderBasket) arg;
 		orderBasket.getSummary();
+
     	if (!idToOrderBasket.containsKey(orderBasket.getBasketId())) {
-			addOrderBasket(orderBasket);
-    		return;
+			addBasketToTable(orderBasket);
+    	} else if (orderBasket.isDeleted()) {
+    		removeBasketFromTable(orderBasket);
+    	} else {
+        	int row = idToRow.get(orderBasket.getBasketId());
+        	fireTableRowsUpdated(row, row);    		
     	}
-    	int row = idToRow.get(orderBasket.getBasketId());
-    	fireTableRowsUpdated(row, row);
 	}
 }
 
 
 @SuppressWarnings("serial")
-class BasketPortfolioTable extends JTable implements MouseListener {
+class BasketTable extends JTable implements MouseListener {
 
 	private transient TraderApplication application;
 	
-    public BasketPortfolioTable(TraderApplication application) {
-        super(new BasketPortfolioTableModel(application));
+    public BasketTable(TraderApplication application) {
+        super(new BasketTableModel(application));
         this.application = application;
         initColumnWidths();
         addMouseListener(this);
@@ -187,7 +199,7 @@ class BasketPortfolioTable extends JTable implements MouseListener {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
         int modelIdx = convertRowIndexToModel(row);
-    	OrderBasket orderBasket = ((BasketPortfolioTableModel) getModel()).getOrderBasket(modelIdx);
+    	OrderBasket orderBasket = ((BasketTableModel) getModel()).getOrderBasket(modelIdx);
         Component c = super.prepareRenderer(renderer, row, column); 
         c.setForeground(Color.black);
         c.setBackground(Color.white);
@@ -208,23 +220,37 @@ class BasketPortfolioTable extends JTable implements MouseListener {
 
         return c;
     }
-
+    
+	@Override
     public void mouseClicked(MouseEvent e) {        
     	if (e.getClickCount() == 2) {
 		    int row = rowAtPoint(e.getPoint());
 		    int modelIdx = convertRowIndexToModel(row);
-		    OrderBasket orderBasket = ((BasketPortfolioTableModel) dataModel).getOrderBasket(modelIdx);
+		    OrderBasket orderBasket = ((BasketTableModel) dataModel).getOrderBasket(modelIdx);
 		    orderBasket.getSummary();
-		    BasketInfoFrame.getInstance(orderBasket, application);
+		    BasketDetailFrame.getInstance(orderBasket, application);
 	    }
     	
     }
 
-    public void mouseEntered(MouseEvent e) {}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+	}
 
-    public void mouseExited(MouseEvent e) {}
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+	}
 
-    public void mousePressed(MouseEvent e) {}
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+	}
 
-    public void mouseReleased(MouseEvent e) {}
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+	}
+
 }

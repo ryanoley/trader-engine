@@ -67,7 +67,6 @@ public class TraderApplication implements Application {
 			new HashMap<SessionID, HashSet<ExecID>>();
 
 	
-
 	public TraderApplication(SessionSettings settings) throws ConfigError, FieldConvertError {
 		this.settings = settings;
 		orderBook = new OrderBook();
@@ -75,7 +74,10 @@ public class TraderApplication implements Application {
 		orderBasketBook = new OrderBasketBook();
 	}
 	
-    // Main message handler
+    
+	/*
+	 *  CORE FUNCTIONALITY
+	 */
     public void fromApp(Message message, SessionID sessionID) throws FieldNotFound,
     	IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
     	try {
@@ -193,7 +195,9 @@ public class TraderApplication implements Application {
         	System.out.println(e);
         }
     }
-
+	/*
+	 *  ORDER AND BASKET SENDING WRAPPERS
+	 */
     public void sendNewOrder(Order order) {
     	orderBook.addOrder(order);
     	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
@@ -219,14 +223,25 @@ public class TraderApplication implements Application {
     	for (Order order : orderBasket.getAllOrders()) {
 	    	sendNewOrder(order);
     	}
+		orderBasket.setStaged(false);
+		orderBasket.setLive(true);
     }
 
     public void cancelBasket(OrderBasket orderBasket) {
     	for (Order order : orderBasket.getAllOpenOrders()) {
             sendCancelOrder(new CancelOrder(order));
     	}
+		orderBasket.setStaged(false);
+		orderBasket.setLive(false);
     }
-         
+
+    public void deleteBasket(OrderBasket orderBasket) {    	
+		orderBasketBook.deleteBasket(orderBasket);
+		observableBasket.update(orderBasket);
+    }
+	/*
+	 *  FIX SESSION 
+	 */
     public void onCreate(SessionID sessionID) { }
 
     public void onLogon(SessionID sessionID) {
@@ -251,7 +266,6 @@ public class TraderApplication implements Application {
     	observableMessage.update(message);
     }
 
-    // Getters and setters
     public SessionID getSessionID() {
     	return sessionID;
     }
@@ -264,8 +278,15 @@ public class TraderApplication implements Application {
     	return settings;
     }
 
-    // Observable classes
-    public void addLogonObserver(Observer observer) {
+    private void assertSession() {
+    	if (sessionID == null) {
+        	throw new IllegalStateException("Active Session required. No session exists.");
+    	}
+    }
+	/*
+	 *  OBSERVABLES 
+	 */    
+     public void addLogonObserver(Observer observer) {
         observableLogon.addObserver(observer);
     }
 
@@ -338,62 +359,9 @@ public class TraderApplication implements Application {
             clearChanged();
         }
     }
-
-    // Parsing RMP messages and ZMQ functions
-    public void fromRMP(String rmpMessage) {
-    	ParsedRMPObject parsedRMPObject = Parser.parseMessage(rmpMessage);
-    	MessageClass messageClass = parsedRMPObject.messageClass;
-
-    	if (messageClass == MessageClass.NEW_BASKET) {
-    		newRMPOrderBasket(parsedRMPObject);
-    	}
-    	else if (messageClass == MessageClass.NEW_ORDER) {
-    		newRMPOrder(parsedRMPObject);
-    	}
-    }
-
-    private void newRMPOrderBasket(ParsedRMPObject parsedRMPObject) {
-		OrderBasket orderBasket = (OrderBasket) parsedRMPObject.object;
-		String basketName = orderBasket.getBasketName();
-
-		if (orderBasketBook.basketExists(basketName)) {
-			toZMQLog(basketName + " already exists", ZMQServer.Parsing);
-		} else {
-			orderBasketBook.addBasket(orderBasket);
-			observableBasket.update(orderBasket);
-			toZMQLog("New basket: " + basketName, ZMQServer.Parsing);
-		}
-    }
-
-    private void newRMPOrder (ParsedRMPObject parsedRMPObject) {
-		Order order = (Order) parsedRMPObject.object;
-		checkSession();
-		//SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN"); // TODO This line is temporary for Parsing dev
-		order.setSessionID(sessionID);
-		String basketName = order.getOrderBasketName(); 
-		if (basketName != null) {
-			OrderBasket orderBasket = orderBasketBook.getBasketbyName(basketName);
-			if (orderBasket != null) {
-				orderBasket.addOrder(order);
-				observableBasket.update(orderBasket);
-				if (!orderBasket.isStaged())
-					toZMQLog("Basket not staged: " + basketName + " symbol:" + order.getSymbol(), ZMQServer.Parsing);
-				else
-					toZMQLog("New order " + order.getSymbol(), ZMQServer.Parsing);
-			} else {
-				toZMQLog("Unknown basket: " + basketName + " symbol:" + order.getSymbol(), ZMQServer.Parsing);
-			}
-		} else {
-			toZMQLog("No basket info:" + order.getSymbol(), ZMQServer.Parsing);
-		}
-    }
-
-    private void checkSession() {
-    	if (sessionID == null) {
-        	throw new IllegalStateException("Active Session required. No session exists.");
-    	}
-    }
-
+	/*
+	 *  ZMQ SERVER 
+	 */   
     public void startZMQServer(Integer port) {
     	if (zmqServer == null) {
         	try {
@@ -425,9 +393,61 @@ public class TraderApplication implements Application {
     		zmqServer.toLog(logString, dir);
     	}
     }
+	/*
+	 *  RMP HANDLING
+	 */ 
+    public void fromRMP(String rmpMessage) {
+    	ParsedRMPObject parsedRMPObject = Parser.parseMessage(rmpMessage);
+    	MessageClass messageClass = parsedRMPObject.messageClass;
+
+    	if (messageClass == MessageClass.NEW_BASKET) {
+    		newRMPOrderBasket(parsedRMPObject);
+    	}
+    	else if (messageClass == MessageClass.NEW_ORDER) {
+    		newRMPOrder(parsedRMPObject);
+    	}
+    }
+
+    private void newRMPOrderBasket(ParsedRMPObject parsedRMPObject) {
+		OrderBasket orderBasket = (OrderBasket) parsedRMPObject.object;
+		String basketName = orderBasket.getBasketName();
+
+		if (orderBasketBook.basketExists(basketName)) {
+			toZMQLog(basketName + " already exists", ZMQServer.Parsing);
+		} else {
+			orderBasketBook.addBasket(orderBasket);
+			observableBasket.update(orderBasket);
+			toZMQLog("New basket: " + basketName, ZMQServer.Parsing);
+		}
+    }
+
+    private void newRMPOrder (ParsedRMPObject parsedRMPObject) {
+		Order order = (Order) parsedRMPObject.object;
+		assertSession();
+		//SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN"); // TODO FOR TESTING ONLY
+		order.setSessionID(sessionID);
+		String basketName = order.getOrderBasketName(); 
+		if (basketName != null) {
+			OrderBasket orderBasket = orderBasketBook.getBasketbyName(basketName);
+			if (orderBasket != null) {
+				orderBasket.addOrder(order);
+				observableBasket.update(orderBasket);
+				if (!orderBasket.isStaged())
+					toZMQLog("Basket not staged: " + basketName + " symbol:" + order.getSymbol(), ZMQServer.Parsing);
+				else
+					toZMQLog("New order " + order.getSymbol(), ZMQServer.Parsing);
+			}
+			else {
+				toZMQLog("Unknown basket: " + basketName + " symbol:" + order.getSymbol(), ZMQServer.Parsing);
+			}
+		} 
+		else {
+			toZMQLog("No basket info:" + order.getSymbol(), ZMQServer.Parsing);
+		}
+    }
 
     public void testRMP() {
-    	// FOR TESTING RMP and ZMQ parsing.  This function is not called unless explicitly changed
+    	// FOR TESTING - NOT CALLED UNLESS EXPLICITLY CHANGED
     	String newBasketString = "1=RMP|2=20170313-13:54:44|3=NB|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket";
 		fromRMP(newBasketString);
 		String newOrderString = "1=RMP|2=20170313-14:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|9=BY|10=100|11=M|12=115.20";

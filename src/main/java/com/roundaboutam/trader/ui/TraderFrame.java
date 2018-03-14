@@ -118,7 +118,7 @@ public class TraderFrame extends JFrame {
 		JTabbedPane tabbedPane = new JTabbedPane();
 
 		tabbedPane.add("Orders", new OrderTablePanel(this.application));
-		tabbedPane.add("Baskets", new BasketPorfolioTablePanel(this.application));
+		tabbedPane.add("Baskets", new BasketTablePanel(this.application));
         tabbedPane.add("Messages", new MessageTablePanel(this.application));
 
         panel.add(tabbedPane);
@@ -140,17 +140,17 @@ public class TraderFrame extends JFrame {
 		c.insets = new Insets(0, 4, 30, 4);
 		panel.add(btnFIX, c);
 
-		JButton btnOrderTicket = getOrderTicketButton();
+		JButton btnZmq = getZMQButton();
 		c.gridy = 1;
-		panel.add(btnOrderTicket, c);
-
+		panel.add(btnZmq, c);
+		
 		JButton btnCancelAllTrades = getCancelAllTradesButton();
 		c.gridy = 2;
 		panel.add(btnCancelAllTrades, c);
 
-		JButton btnZmq = getZMQButton();
+		JButton btnOrderTicket = getOrderTicketButton();
 		c.gridy = 3;
-		panel.add(btnZmq, c);
+		panel.add(btnOrderTicket, c);
 
 		JButton btnExit = getExitButton();
 		c.gridy = 4;

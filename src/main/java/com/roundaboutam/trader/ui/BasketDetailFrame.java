@@ -21,33 +21,34 @@ import com.roundaboutam.trader.TraderEngine;
 import com.roundaboutam.trader.order.OrderBasket;
 
 
-public class BasketInfoFrame {
+public class BasketDetailFrame {
 
 	private transient TraderApplication application = null;
 	private static JFrame frame;
 	private static JPanel panel;
-	private static BasketInfoFrame instance = null;
+	private static BasketDetailFrame instance = null;
 	private OrderBasket orderBasket;
     JButton submitButton;
     JButton cancelAllButton;
+    JButton deleteButton;
 
-	public static BasketInfoFrame getInstance(OrderBasket orderBasket, TraderApplication application) {
+	public static BasketDetailFrame getInstance(OrderBasket orderBasket, TraderApplication application) {
 		if (instance == null) {
-			instance = new BasketInfoFrame(orderBasket, application);
+			instance = new BasketDetailFrame(orderBasket, application);
 		}
 		if (!frame.isVisible())
 			frame.setVisible(true);
 		return instance;
 	}
 
-	private BasketInfoFrame(OrderBasket orderBasket, TraderApplication application) {
+	private BasketDetailFrame(OrderBasket orderBasket, TraderApplication application) {
 		this.orderBasket = orderBasket;
 		this.application = application;
-		makeOrderBasketFrame();
+		makeBasketDetailFrame();
 		activateButtons();
 	}
 
-	private void makeOrderBasketFrame() {
+	private void makeBasketDetailFrame() {
 		frame = new JFrame();
 		Point traderEngineLoc = TraderEngine.get().getTraderFrame().getLocationOnScreen();
 		frame.setLocation(traderEngineLoc.x + 50, traderEngineLoc.y + 50);
@@ -59,7 +60,7 @@ public class BasketInfoFrame {
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx=0;
 		c.gridy=0;
-		c.gridwidth = 3;
+		c.gridwidth = 4;
 		c.weighty = 1;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.BOTH;
@@ -79,28 +80,34 @@ public class BasketInfoFrame {
 	    panel.add(submitButton, c);
 
 	    c.gridx = 1;
-	    JButton closeButton = getCloseButton();
-	    panel.add(closeButton, c);
-
-	    c.gridx = 2;
 	    cancelAllButton = getCancelAllButton();
 	    panel.add(cancelAllButton, c);
 
+	    c.gridx = 2;
+	    deleteButton = getDeleteButton();
+	    panel.add(deleteButton, c);
+
+	    c.gridx = 3;
+	    JButton closeButton = getCloseButton();
+	    panel.add(closeButton, c);
+	    
 	    frame.add(panel);
 	    frame.setVisible(true);
 	}
 	
 	private void activateButtons() {
-		if (orderBasket.isFilled()) {
-			submitButton.setEnabled(false);
-			cancelAllButton.setEnabled(false);
-		} else if (orderBasket.isLive()) {
-			submitButton.setEnabled(false);
-			cancelAllButton.setEnabled(true);
-		} else if (orderBasket.isStaged()) {
+		if (orderBasket.isStaged()) {
+			deleteButton.setEnabled(true);
 			submitButton.setEnabled(true);
 			cancelAllButton.setEnabled(false);
-		} else {
+		}
+		else if (orderBasket.isLive()) {
+			deleteButton.setEnabled(false);
+			submitButton.setEnabled(false);	
+			cancelAllButton.setEnabled(true);
+		}
+		else {
+			deleteButton.setEnabled(false);
 			submitButton.setEnabled(false);
 			cancelAllButton.setEnabled(false);
 		}
@@ -110,9 +117,9 @@ public class BasketInfoFrame {
 		String[] columns = new String[] {"BasketSummary", "BY", "SS", "BTC", "SL"};
 
 		Object[][] data = new Object[][] {
-			{"Orders", orderBasket.nBY, orderBasket.nSS, orderBasket.nBTC, orderBasket.nSL },
-			{"Shares", orderBasket.shrBY, orderBasket.shrSS, orderBasket.shrBTC, orderBasket.shrSL },
-			{"ExecShares", orderBasket.shrBYExec, orderBasket.shrSSExec, orderBasket.shrBTCExec, orderBasket.shrSLExec },
+			{"Orders", orderBasket.nBY, orderBasket.nSS, orderBasket.nBTC, orderBasket.nSL},
+			{"Shares", orderBasket.shrBY, orderBasket.shrSS, orderBasket.shrBTC, orderBasket.shrSL},
+			{"ExecShares", orderBasket.shrBYExec, orderBasket.shrSSExec, orderBasket.shrBTCExec, orderBasket.shrSLExec},
 			};
 		JTable table = new JTable(data, columns);
 		JTableHeader header = table.getTableHeader();
@@ -143,18 +150,6 @@ public class BasketInfoFrame {
 	    return submitButton;
 	}
 
-	private void confirmAndSubmit() {
-		int choice = JOptionPane.showOptionDialog(frame, "Submit basket to exchange?", "Confirm?", 
-				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if (choice == JOptionPane.YES_OPTION) {
-            application.sendBasket(orderBasket);
-			orderBasket.setStaged(false);
-			orderBasket.setLive(true);
-			instance = null;
-			frame.dispose();
-		}
-	}
-	
 	private JButton getCancelAllButton() {
 		cancelAllButton = new JButton("Cancel All Trades");
 		cancelAllButton.addActionListener(new ActionListener() {
@@ -163,6 +158,26 @@ public class BasketInfoFrame {
 			}
 		});
 	    return cancelAllButton;
+	}
+
+	private JButton getDeleteButton() {
+		submitButton = new JButton("Delete");
+		submitButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				deleteBasket();
+			}
+		});
+	    return submitButton;
+	}
+	
+	private void confirmAndSubmit() {
+		int choice = JOptionPane.showOptionDialog(frame, "Submit basket to exchange?", "Confirm?", 
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		if (choice == JOptionPane.YES_OPTION) {
+            application.sendBasket(orderBasket);
+			instance = null;
+			frame.dispose();
+		}
 	}
 	
 	private void cancelAllTrades() {
@@ -173,6 +188,20 @@ public class BasketInfoFrame {
 			instance = null;
 			frame.dispose();
 		}
+	}
+
+	private void deleteBasket() {
+		int choice = JOptionPane.showOptionDialog(frame, "Delete this Basket", "Confirm?", 
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		if (!orderBasket.isStaged()){
+			throw new IllegalStateException(orderBasket.getBasketName() + " is not Staged, cannot delete.");
+		}
+		else if (choice == JOptionPane.YES_OPTION) {
+			application.deleteBasket(orderBasket);
+		}
+
+		instance = null;
+		frame.dispose();
 	}
 	
 }

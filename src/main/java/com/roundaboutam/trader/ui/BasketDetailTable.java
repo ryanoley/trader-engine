@@ -22,7 +22,7 @@ import com.roundaboutam.trader.order.OrderBasket;
 class BasketDetailTable extends JTable implements MouseListener {
 
     public BasketDetailTable(OrderBasket orderBasket) {
-        super(new BasketTableModel(orderBasket));
+        super(new BasketDetailTableModel(orderBasket));
         initColumnWidths();
         addMouseListener(this);
         this.setAutoCreateRowSorter(true);
@@ -51,7 +51,7 @@ class BasketDetailTable extends JTable implements MouseListener {
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
         int modelIdx = convertRowIndexToModel(row);
-    	Order order = ((BasketTableModel) getModel()).getOrder(modelIdx);
+    	Order order = ((BasketDetailTableModel) getModel()).getOrder(modelIdx);
         Component c = super.prepareRenderer(renderer, row, column);
         
         JComponent jc = (JComponent) c;
@@ -87,7 +87,7 @@ class BasketDetailTable extends JTable implements MouseListener {
 
 
 @SuppressWarnings("serial")
-class BasketTableModel extends AbstractTableModel {
+class BasketDetailTableModel extends AbstractTableModel {
 
     private final static int ORDID = 0;
     private final static int SIDE = 1;
@@ -104,7 +104,7 @@ class BasketTableModel extends AbstractTableModel {
     public final String[] headers = new String[] {"OrdID", "Side", "Sym", "Type", "Limit",
     		"Shares", "Shares Exec", "% Exec"};
 
-    public BasketTableModel(OrderBasket orderBasket) {
+    public BasketDetailTableModel(OrderBasket orderBasket) {
     	rowToOrder = new HashMap<Integer, Order>();
     	rowToOrderID = new HashMap<Integer, String>();
     	int i = 0;

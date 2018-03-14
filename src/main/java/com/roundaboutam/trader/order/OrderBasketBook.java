@@ -8,11 +8,13 @@ import java.util.HashMap;
 public class OrderBasketBook {
 
 	private final HashMap<String, OrderBasket> basketMap;
+	private final HashMap<String, OrderBasket> deletedBasketMap;
 	private final HashMap<String, String> nameToID;
 
 	public OrderBasketBook() {
 		basketMap = new HashMap<String, OrderBasket>();
 		nameToID = new HashMap<String, String>();
+		deletedBasketMap = new HashMap<String, OrderBasket>();
 	}
 
 	public void addBasket(OrderBasket orderBasket) {
@@ -20,6 +22,16 @@ public class OrderBasketBook {
 		nameToID.put(orderBasket.getBasketName(), orderBasket.getBasketId());
 	}
 
+	public void deleteBasket(OrderBasket orderBasket) {
+		if (orderBasket.isStaged()) {
+			basketMap.remove(orderBasket.getBasketId());
+			nameToID.remove(orderBasket.getBasketName());
+			orderBasket.setDeleted(true);
+			orderBasket.setStaged(false);
+			deletedBasketMap.put(orderBasket.getBasketId(), orderBasket);			
+		}
+	}
+	
 	public OrderBasket getBasket(String basketID) {
 		return basketMap.get(basketID);
 	}

@@ -17,6 +17,7 @@ public class OrderBasket {
 	public boolean staged = false;
 	public boolean live = false;
 	public boolean filled = false;
+	public boolean deleted = false;
 	private int totalShares = 0;
 	private int openShares = 0;
 	private int execShares = 0;
@@ -93,6 +94,7 @@ public class OrderBasket {
 		}
 		if (openShares == 0  && live && ackSum == orderMap.size()) {
 			setFilled(true);
+			setLive(false);
 		}
 	}
 
@@ -147,6 +149,17 @@ public class OrderBasket {
 		this.basketName = basketName;
 	}
 	
+	public int getOpenShares() {
+		return openShares;
+	}
+	
+	public int getExecShares() {
+		return execShares;
+	}
+	
+	public int getTotalShares() {
+		return totalShares;
+	}
 	public boolean isStaged() {
 		return staged;
 	}
@@ -171,16 +184,12 @@ public class OrderBasket {
 		this.filled = filled;
 	}
 
-	public int getOpenShares() {
-		return openShares;
+	public boolean isDeleted() {
+		return deleted;
 	}
-	
-	public int getExecShares() {
-		return execShares;
-	}
-	
-	public int getTotalShares() {
-		return totalShares;
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 	
 }

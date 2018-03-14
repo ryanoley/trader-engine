@@ -58,7 +58,7 @@ public class OrderModificationFrame {
 		frame.setLocation(traderEngineLoc.x + 50, traderEngineLoc.y + 50);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Order Modification Ticket");
-		frame.setSize(400, 600);
+		frame.setSize(300, 400);
 		frame.setResizable(false);
 
 		panel = new JPanel(new GridBagLayout());

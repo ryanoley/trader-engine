@@ -6,10 +6,12 @@ import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.StringJoiner;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -94,23 +96,23 @@ public class OrderModificationFrame {
 
 	    c.gridx = 0;
 	    c.gridy = 6;
-	    JButton btnModifySubmit = new JButton("Modify Order");
-	    btnModifySubmit.addActionListener(new ActionListener() {
+	    JButton btnModifyOrder = new JButton("Modify Order");
+	    btnModifyOrder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				makeModifyTransmitOrder();
+				confirmModifyCancelOrder("Modify");
 			}
 		});
-	    panel.add(btnModifySubmit, c);
+	    panel.add(btnModifyOrder, c);
 
 	    c.gridx = 0;
 	    c.gridy = 7;
-	    JButton btnCancelSubmit = new JButton("Cancel Order");
-	    btnCancelSubmit.addActionListener(new ActionListener() {
+	    JButton btnCancelOrder = new JButton("Cancel Order");
+	    btnCancelOrder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				makeCancelTransmitOrder();
+				confirmModifyCancelOrder("Cancel");
 			}
 		});
-	    panel.add(btnCancelSubmit, c);
+	    panel.add(btnCancelOrder, c);
 
 	    c.gridx = 0;
 	    c.gridy = 8;
@@ -135,20 +137,31 @@ public class OrderModificationFrame {
         field.setForeground(labelColor);
     }
 
-	private void makeCancelTransmitOrder() {
-        application.cancel(new CancelOrder(order));
-		instance = null;
-        frame.dispose();
+	private void confirmModifyCancelOrder(String string) {
+		StringJoiner joiner = new StringJoiner(" ");
+		joiner.add(string);
+		joiner.add(order.getSymbol());
+		joiner.add("(" + order.getPriceType().toString() + ") Order?");
+		
+		int choice = JOptionPane.showOptionDialog(frame, joiner.toString(), "Confirm?", 
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		
+		if (choice == JOptionPane.YES_OPTION) {
+			if (string.toUpperCase().equals("CANCEL")) {
+				application.sendCancelOrder(new CancelOrder(order));
+			}
+			else if (string.toUpperCase().equals("MODIFY")) {
+				ReplaceOrder replaceOrder = new ReplaceOrder(order);
+				replaceOrder.setQuantity(Integer.parseInt(quantityField.getText()));
+		        if (order.getPriceType() == PriceType.LIMIT) {
+		    		replaceOrder.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
+		        }
+		        application.sendReplaceOrder(replaceOrder);
+			}
+			instance = null;
+	        frame.dispose();
+		}
 	}
 
-	private void makeModifyTransmitOrder() {
-		ReplaceOrder replaceOrder = new ReplaceOrder(order);
-		replaceOrder.setQuantity(Integer.parseInt(quantityField.getText()));
-        if (order.getPriceType() == PriceType.LIMIT) {
-    		replaceOrder.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
-        }
-        application.replace(replaceOrder);
-        instance = null;
-        frame.dispose();
-	}
+	
 }

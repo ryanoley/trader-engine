@@ -326,7 +326,7 @@ public class OrderTicketFrame {
 		int choice = JOptionPane.showOptionDialog(frame, joiner.toString(), "Confirm?", 
 				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (choice == JOptionPane.YES_OPTION) {
-            application.send(order);
+            application.sendNewOrder(order);
 			instance = null;
 			frame.dispose();
 		}

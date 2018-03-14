@@ -194,36 +194,36 @@ public class TraderApplication implements Application {
         }
     }
 
-    public void send(Order order) {
+    public void sendNewOrder(Order order) {
     	orderBook.addOrder(order);
     	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
     }
 
-    public void cancel(CancelOrder cancelOrder) {
+    public void sendCancelOrder(CancelOrder cancelOrder) {
     	orderBook.addCancelOrder(cancelOrder);
     	sendToBroker(FIXOrder.formatCancelOrder(cancelOrder), cancelOrder.getSessionID());
     }
 
-    public void replace(ReplaceOrder replaceOrder) {
+    public void sendReplaceOrder(ReplaceOrder replaceOrder) {
     	orderBook.addReplaceOrder(replaceOrder);
         sendToBroker(FIXOrder.formatReplaceOrder(replaceOrder), replaceOrder.getSessionID());
     }
 
     public void cancelAllOpenOrders() {
     	for (Order o : orderBook.getAllOpenOrders()) {
-            cancel(new CancelOrder(o));
+            sendCancelOrder(new CancelOrder(o));
     	}
     }
 
     public void sendBasket(OrderBasket orderBasket) {
     	for (Order order : orderBasket.getAllOrders()) {
-	    	send(order);
+	    	sendNewOrder(order);
     	}
     }
 
     public void cancelBasket(OrderBasket orderBasket) {
     	for (Order order : orderBasket.getAllOpenOrders()) {
-            cancel(new CancelOrder(order));
+            sendCancelOrder(new CancelOrder(order));
     	}
     }
          
@@ -427,14 +427,13 @@ public class TraderApplication implements Application {
     }
 
     public void testRMP() {
-    	/*
+    	// FOR TESTING RMP and ZMQ parsing.  This function is not called unless explicitly changed
     	String newBasketString = "1=RMP|2=20170313-13:54:44|3=NB|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket";
 		fromRMP(newBasketString);
 		String newOrderString = "1=RMP|2=20170313-14:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|9=BY|10=100|11=M|12=115.20";
 		fromRMP(newOrderString);
 		String newLimitOrderString = "1=RMP|2=20170313-15:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|9=SL|10=175|11=L|12=117.05";
 		fromRMP(newLimitOrderString);
-		*/
     }
 
 }

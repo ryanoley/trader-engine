@@ -44,7 +44,7 @@ public class TraderEngine {
 		application = new TraderApplication(settings);
 
         initiator = new SocketInitiator(
-        		application, 
+        		application,
         		new FileStoreFactory(settings), 
         		settings, 
         		new FileLogFactory(settings),

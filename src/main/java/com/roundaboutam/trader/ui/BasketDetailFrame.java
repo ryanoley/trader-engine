@@ -28,9 +28,9 @@ public class BasketDetailFrame {
 	private static JPanel panel;
 	private static BasketDetailFrame instance = null;
 	private OrderBasket orderBasket;
-    JButton submitButton;
-    JButton cancelAllButton;
-    JButton deleteButton;
+	private JButton submitBasketButton;
+	private JButton cancelAllButton;
+	private JButton deleteButton;
 
 	public static BasketDetailFrame getInstance(OrderBasket orderBasket, TraderApplication application) {
 		if (instance == null) {
@@ -45,7 +45,6 @@ public class BasketDetailFrame {
 		this.orderBasket = orderBasket;
 		this.application = application;
 		makeBasketDetailFrame();
-		activateButtons();
 	}
 
 	private void makeBasketDetailFrame() {
@@ -71,20 +70,19 @@ public class BasketDetailFrame {
 		c.weighty = .25;
 	    JTable summaryTable = basketSummaryPanel(orderBasket);
 	    panel.add(new JScrollPane(summaryTable), c);
-
+	    
+		activateButtons();
+		
 	    c = new GridBagConstraints();
 	    c.gridy = 2;
 		c.weighty = .1;
-		c.weightx = 1;
-	    submitButton = getSubmitButton();
-	    panel.add(submitButton, c);
+		c.weightx = 1;  
+	    panel.add(submitBasketButton, c);
 
 	    c.gridx = 1;
-	    cancelAllButton = getCancelAllButton();
 	    panel.add(cancelAllButton, c);
 
 	    c.gridx = 2;
-	    deleteButton = getDeleteButton();
 	    panel.add(deleteButton, c);
 
 	    c.gridx = 3;
@@ -96,19 +94,23 @@ public class BasketDetailFrame {
 	}
 	
 	private void activateButtons() {
+		submitBasketButton = getSubmitBasketButton();
+	    cancelAllButton = getCancelAllButton();
+	    deleteButton = getDeleteButton();
+		
 		if (orderBasket.isStaged()) {
 			deleteButton.setEnabled(true);
-			submitButton.setEnabled(true);
+			submitBasketButton.setEnabled(true);
 			cancelAllButton.setEnabled(false);
 		}
 		else if (orderBasket.isLive()) {
+			submitBasketButton.setEnabled(false);	
 			deleteButton.setEnabled(false);
-			submitButton.setEnabled(false);	
 			cancelAllButton.setEnabled(true);
 		}
 		else {
 			deleteButton.setEnabled(false);
-			submitButton.setEnabled(false);
+			submitBasketButton.setEnabled(false);
 			cancelAllButton.setEnabled(false);
 		}
 	}
@@ -140,14 +142,14 @@ public class BasketDetailFrame {
 	    return btnClose;
 	}
 	
-	private JButton getSubmitButton() {
-		submitButton = new JButton("Submit");
-		submitButton.addActionListener(new ActionListener() {
+	private JButton getSubmitBasketButton() {
+		submitBasketButton = new JButton("Submit");
+		submitBasketButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				confirmAndSubmit();
 			}
 		});
-	    return submitButton;
+	    return submitBasketButton;
 	}
 
 	private JButton getCancelAllButton() {
@@ -161,13 +163,13 @@ public class BasketDetailFrame {
 	}
 
 	private JButton getDeleteButton() {
-		submitButton = new JButton("Delete");
-		submitButton.addActionListener(new ActionListener() {
+		deleteButton = new JButton("Delete");
+		deleteButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				deleteBasket();
 			}
 		});
-	    return submitButton;
+	    return deleteButton;
 	}
 	
 	private void confirmAndSubmit() {

@@ -430,17 +430,17 @@ public class TraderApplication implements Application {
 		if (basketName != null) {
 			OrderBasket orderBasket = orderBasketBook.getBasketbyName(basketName);
 			if (orderBasket != null) {
-				orderBasket.addOrder(order);
-				observableBasket.update(orderBasket);
 				if (!orderBasket.isStaged())
 					toZMQLog("Basket not staged: " + basketName + " symbol:" + order.getSymbol(), ZMQServer.Parsing);
-				else
+				else {
+					orderBasket.addOrder(order);
+					observableBasket.update(orderBasket);
 					toZMQLog("New order " + order.getSymbol(), ZMQServer.Parsing);
+				}	
 			}
-			else {
+			else
 				toZMQLog("Unknown basket: " + basketName + " symbol:" + order.getSymbol(), ZMQServer.Parsing);
-			}
-		} 
+		}
 		else {
 			toZMQLog("No basket info:" + order.getSymbol(), ZMQServer.Parsing);
 		}

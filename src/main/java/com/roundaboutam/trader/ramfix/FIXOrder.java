@@ -29,18 +29,21 @@ import quickfix.fix42.OrderCancelRequest;
 
 public class FIXOrder {
 
-	public static Message formatNewOrder(Order order) {
+	public static Message formatNewOrder(Order order, boolean isProd) {
 		if (order.getVwapFlag()) {
 			return formatVwapOrder(order);
 		} else {
-			return formatNormalOrder(order);
+			return formatNormalOrder(order, isProd);
 		}
 	}
 
-	private static Message formatNormalOrder(Order order) {
+	private static Message formatNormalOrder(Order order, boolean isProd) {
 		NewOrderSingle fixOrder = getNewOrderSingle(order);
 		// TODO ML_SMARTDMA rejects in UAT, maybe should be used in PROD
-		fixOrder.setString(TargetSubID.FIELD, "ML_ARCA");
+		if (isProd)
+			fixOrder.setString(TargetSubID.FIELD, "ML_SMARTDMA");		
+		else
+			fixOrder.setString(TargetSubID.FIELD, "ML_ARCA");
 		return fixOrder;
 	}
 

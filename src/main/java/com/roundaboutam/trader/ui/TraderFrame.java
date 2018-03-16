@@ -30,6 +30,7 @@ public class TraderFrame extends JFrame {
 	private FIXMonitor fixMonitor;
 	private JButton btnFIX;
 	private JButton btnZMQ;
+	private JButton btnExport;
 	
 	public TraderFrame(TraderApplication application) {
 		super();
@@ -42,23 +43,6 @@ public class TraderFrame extends JFrame {
 		setVisible(true);
 	}
 
-	private void addWindowClosingHandler() {
-		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		this.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				callExitDialogueBoxAndShutdown();
-			}
-		});
-	}
-
-	private void callExitDialogueBoxAndShutdown() {
-		int choice = JOptionPane.showOptionDialog(null, "Are you sure?", "EXIT?", 
-				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if (choice != JOptionPane.YES_OPTION)
-			return;
-		TraderEngine.get().shutdown();
-	}
 
 	public void addPanels() {
 		getContentPane().add(makeBanner(), BorderLayout.NORTH);
@@ -135,7 +119,7 @@ public class TraderFrame extends JFrame {
 		c.ipady = 12;
 		c.gridx = 0;
 
-		btnFIX = getFixButton();
+		JButton btnFIX = getFixButton();
 		c.gridy = 0;
 		c.insets = new Insets(0, 4, 30, 4);
 		panel.add(btnFIX, c);
@@ -152,10 +136,14 @@ public class TraderFrame extends JFrame {
 		c.gridy = 3;
 		panel.add(btnOrderTicket, c);
 
-		JButton btnExit = getExitButton();
+		JButton btnExport = getExportTradesButton();
 		c.gridy = 4;
-		panel.add(btnExit, c);
+		panel.add(btnExport, c);
 
+		JButton btnExit = getExitButton();
+		c.gridy = 5;
+		panel.add(btnExit, c);
+		
 		return panel;
 	}
 	
@@ -175,40 +163,6 @@ public class TraderFrame extends JFrame {
 		});
 		return btnFIX;
 	}
-
-	private JButton getCancelAllTradesButton() {
-		JButton btnCancelAllTrades = new JButton("Cancel All Trades");
-		btnCancelAllTrades.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				int choice = JOptionPane.showOptionDialog(null, 
-						"Are you sure you want to cancel all open orders?", "CANCEL ALL ORDERS?", 
-						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-				if (choice == JOptionPane.YES_OPTION)
-					application.cancelAllOpenOrders();
-			}
-		});
-		return btnCancelAllTrades;
-	}
-	
-	private JButton getExitButton() {
-		JButton btnExit = new JButton("Exit");
-		btnExit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				callExitDialogueBoxAndShutdown();
-			}
-		});
-		return btnExit;
-	}
-	
-	private JButton getOrderTicketButton() {
-		JButton btnOrderTicket = new JButton("Order Ticket");
-		btnOrderTicket.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				OrderTicketFrame.getInstance(application);
-			}
-		});
-		return btnOrderTicket;
-	}
 	
 	private JButton getZMQButton() {
 		btnZMQ = new JButton("Start ZMQ");
@@ -220,6 +174,70 @@ public class TraderFrame extends JFrame {
 		return btnZMQ;
 	}
 	
+	private JButton getCancelAllTradesButton() {
+		JButton btnCancelAllTrades = new JButton("Cancel All Trades");
+		btnCancelAllTrades.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int choice = JOptionPane.showOptionDialog(TraderEngine.get().getTraderFrame(), 
+						"Cancel all open orders?", "CANCEL ALL ORDERS?", JOptionPane.YES_NO_OPTION, 
+						JOptionPane.QUESTION_MESSAGE, null, null, null);
+				if (choice == JOptionPane.YES_OPTION)
+					application.cancelAllOpenOrders();
+			}
+		});
+		return btnCancelAllTrades;
+	}
+	
+	private JButton getOrderTicketButton() {
+		JButton btnOrderTicket = new JButton("Order Ticket");
+		btnOrderTicket.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				OrderTicketFrame.getInstance(application);
+			}
+		});
+		return btnOrderTicket;
+	}
+
+	private JButton getExportTradesButton() {
+		btnExport = new JButton("Export Trades");
+		btnExport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String outputLocation = JOptionPane.showInputDialog(TraderEngine.get().getTraderFrame(), 
+																	"Export Location", "C:/temp/trade_report.csv");
+				application.writeOrderBookToCSV(outputLocation);
+			}
+		});
+		return btnExport;
+	}
+	
+	private JButton getExitButton() {
+		JButton btnExit = new JButton("Exit");
+		btnExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				callExitDialogueBoxAndShutdown();
+			}
+		});
+		return btnExit;
+	}
+
+	private void callExitDialogueBoxAndShutdown() {
+		int choice = JOptionPane.showOptionDialog(TraderEngine.get().getTraderFrame(), "Are you sure?", "EXIT?", 
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		if (choice != JOptionPane.YES_OPTION)
+			return;
+		TraderEngine.get().shutdown();
+	}
+
+	private void addWindowClosingHandler() {
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				callExitDialogueBoxAndShutdown();
+			}
+		});
+	}
+
 	public void setFixButtonText(String text) {
 		btnFIX.setText(text);
 	}

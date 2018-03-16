@@ -3,6 +3,7 @@ package com.roundaboutam.trader.ui;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -77,83 +78,124 @@ public class OrderTicketFrame {
 
 		frame = new JFrame();
 		Point traderEngineLoc = TraderEngine.get().getTraderFrame().getLocationOnScreen();
-		frame.setLocation(traderEngineLoc.x + 50, traderEngineLoc.y + 50);
+		frame.setLocation(traderEngineLoc.x + 200, traderEngineLoc.y + 200);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Order Ticket");
-		frame.setSize(400, 600);
-		frame.setResizable(false);
+		frame.setSize(400, 300);
+		frame.setResizable(true);
 
 		panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.PAGE_START;
-
+		
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = .5;
 		c.gridx = 0;
 		c.gridy = 0;
 		panel.add(new JLabel("Ticker:"), c);
+
 		c.gridx = 0;
 		c.gridy = 1;
 		panel.add(symbolField, c);
 
-	    orderTypesCombo.addItemListener(new OrderTypeListener());
-	    c.gridx = 0;
-	    c.gridy = 2;
+	    c.insets = new Insets(0,5,0,0);
+	    c.gridx = 1;
+	    c.gridy = 0;
 	    panel.add(new JLabel("Order Type:"), c);
-	    c.gridx = 0;
-	    c.gridy = 3;
+
+	    orderTypesCombo.addItemListener(new OrderTypeListener());
+	    c.insets = new Insets(0,5,0,0);
+	    c.gridx = 1;
+	    c.gridy = 1;
 	    panel.add(orderTypesCombo, c);
 
-	    c.gridx = 0;
-	    c.gridy = 4;
+	    c.insets = new Insets(0,5,0,0);
+	    c.gridx = 2;
+	    c.gridy = 0;
 	    panel.add(new JLabel("Order Side:"), c);
-	    c.gridx = 0;
-	    c.gridy = 5;
+
+	    c.insets = new Insets(0,5,0,0);
+	    c.gridx = 2;
+	    c.gridy = 1;
 	    panel.add(orderSideCombo, c);
 
+	    c.insets = new Insets(10,0,0,0);
+	    c.gridx = 0;
+	    c.gridy = 3;
+	    panel.add(new JLabel("Quantity:"), c);
+
+	    c.insets = new Insets(0,0,0,0);
+	    c.gridx = 0;
+	    c.gridy = 4;
+	    panel.add(quantityField, c);
+
+	    c.insets = new Insets(10,5,0,0);
+	    c.gridx = 1;
+	    c.gridy = 3;
+	    panel.add(new JLabel("Limit Price:"), c);
+
+	    c.insets = new Insets(0,5,0,0);
+	    c.gridx = 1;
+	    c.gridy = 4;
+	    panel.add(limitPriceField, c);
+
+	    c.insets = new Insets(10,0,0,0);
+	    c.gridx = 0;
+	    c.gridy = 5;
+	    panel.add(new JLabel("Participation Rate:"), c);
+
+	    c.insets = new Insets(0,0,0,0);
 	    c.gridx = 0;
 	    c.gridy = 6;
-	    panel.add(new JLabel("Quantity:"), c);
+	    panel.add(participationRateField, c);
+
+	    c.gridx = 1;
+	    c.gridy = 5;
+	    c.insets = new Insets(10,5,0,0);
+	    panel.add(new JLabel("Start Time:"), c);
+	    
+	    c.gridx = 1;
+	    c.gridy = 6;
+	    c.insets = new Insets(0,5,0,0);
+	    panel.add(startTimeField, c);
+
+	    c.gridx = 2;
+	    c.gridy = 5;
+	    c.insets = new Insets(10,5,0,0);
+	    panel.add(new JLabel("End Time:"), c);
+	    
+	    c.gridx = 2;
+	    c.gridy = 6;
+	    c.insets = new Insets(0,5,0,0);
+	    panel.add(endTimeField, c);
+
+	    
 	    c.gridx = 0;
 	    c.gridy = 7;
-	    panel.add(quantityField, c);
+	    c.insets = new Insets(10,0,0,0);
+	    panel.add(new JLabel("Custom Tag:"), c);
 
 	    c.gridx = 0;
 	    c.gridy = 8;
-	    panel.add(new JLabel("Limit Price:"), c);
-	    c.gridx = 0;
-	    c.gridy = 9;
-	    panel.add(limitPriceField, c);
-	    
-	    c.gridx = 0;
-	    c.gridy = 10;
-	    panel.add(new JLabel("Participation Rate:"), c);
-	    c.gridx = 0;
-	    c.gridy = 11;
-	    panel.add(participationRateField, c);
-
-	    c.gridx = 0;
-	    c.gridy = 12;
-	    panel.add(new JLabel("Start Time:"), c);
-	    c.gridx = 0;
-	    c.gridy = 13;
-	    panel.add(startTimeField, c);
-
-	    c.gridx = 0;
-	    c.gridy = 14;
-	    panel.add(new JLabel("End Time:"), c);
-	    c.gridx = 0;
-	    c.gridy = 15;
-	    panel.add(endTimeField, c);
-
-	    c.gridx = 0;
-	    c.gridy = 16;
-	    panel.add(new JLabel("Custom Tag:"), c);
-	    c.gridx = 0;
-	    c.gridy = 17;
+	    c.insets = new Insets(0,0,0,0);
 	    panel.add(customTagField, c);
 
+	    c.gridx = 1;
+	    c.gridy = 7;
+	    c.insets = new Insets(10,5,0,0);
+	    panel.add(new JLabel("Session ID:"), c);
+	    
+	    c.gridx = 1;
+	    c.gridy = 8;
+	    c.insets = new Insets(0,5,0,0);
+	    panel.add(sessionIDCombo, c);
+	    
+	    
+	    
 	    c.gridx = 0;
-	    c.gridy = 18;
+	    c.gridy = 9;
+	    c.ipady = 10;
+	    c.insets = new Insets(10,0,0,0);
 	    submitButton = new JButton("Submit");
 	    submitButton.setEnabled(false);
 	    submitButton.addActionListener(new ActionListener() {
@@ -163,8 +205,10 @@ public class OrderTicketFrame {
 		});
 	    panel.add(submitButton, c);
 
-	    c.gridx = 0;
-	    c.gridy = 19;
+	    c.gridx = 1;
+	    c.gridy = 9;
+	    c.ipady = 10;
+	    c.insets = new Insets(10,5,0,0);
 	    JButton btnClose = new JButton("Close");
 	    btnClose.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -174,13 +218,7 @@ public class OrderTicketFrame {
 		});
 	    panel.add(btnClose, c);
 
-	    c.gridx = 0;
-	    c.gridy = 20;
-	    panel.add(new JLabel("Session ID:"), c);
-	    c.gridx = 0;
-	    c.gridy = 21;
-	    panel.add(sessionIDCombo, c);
-
+	    
 	    checkFields();
 
         SubmitActivator activator = new SubmitActivator();

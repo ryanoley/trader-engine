@@ -1,5 +1,7 @@
 package com.roundaboutam.trader.order;
 
+import java.util.StringJoiner;
+
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
 import com.roundaboutam.trader.ramfix.OrderTIF;
 import com.roundaboutam.trader.rmp.OrderSide;
@@ -25,7 +27,7 @@ public class Order {
 	private OrderOpenClose orderOpenClose = null;
     private PriceType priceType = null;
     private OrderTIF orderTIF = null;
-    private int quantity = 0;
+    private Integer quantity = 0;
     private Double limitPrice = null;
     private Double stopPrice = null;
 	private String startTime = "09:32:00";
@@ -33,10 +35,10 @@ public class Order {
 	private int participationRate = 12;
 
     // Execution related fields - Same names as FIX fields
-    private int leavesQty = 0;
-    private int cumQty = 0;
-    private double avgPx = 0.0;
-    private int orderQty = 0;
+    private Integer leavesQty = 0;
+    private Integer cumQty = 0;
+    private Double avgPx = 0.0;
+    private Integer orderQty = 0;
 
     private boolean rejected = false;
     private boolean canceled = false;
@@ -280,25 +282,52 @@ public class Order {
 	public Boolean getVwapFlag() {
 		return vwapFlag;
 	}
+
 	public void setVwapFlag(Boolean vwapFlag) {
 		this.vwapFlag = vwapFlag;
 	}
+
 	public String getStartTime() {
 		return startTime;
 	}
+
 	public void setStartTime(String startTime) {
 		this.startTime = startTime;
 	}
+
 	public String getEndTime() {
 		return endTime;
 	}
+
 	public void setEndTime(String endTime) {
 		this.endTime = endTime;
 	}
+
 	public int getParticipationRate() {
 		return participationRate;
 	}
+
 	public void setParticipationRate(int participationRate) {
 		this.participationRate = participationRate;
-	}	
+	}
+	
+	public String getExportString() {
+		StringJoiner joiner = new StringJoiner(",");
+		joiner.add(this.orderID);
+		joiner.add(this.symbol);
+		joiner.add(this.suffix);
+		joiner.add(this.orderSide.toString());
+		joiner.add(this.priceType.toString());
+		joiner.add(this.quantity.toString());
+		joiner.add(this.orderQty.toString());
+		joiner.add(this.cumQty.toString());
+		joiner.add(this.leavesQty.toString());
+		joiner.add(this.avgPx.toString());
+		joiner.add(orderBasketID);
+		joiner.add(orderBasketName);
+
+		return joiner.toString();
+	}
+
+	
 }

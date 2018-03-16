@@ -1,5 +1,7 @@
 package com.roundaboutam.trader;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Observable;
@@ -59,6 +61,7 @@ public class TraderApplication implements Application {
 	private final OrderBasketBook orderBasketBook;
 	private final ExecutionBook executionBook;
 	private ZMQServer zmqServer = null;
+	private Boolean isProd = null;
 
     private final DefaultMessageFactory messageFactory = new DefaultMessageFactory();
 
@@ -69,12 +72,21 @@ public class TraderApplication implements Application {
 	
 	public TraderApplication(SessionSettings settings) throws ConfigError, FieldConvertError {
 		this.settings = settings;
+		setLaunchEnv();
 		orderBook = new OrderBook();
 		executionBook = new ExecutionBook(settings.getString("CustomLogPath"));
 		orderBasketBook = new OrderBasketBook();
 	}
 	
-    
+	private void setLaunchEnv() throws ConfigError, FieldConvertError {
+		String launchEnvString = this.settings.getString("LaunchEnvironment");
+		if (launchEnvString.equals("prod"))
+			this.isProd = true;
+		else
+			this.isProd = false;
+	}
+	
+	
 	/*
 	 *  CORE FUNCTIONALITY
 	 */
@@ -200,7 +212,7 @@ public class TraderApplication implements Application {
 	 */
     public void sendNewOrder(Order order) {
     	orderBook.addOrder(order);
-    	sendToBroker(FIXOrder.formatNewOrder(order), order.getSessionID());
+    	sendToBroker(FIXOrder.formatNewOrder(order, this.isProd), order.getSessionID());
     }
 
     public void sendCancelOrder(CancelOrder cancelOrder) {
@@ -239,6 +251,18 @@ public class TraderApplication implements Application {
 		orderBasketBook.deleteBasket(orderBasket);
 		observableBasket.update(orderBasket);
     }
+    
+	public void writeOrderBookToCSV(String outputLocation) {
+		String orderBookCSV = orderBook.getOrderBookCSV();
+		PrintWriter out;
+		try {
+			out = new PrintWriter(outputLocation);
+			out.println(orderBookCSV);
+			out.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 	/*
 	 *  FIX SESSION 
 	 */
@@ -444,6 +468,7 @@ public class TraderApplication implements Application {
 		else {
 			toZMQLog("No basket info:" + order.getSymbol(), ZMQServer.Parsing);
 		}
+
     }
 
     public void testRMP() {
@@ -455,5 +480,7 @@ public class TraderApplication implements Application {
 		String newLimitOrderString = "1=RMP|2=20170313-15:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|9=SL|10=175|11=L|12=117.05";
 		fromRMP(newLimitOrderString);
     }
+
+
 
 }

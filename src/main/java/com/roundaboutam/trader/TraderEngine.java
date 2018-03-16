@@ -75,6 +75,7 @@ public class TraderEngine {
         settings.setString("FileStorePath", rootpath + "\\fileStore");
         settings.setString("FileLogPath", rootpath + "\\logs");
         settings.setString("CustomLogPath", rootpath + "\\custom");
+        settings.setString("LaunchEnvironment", launchEnv);
         return settings;
 	}
 

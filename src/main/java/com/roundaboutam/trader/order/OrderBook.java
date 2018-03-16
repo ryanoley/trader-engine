@@ -2,6 +2,7 @@ package com.roundaboutam.trader.order;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import com.roundaboutam.trader.MessageContainer;
@@ -125,6 +126,17 @@ public class OrderBook {
 		}	
 		return openOrders;
 	}
+
+	public String getOrderBookCSV() {
+		StringJoiner joiner = new StringJoiner("\n");
+		for (Map.Entry<String, Order> entry : orderMap.entrySet()) {
+		    Order order = entry.getValue();
+		    joiner.add(order.getExportString());
+		}
+	    
+		return joiner.toString();
+	}
+
 
 }
 

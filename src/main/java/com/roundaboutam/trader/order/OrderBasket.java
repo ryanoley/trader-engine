@@ -14,25 +14,40 @@ public class OrderBasket {
 	private HashMap<String, Order> orderMap;
 	private String basketName;
 	private String basketID;
+	
 	public boolean staged = false;
 	public boolean live = false;
 	public boolean filled = false;
 	public boolean deleted = false;
+	
 	private int totalShares = 0;
 	private int openShares = 0;
 	private int execShares = 0;
-	public int nBY = 0;
-	public int nSL = 0;
-	public int nSS = 0;
-	public int nBTC = 0;
-	public int shrBY = 0;
-	public int shrSL = 0;
-	public int shrSS = 0;
-	public int shrBTC = 0;
-	public int shrBYExec = 0;
-	public int shrSLExec = 0;
-	public int shrSSExec = 0;
-	public int shrBTCExec = 0;
+	
+	public int nOrdersBY = 0;
+	public int nOrdersBTC = 0;
+	public int nOrdersSL = 0;
+	public int nOrdersSS = 0;
+
+	public int nSharesBY = 0;
+	public int nSharesBTC = 0;
+	public int nSharesSL = 0;
+	public int nSharesSS = 0;
+
+	public int execSharesBY = 0;
+	public int execSharesBTC = 0;
+	public int execSharesSL = 0;
+	public int execSharesSS = 0;
+
+	public double totalDollarsBY = 0;
+	public double totalDollarsBTC = 0;
+	public double totalDollarsSL = 0;
+	public double totalDollarsSS = 0;
+
+	public double execDollarsBY = 0;
+	public double execDollarsBTC = 0;
+	public double execDollarsSL = 0;
+	public double execDollarsSS = 0;
 
 	public OrderBasket() {
 		orderMap = new HashMap<String, Order>();
@@ -69,23 +84,32 @@ public class OrderBasket {
 			OrderOpenClose orderOpenClose = order.getOrderOpenClose();
 			int orderQty = order.getQuantity();	
 			int orderQtyExec = order.getCumQty();
+			double orderAvgPx = order.getAvgPx();
 
 			if (orderSide == OrderSide.BUY && orderOpenClose == OrderOpenClose.OPEN) {
-				nBY ++;
-				shrBY += orderQty;
-				shrBYExec += orderQtyExec;
+				nOrdersBY ++;
+				nSharesBY += orderQty;
+				execSharesBY += orderQtyExec;
+				totalDollarsBY += orderQty * orderAvgPx;
+				execDollarsBY += orderQtyExec * orderAvgPx;
 			} else if (orderSide == OrderSide.BUY && orderOpenClose == OrderOpenClose.CLOSE) {
-				nBTC ++;
-				shrBTC += orderQty;
-				shrBTCExec += orderQtyExec;
+				nOrdersBTC ++;
+				nSharesBTC += orderQty;
+				execSharesBTC += orderQtyExec;
+				totalDollarsBTC += orderQty * orderAvgPx;
+				execDollarsBTC += orderQtyExec * orderAvgPx;
 			} else if (orderSide == OrderSide.SHORT_SELL) {
-				nSS ++;
-				shrSS += orderQty;
-				shrSSExec += orderQtyExec;
+				nOrdersSS ++;
+				nSharesSS += orderQty;
+				execSharesSS += orderQtyExec;
+				totalDollarsSS += orderQty * orderAvgPx;
+				execDollarsSS += orderQtyExec * orderAvgPx;
 			} else if (orderSide == OrderSide.SELL) {
-				nSL ++;
-				shrSL += orderQty;
-				shrSLExec += orderQtyExec;
+				nOrdersSL ++;
+				nSharesSL += orderQty;
+				execSharesSL += orderQtyExec;
+				totalDollarsSL += orderQty * orderAvgPx;
+				execDollarsSL += orderQtyExec * orderAvgPx;
 			}
 			totalShares += orderQty;
 			openShares += order.getLeavesQty();
@@ -102,18 +126,31 @@ public class OrderBasket {
 		totalShares = 0;
 		openShares = 0;
 		execShares = 0;
-		nBY = 0;
-		nSL = 0;
-		nSS = 0;
-		nBTC = 0;
-		shrBY = 0;
-		shrSL = 0;
-		shrSS = 0;
-		shrBTC = 0;
-		shrBYExec = 0;
-		shrSLExec = 0;
-		shrSSExec = 0;
-		shrBTCExec = 0;
+		
+		nOrdersBY = 0;
+		nOrdersBTC = 0;
+		nOrdersSL = 0;
+		nOrdersSS = 0;
+		
+		nSharesBY = 0;
+		nSharesBTC = 0;
+		nSharesSL = 0;
+		nSharesSS = 0;
+		
+		execSharesBY = 0;
+		execSharesBTC = 0;
+		execSharesSL = 0;
+		execSharesSS = 0;
+		
+		totalDollarsBY = 0;
+		totalDollarsBTC = 0;
+		totalDollarsSL = 0;
+		totalDollarsSS = 0;
+		
+		execDollarsBY = 0;
+		execDollarsBTC = 0;
+		execDollarsSL = 0;
+		execDollarsSS = 0;
 	}
 	
 	public ArrayList<Order> getAllOrders() {
@@ -149,17 +186,70 @@ public class OrderBasket {
 		this.basketName = basketName;
 	}
 	
-	public int getOpenShares() {
-		return openShares;
+	public int getOrderCount() {
+		return orderMap.size();
 	}
-	
-	public int getExecShares() {
-		return execShares;
-	}
-	
+
 	public int getTotalShares() {
 		return totalShares;
 	}
+
+	public int getExecShares() {
+		return execShares;
+	}
+
+	public int getOpenShares() {
+		return openShares;
+	}	
+
+	public int getOpenSharesBY() {
+		return nSharesBY - execSharesBY;
+	}
+	
+	public int getOpenSharesBTC() {
+		return nSharesBTC - execSharesBTC;
+	}
+	
+	public int getOpenSharesSL() {
+		return nSharesSL - execSharesSL;
+	}
+	
+	public int getOpenSharesSS() {
+		return nSharesSS - execSharesSS;
+	}
+	
+	public double getTotalDollarsAbs() {
+		 return totalDollarsBY + totalDollarsBTC + totalDollarsSS + totalDollarsSL;
+	}
+
+	public double getTotalDollarsNet() {
+		 return totalDollarsBY + totalDollarsBTC - totalDollarsSS - totalDollarsSL;
+	}
+
+	public double getExecDollarsAbs() {
+		 return execDollarsBY + execDollarsBTC + execDollarsSS + execDollarsSL;
+	}
+
+	public double getExecDollarsNet() {
+		 return execDollarsBY + execDollarsBTC - execDollarsSS - execDollarsSL;
+	}
+		
+	public double getOpenDollarsBY() {
+		return totalDollarsBY - execDollarsBY;
+	}
+	
+	public double getOpenDollarsBTC() {
+		return totalDollarsBTC - execDollarsBTC;
+	}
+	
+	public double getOpenDollarsSL() {
+		return totalDollarsSL - execDollarsSL;
+	}
+	
+	public double getOpenDollarsSS() {
+		return totalDollarsSS - execDollarsSS;
+	}
+
 	public boolean isStaged() {
 		return staged;
 	}

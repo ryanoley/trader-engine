@@ -15,6 +15,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.MatteBorder;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.TraderEngine;
@@ -116,18 +118,40 @@ public class BasketDetailFrame {
 	}
 
 	private JTable basketSummaryPanel(OrderBasket orderBasket) {
-		String[] columns = new String[] {"BasketSummary", "BY", "SS", "BTC", "SL"};
+		String[] columns = new String[] {"Basket Summary", "BY", "SS", "BTC", "SL", "Total"};
 
 		Object[][] data = new Object[][] {
-			{"Orders", orderBasket.nBY, orderBasket.nSS, orderBasket.nBTC, orderBasket.nSL},
-			{"Shares", orderBasket.shrBY, orderBasket.shrSS, orderBasket.shrBTC, orderBasket.shrSL},
-			{"ExecShares", orderBasket.shrBYExec, orderBasket.shrSSExec, orderBasket.shrBTCExec, orderBasket.shrSLExec},
+			{"Orders", orderBasket.nOrdersBY, orderBasket.nOrdersSS, 
+						orderBasket.nOrdersBTC, orderBasket.nOrdersSL, 
+						orderBasket.getOrderCount()},
+	
+			{"Traded Dollars (Net)", orderBasket.execDollarsBY, -orderBasket.execDollarsSS, 
+									orderBasket.execDollarsBTC, -orderBasket.execDollarsSL, 
+									orderBasket.getExecDollarsNet()},
+
+			{"Open Shares", orderBasket.getOpenSharesBY(), orderBasket.getOpenSharesSS(), 
+									orderBasket.getOpenSharesBTC(), orderBasket.getOpenSharesSL(), 
+									orderBasket.getOpenShares()}		
 			};
+
 		JTable table = new JTable(data, columns);
 		JTableHeader header = table.getTableHeader();
 		header.setOpaque(false);
 		header.setBackground(Color.lightGray);
 		header.setBorder(new MatteBorder(0, 0, 1, 0, Color.black));
+		
+		TableColumnModel model = table.getColumnModel();
+        TableColumn column = model.getColumn(0);
+        column.setPreferredWidth((int) (150));
+        column = model.getColumn(1);
+        column.setPreferredWidth((int) (100));
+        column = model.getColumn(2);
+        column.setPreferredWidth((int) (100));
+        column = model.getColumn(3);
+        column.setPreferredWidth((int) (100));
+        column = model.getColumn(4);
+        column.setPreferredWidth((int) (100));
+
 		return table;
 	}
 	

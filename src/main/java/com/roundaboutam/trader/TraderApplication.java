@@ -208,7 +208,7 @@ public class TraderApplication implements Application {
         }
     }
 	/*
-	 *  ORDER AND BASKET SENDING WRAPPERS
+	 *  ORDER AND ORDER BASKET FUNTIONS
 	 */
     public void sendNewOrder(Order order) {
     	orderBook.addOrder(order);
@@ -468,7 +468,6 @@ public class TraderApplication implements Application {
 		else {
 			toZMQLog("No basket info:" + order.getSymbol(), ZMQServer.Parsing);
 		}
-
     }
 
     public void testRMP() {

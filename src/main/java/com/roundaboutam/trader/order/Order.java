@@ -1,6 +1,8 @@
 package com.roundaboutam.trader.order;
 
-import java.util.StringJoiner;
+
+import java.util.Map;
+import java.util.LinkedHashMap;
 
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
 import com.roundaboutam.trader.ramfix.OrderTIF;
@@ -311,22 +313,23 @@ public class Order {
 		this.participationRate = participationRate;
 	}
 	
-	public String getExportString() {
-		StringJoiner joiner = new StringJoiner(",");
-		joiner.add(this.orderID);
-		joiner.add(this.symbol);
-		joiner.add(this.suffix);
-		joiner.add(this.orderSide.toString());
-		joiner.add(this.priceType.toString());
-		joiner.add(this.quantity.toString());
-		joiner.add(this.orderQty.toString());
-		joiner.add(this.cumQty.toString());
-		joiner.add(this.leavesQty.toString());
-		joiner.add(this.avgPx.toString());
-		joiner.add(orderBasketID);
-		joiner.add(orderBasketName);
-
-		return joiner.toString();
+	public Map<String, String> getExportHash() {
+		
+		Map<String, String> exportHash = new LinkedHashMap<String, String>();
+		
+		exportHash.put("OrderID", this.orderID);
+		exportHash.put("Symbol", this.symbol);
+		exportHash.put("Suffix", this.suffix);
+		exportHash.put("Side", this.orderSide.toString());
+		exportHash.put("Type", this.priceType.toString());
+		exportHash.put("Quantity", this.quantity.toString());
+		exportHash.put("ExecutedShares", this.cumQty.toString());
+		exportHash.put("OpenShares", this.leavesQty.toString());
+		exportHash.put("AveragePrice", this.avgPx.toString());
+		exportHash.put("BasketID", this.orderBasketID);
+		exportHash.put("BasketName", this.orderBasketName);
+		
+		return exportHash;
 	}
 
 	

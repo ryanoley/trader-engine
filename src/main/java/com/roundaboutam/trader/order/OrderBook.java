@@ -128,15 +128,27 @@ public class OrderBook {
 	}
 
 	public String getOrderBookCSV() {
-		StringJoiner joiner = new StringJoiner("\n");
-		for (Map.Entry<String, Order> entry : orderMap.entrySet()) {
-		    Order order = entry.getValue();
-		    joiner.add(order.getExportString());
+		
+		StringJoiner bookJoiner = new StringJoiner("\n");
+		
+		for (Order order : orderMap.values()) {
+			StringJoiner columnJoiner = new StringJoiner(",");
+			StringJoiner fieldJoiner = new StringJoiner(",");
+		    for (Map.Entry<String, String> orderFieldMap : order.getExportHash().entrySet()) {
+		    	String field = orderFieldMap.getKey();
+		    	String value = orderFieldMap.getValue();
+		    	columnJoiner.add(field);
+		    	fieldJoiner.add(value);
+		    }
+		    if(bookJoiner.length() == 0)
+		    	bookJoiner.add(columnJoiner.toString());
+		    bookJoiner.add(fieldJoiner.toString());
 		}
-	    
-		return joiner.toString();
+		return bookJoiner.toString();
 	}
 
+	
+	
 
 }
 

@@ -89,7 +89,7 @@ public class OrderTicketFrame {
 		c.anchor = GridBagConstraints.PAGE_START;
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = .5;
+		c.weightx = 1;
 		c.gridx = 0;
 		c.gridy = 0;
 		panel.add(new JLabel("Ticker:"), c);
@@ -182,6 +182,7 @@ public class OrderTicketFrame {
 
 	    c.gridx = 1;
 	    c.gridy = 7;
+	    c.gridwidth = 2;
 	    c.insets = new Insets(10,5,0,0);
 	    panel.add(new JLabel("Session ID:"), c);
 	    
@@ -189,12 +190,11 @@ public class OrderTicketFrame {
 	    c.gridy = 8;
 	    c.insets = new Insets(0,5,0,0);
 	    panel.add(sessionIDCombo, c);
-	    
-	    
-	    
+
 	    c.gridx = 0;
 	    c.gridy = 9;
 	    c.ipady = 10;
+	    c.gridwidth = 1;
 	    c.insets = new Insets(10,0,0,0);
 	    submitButton = new JButton("Submit");
 	    submitButton.setEnabled(false);

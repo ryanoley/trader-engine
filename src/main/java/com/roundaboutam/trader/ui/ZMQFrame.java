@@ -23,12 +23,11 @@ public class ZMQFrame {
 	private static JTextField portField = new JTextField("5555");
 	private static ZMQFrame instance = null;
 	private transient TraderApplication application = null;
-	private JButton zmqButton= null;
 
 	
-	public static ZMQFrame getInstance(JButton zmqButton, TraderApplication application) {
+	public static ZMQFrame getInstance(TraderApplication application) {
 		if (instance == null) {
-			instance = new ZMQFrame(zmqButton, application);
+			instance = new ZMQFrame(application);
 			return instance;
 		}
 		if (!frame.isVisible())
@@ -36,12 +35,10 @@ public class ZMQFrame {
 		return instance;
 	}
 
-	private ZMQFrame(JButton zmqButton, TraderApplication application) {
+	private ZMQFrame(TraderApplication application) {
 		this.application = application;
-		this.zmqButton = zmqButton;
 		makeZMQFrame();
 	}
-
 
 	private void makeZMQFrame() {
 		frame = new JFrame();
@@ -99,15 +96,23 @@ public class ZMQFrame {
 	
 	private void startZMQ(Integer port){
 		application.startZMQServer(port);
-		zmqButton.setText("Stop ZMQ");
+		setTraderFrameZmqBtnText();
 		instance = null;
 		frame.dispose();
 	}
 	
 	private void stopZMQ(){
 		application.stopZMQServer();
-		zmqButton.setText("Start ZMQ");
+		setTraderFrameZmqBtnText();
 		instance = null;
 		frame.dispose();
+	}
+	
+	private void setTraderFrameZmqBtnText() {
+		if (application.getZMQServerStatus())
+			TraderEngine.get().getTraderFrame().setZmqButtonText("Stop ZMQ");
+		else 
+			TraderEngine.get().getTraderFrame().setZmqButtonText("Start ZMQ");
+		
 	}
 }

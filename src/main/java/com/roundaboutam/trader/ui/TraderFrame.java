@@ -168,7 +168,7 @@ public class TraderFrame extends JFrame {
 		btnZMQ = new JButton("Start ZMQ");
 		btnZMQ.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ZMQFrame.getInstance(btnZMQ, application);
+				ZMQFrame.getInstance(application);
 			}
 		});
 		return btnZMQ;
@@ -240,5 +240,9 @@ public class TraderFrame extends JFrame {
 
 	public void setFixButtonText(String text) {
 		btnFIX.setText(text);
+	}
+
+	public void setZmqButtonText(String text) {
+		btnZMQ.setText(text);
 	}
 }

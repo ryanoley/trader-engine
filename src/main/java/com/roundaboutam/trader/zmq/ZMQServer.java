@@ -33,59 +33,76 @@ public class ZMQServer implements Runnable{
 	volatile Boolean shutdown = false;
 	private HashSet<String> rmpConnections;
 	private BufferedWriter zmqLogFile;
+	private ZMQ.Socket responder;
 	private transient TraderApplication application = null;
-	private Integer port;
 
 	public ZMQServer(TraderApplication application, Integer port, String logFilePath) {
 		context = ZMQ.context(1);
 		rmpConnections = new HashSet<String>();
-		this.application = application;
-		this.port = port;
+		startServer(port);
 		setLogFile(logFilePath);
+		this.application = application;
 	}
 
-	public void run() {
-		ZMQ.Socket responder = context.socket(ZMQ.REP);
-		responder.setReceiveTimeOut(5000);
-	    responder.bind("tcp://*:" + port);
+	private void startServer(int port) {
+		this.responder = context.socket(ZMQ.REP);
+		this.responder.setReceiveTimeOut(5000);
+		this.responder.bind("tcp://*:" + port);
 	    setStarted(true);
-	    System.out.println("ZMQ Server listening on port " + port);
+	    System.out.println("ZMQ Server listening on port " + port);	
+	}
+	
+	public void run() {
 		while (!shutdown) {
 	        // Wait for next request from the client
-			String replyString = "";
 	        byte[] request = responder.recv(0);
 	        if (request == null)
 	        	continue;
 	        String requestString = new String(request);
 	        toLog(requestString, Inbound);
-	    	HashMap<Integer, String> fieldMap = Parser.getFieldMap(requestString);
-	    	MessageClass messageClass = MessageClass.parse(fieldMap.get(MessageClass.RMPFieldID));
-	    	String sourceApp = fieldMap.get(SourceApp.RMPFieldID);
-    		
-	    	if (messageClass == MessageClass.OPEN_RMP_CONNECTION | messageClass == MessageClass.CLOSE_RMP_CONNECTION) {
-	    		if (messageClass == MessageClass.OPEN_RMP_CONNECTION) {
-	    			rmpConnections.add(sourceApp);
-	    			replyString = "1=RMP|3=ORC|4=TRADERENGINE|5=" + sourceApp;
-	    		} else {
-	    			rmpConnections.remove(sourceApp);
-	    			replyString = "1=RMP|3=CRC|4=TRADERENGINE|5=" + sourceApp;
-	    		}
-	    		toLog(replyString, Outbound);
-	    	} else if (rmpConnections.contains(sourceApp)) {
-	    		application.fromRMP(requestString);
-	    		replyString = "Acked";
-	    	}
-	    	else {
-	    		replyString = "Unknown SourceApp: " + sourceApp;
-	    		toLog(replyString, Outbound);
-	    	}
-	    	setConnected(rmpConnections.size() > 0 ? true : false);
-	    	// Send reply back to client
-	        responder.send(replyString.getBytes(), 0);	
+	        String replyString;
+	        
+	        if(!Parser.checkString(requestString)) {
+	        	replyString = "NOT PROCESSED: " + requestString;
+	        	responder.send(replyString.getBytes(), 0);
+	        }
+	        else {
+		    	// Send reply back to client
+		        replyString = processFormattedRequest(requestString);
+		        setConnected(rmpConnections.size() > 0 ? true : false);
+		        responder.send(replyString.getBytes(), 0);	
+	        }
+	        
+	        toLog(replyString, Outbound);
 	    }
 	    System.out.println("ZMQ Server shutdown");
 		responder.close();
 	    context.term();
+	}
+
+	private String processFormattedRequest(String requestString){
+		String replyString;
+    	HashMap<Integer, String> fieldMap = Parser.getFieldMap(requestString);
+    	MessageClass messageClass = MessageClass.parse(fieldMap.get(MessageClass.RMPFieldID));
+    	String sourceApp = fieldMap.get(SourceApp.RMPFieldID);
+		
+    	if (messageClass == MessageClass.OPEN_RMP_CONNECTION | messageClass == MessageClass.CLOSE_RMP_CONNECTION) {
+    		if (messageClass == MessageClass.OPEN_RMP_CONNECTION) {
+    			rmpConnections.add(sourceApp);
+    			replyString = "1=RMP|3=ORC|4=TRADERENGINE|5=" + sourceApp;
+    		} else {
+    			rmpConnections.remove(sourceApp);
+    			replyString = "1=RMP|3=CRC|4=TRADERENGINE|5=" + sourceApp;
+    		}
+    	} else if (rmpConnections.contains(sourceApp)) {
+    		application.fromRMP(requestString);
+    		replyString = "Acked";
+    	}
+    	else {
+    		replyString = "Unknown SourceApp: " + sourceApp;
+    	}
+		
+    	return replyString;
 	}
 
 	public void setLogFile(String filePath) {

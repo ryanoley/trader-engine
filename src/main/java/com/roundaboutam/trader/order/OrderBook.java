@@ -40,20 +40,6 @@ public class OrderBook {
 			return orderMap.get(orderID);
 	}
 
-	public void processOrderCancelReject(String orderID) {
-		if (replaceOrderMap.containsKey(orderID)) {
-			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
-			replaceOrder.setRejected(true);
-			orderMap.get(replaceOrder.getOrigOrderID()).setMessage("Replace Rejected");
-			orderMap.get(replaceOrder.getOrigOrderID()).setModified(false);
-		} else if (cancelOrderMap.containsKey(orderID)) {
-			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
-			cancelOrder.setRejected(true);
-			orderMap.get(cancelOrder.getOrigOrderID()).setMessage("Cancel Rejected");
-			orderMap.get(cancelOrder.getOrigOrderID()).setCanceled(false);
-		}
-	}
-
 	public int processExecutionReport(MessageContainer messageContainer, SessionID sessionID) {
 		Order order;
 		String orderID = messageContainer.getClOrdID();
@@ -97,18 +83,23 @@ public class OrderBook {
 			order.setAcknowledged(true);
 			addOrder(order);
 		}
-		updateOrderMessage(order, messageContainer);
+		
+		order.updateMessage(messageContainer);
 		return order.processFill(cumQty, leavesQty, avgPx, orderQty);
 	}
 
-	public void updateOrderMessage(Order order, MessageContainer messageContainer) {
-		ExecutionType executionType = messageContainer.getExecutionType();
-		StringJoiner joiner = new StringJoiner(" ");
-		if (order.isOldSession())
-			joiner.add("Old Session -");
-
-		joiner.add(executionType.toString());
-		order.setMessage(joiner.toString());
+	public void processOrderCancelReject(String orderID) {
+		if (replaceOrderMap.containsKey(orderID)) {
+			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
+			replaceOrder.setRejected(true);
+			orderMap.get(replaceOrder.getOrigOrderID()).setMessage("Replace Rejected");
+			orderMap.get(replaceOrder.getOrigOrderID()).setModified(false);
+		} else if (cancelOrderMap.containsKey(orderID)) {
+			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
+			cancelOrder.setRejected(true);
+			orderMap.get(cancelOrder.getOrigOrderID()).setMessage("Cancel Rejected");
+			orderMap.get(cancelOrder.getOrigOrderID()).setCanceled(false);
+		}
 	}
 
 	public void orderRejected(String orderID) {

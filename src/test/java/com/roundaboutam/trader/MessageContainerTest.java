@@ -63,7 +63,6 @@ public class MessageContainerTest extends TestCase {
 	
 	
 	public void testCancelRequest() throws InvalidMessage {
-
 		String cancelRequestString = "8=FIX.4.29=14435=F34=22649=ROUNDPROD0152=20180321-14:23:56.88156=REALTICK" + 
 				"11=152164223688138=10041=152164221809754=155=ZVZZT60=20180321-14:23:56.88110=198";
 		Message cancelRequestMsg = new Message(cancelRequestString);
@@ -85,7 +84,6 @@ public class MessageContainerTest extends TestCase {
 	}
 
 	public void testCancelResponse() throws InvalidMessage {
-
 		String cancelResponseString = "8=FIX.4.29=29535=849=REALTICK56=ROUNDPROD0134=22750=ML_SMARTDMA" + 
 				"52=20180321-14:23:5737=64959827-59-0ffn11=152164223688141=152164221809717=64959827-115-04t8-7" +
 				"20=0150=439=455=ZVZZT54=138=10040=244=9.7559=047=I32=031=0.000000151=014=06=0.0000" +

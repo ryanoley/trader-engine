@@ -2,8 +2,11 @@ package com.roundaboutam.trader.order;
 
 
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.LinkedHashMap;
 
+import com.roundaboutam.trader.MessageContainer;
+import com.roundaboutam.trader.ramfix.ExecutionType;
 import com.roundaboutam.trader.ramfix.OrderOpenClose;
 import com.roundaboutam.trader.ramfix.OrderTIF;
 import com.roundaboutam.trader.rmp.OrderSide;
@@ -73,19 +76,39 @@ public class Order {
     	return fillSize;
     }
 
+	public void updateMessage(MessageContainer messageContainer) {
+		ExecutionType executionType = messageContainer.getExecutionType();
+		StringJoiner joiner = new StringJoiner(" ");
+		if (isOldSession())
+			joiner.add("Old Session -");
+		joiner.add(executionType.toString());
+		setMessage(joiner.toString());
+	}
+
     private void checkExecution() {
-    	if (quantity != orderQty) {
+    	if (!quantity.equals(orderQty)) {
     		setMessage("Quantity Mismatch");
     		System.out.println("Quantity Mismatch: " + symbol);
     	}
     }
 
-	public String getCustomTag() {
-		return customTag;
-	}
-
-	public void setCustomTag(String customTag) {
-		this.customTag = customTag;
+	public Map<String, String> getExportHash() {
+		
+		Map<String, String> exportHash = new LinkedHashMap<String, String>();
+		
+		exportHash.put("OrderID", this.orderID);
+		exportHash.put("Symbol", this.symbol);
+		exportHash.put("Suffix", this.suffix);
+		exportHash.put("Side", this.orderSide.toString());
+		exportHash.put("Type", this.priceType.toString());
+		exportHash.put("Quantity", this.quantity.toString());
+		exportHash.put("ExecutedShares", this.cumQty.toString());
+		exportHash.put("OpenShares", this.leavesQty.toString());
+		exportHash.put("AveragePrice", this.avgPx.toString());
+		exportHash.put("BasketID", this.orderBasketID);
+		exportHash.put("BasketName", this.orderBasketName);
+		
+		return exportHash;
 	}
 
 	public String getSymbol() {
@@ -174,6 +197,14 @@ public class Order {
 
 	public void setStopPrice(Double stopPrice) {
 		this.stopPrice = stopPrice;
+	}
+
+	public String getCustomTag() {
+		return customTag;
+	}
+
+	public void setCustomTag(String customTag) {
+		this.customTag = customTag;
 	}
 
 	public int getLeavesQty() {
@@ -311,25 +342,6 @@ public class Order {
 
 	public void setParticipationRate(int participationRate) {
 		this.participationRate = participationRate;
-	}
-	
-	public Map<String, String> getExportHash() {
-		
-		Map<String, String> exportHash = new LinkedHashMap<String, String>();
-		
-		exportHash.put("OrderID", this.orderID);
-		exportHash.put("Symbol", this.symbol);
-		exportHash.put("Suffix", this.suffix);
-		exportHash.put("Side", this.orderSide.toString());
-		exportHash.put("Type", this.priceType.toString());
-		exportHash.put("Quantity", this.quantity.toString());
-		exportHash.put("ExecutedShares", this.cumQty.toString());
-		exportHash.put("OpenShares", this.leavesQty.toString());
-		exportHash.put("AveragePrice", this.avgPx.toString());
-		exportHash.put("BasketID", this.orderBasketID);
-		exportHash.put("BasketName", this.orderBasketName);
-		
-		return exportHash;
 	}
 
 	

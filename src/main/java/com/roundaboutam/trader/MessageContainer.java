@@ -197,6 +197,35 @@ public class MessageContainer {
     	}
 	}
 
+	public String getDisplayID() {
+		if (messageType == MessageType.EXECUTION_REPORT || messageType == MessageType.ORDER_CANCEL_REJECT) {
+			return orderID;
+    	} else {
+    		return  "-";
+    	}
+    }
+
+	public Integer getDisplayQty() {
+		if (executionType == ExecutionType.PARTIAL_FILL || executionType == ExecutionType.FILL) {
+			return lastShares;
+    	} else {
+    		return orderQty;
+    	}
+    }
+
+    public String getDisplayStatus() {
+		if (messageType == MessageType.EXECUTION_REPORT) {
+    		return executionType.toString();
+    	} else if (messageType == MessageType.ORDER_CANCEL_REJECT) {
+    		return orderStatus.toString();
+    	} else if (messageType == MessageType.NEW_ORDER || messageType == MessageType.REPLACE_ORDER 
+				|| messageType == MessageType.CANCEL_ORDER){
+    		return orderSide.toString();
+    	} else {
+    		return "-";
+    	}
+    }
+
     public Message getMessage() {
         	return this.message;
         }
@@ -304,35 +333,6 @@ public class MessageContainer {
     public OrderOpenClose getOpenClose() {
     	return orderOpenClose;
     } 
-
-	public String getDisplayID() {
-		if (messageType == MessageType.EXECUTION_REPORT || messageType == MessageType.ORDER_CANCEL_REJECT) {
-			return orderID;
-    	} else {
-    		return  "-";
-    	}
-    }
-
-	public Integer getDisplayQty() {
-		if (executionType == ExecutionType.PARTIAL_FILL || executionType == ExecutionType.FILL) {
-			return lastShares;
-    	} else {
-    		return orderQty;
-    	}
-    }
-
-    public String getDisplayStatus() {
-		if (messageType == MessageType.EXECUTION_REPORT) {
-    		return executionType.toString();
-    	} else if (messageType == MessageType.ORDER_CANCEL_REJECT) {
-    		return orderStatus.toString();
-    	} else if (messageType == MessageType.NEW_ORDER || messageType == MessageType.REPLACE_ORDER 
-				|| messageType == MessageType.CANCEL_ORDER){
-    		return orderSide.toString();
-    	} else {
-    		return "-";
-    	}
-    }
 
 }
 

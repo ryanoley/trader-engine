@@ -18,8 +18,6 @@ public class Execution {
     private String customTag = null;
     private OrderSide orderSide;
     private ExecutionType executionType;
-    private double bid;
-    private double ask;
  
     private static int nextID = 1;
 
@@ -49,8 +47,7 @@ public class Execution {
     	StringJoiner joiner = new StringJoiner(",");
     	joiner.add(ID).add(executionType.toString()).add(orderID).add(permanentID).add(outSymbol).add(
     			transactTime).add(orderSide.toString()).add(Integer.toString(quantity)).add(
-    			Double.toString(price)).add(Double.toString(bid)).add(
-    			Double.toString(ask)).add(customTag);
+    			Double.toString(price)).add(customTag);
     	return joiner.toString();
     }
 
@@ -80,22 +77,6 @@ public class Execution {
 
 	public double getPrice() {
 		return price;
-	}
-
-	public double getBid() {
-		return bid;
-	}
-
-	public void setBid(double bid) {
-		this.bid = bid;
-	}
-
-	public double getAsk() {
-		return ask;
-	}
-
-	public void setAsk(double ask) {
-		this.ask = ask;
 	}
 
 	public String getID() {

@@ -16,8 +16,6 @@ public class CancelOrder {
 
     // Order related fields
     private OrderSide orderSide = null;
-
-    // Order related fields
     private int quantity = 0;
 
     // Execution related fields

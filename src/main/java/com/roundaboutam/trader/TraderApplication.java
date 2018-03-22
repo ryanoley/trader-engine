@@ -154,13 +154,13 @@ public class TraderApplication implements Application {
     private void executionReport(Message message, SessionID sessionID) throws FieldNotFound {
 
         ExecID execID = (ExecID) message.getField(new ExecID());
-        if (alreadyProcessed(execID, sessionID)) { return; }
+        if (executionIsProcessed(execID, sessionID)) { return; }
         
         MessageContainer messageContainer = new MessageContainer(message);
         String orderID = messageContainer.getClOrdID();
         String orderMessage = messageContainer.getText();
-
         char ordStatus = message.getChar(OrdStatus.FIELD);
+
         if (ordStatus == OrdStatus.REJECTED) {
         	System.out.println("TraderApplication.executionReport - Rejected: " + orderMessage);
         	orderBook.orderRejected(orderID);
@@ -168,9 +168,10 @@ public class TraderApplication implements Application {
         else {
         	orderBook.processExecutionReport(messageContainer, sessionID);
         }
+
         Order order = orderBook.getOrder(orderID);
         observableOrder.update(order);
-        executionBook.processExecutionReport(messageContainer, orderBook.getOrder(orderID));
+        executionBook.processExecutionReport(messageContainer, order);
 
         if (order.getOrderBasketID() != null){
         	OrderBasket ob = orderBasketBook.getBasket(order.getOrderBasketID());
@@ -184,7 +185,7 @@ public class TraderApplication implements Application {
     	executionBook.processOrderCancelReject(messageContainer, orderBook.getOrder(messageContainer.getOrigClOrdID()));
     }
 
-    private boolean alreadyProcessed(ExecID execID, SessionID sessionID) {
+    private boolean executionIsProcessed(ExecID execID, SessionID sessionID) {
         HashSet<ExecID> set = execIDs.get(sessionID);
         if (set == null) {
             set = new HashSet<ExecID>();

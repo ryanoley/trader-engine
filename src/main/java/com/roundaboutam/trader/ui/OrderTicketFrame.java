@@ -168,7 +168,6 @@ public class OrderTicketFrame {
 	    c.gridy = 6;
 	    c.insets = new Insets(0,5,0,0);
 	    panel.add(endTimeField, c);
-
 	    
 	    c.gridx = 0;
 	    c.gridy = 7;

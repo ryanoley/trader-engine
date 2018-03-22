@@ -69,10 +69,9 @@ public class ZMQServer implements Runnable{
 	        else {
 		    	// Send reply back to client
 		        replyString = processFormattedRequest(requestString);
-		        setConnected(rmpConnections.size() > 0 ? true : false);
-		        responder.send(replyString.getBytes(), 0);	
+		        responder.send(replyString.getBytes(), 0);
 	        }
-	        
+	        setConnected(rmpConnections.size() > 0 ? true : false);
 	        toLog(replyString, Outbound);
 	    }
 	    System.out.println("ZMQ Server shutdown");

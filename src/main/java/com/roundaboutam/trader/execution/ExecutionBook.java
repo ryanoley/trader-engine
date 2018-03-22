@@ -65,9 +65,6 @@ public class ExecutionBook {
             execution.setSuffix(messageContainer.getSymbolSfx());
         }
         execution.setCustomTag(order.getCustomTag());
-        // TODO: Market data used here to capture BidAsk
-        execution.setBid(0);
-        execution.setAsk(0);
         addExecution(execution);
 	}
 	

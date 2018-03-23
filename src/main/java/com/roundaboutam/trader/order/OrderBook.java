@@ -83,7 +83,7 @@ public class OrderBook {
 			order.setAcknowledged(true);
 			addOrder(order);
 		}
-		
+
 		order.updateMessage(messageContainer);
 		return order.processFill(cumQty, leavesQty, avgPx, orderQty);
 	}

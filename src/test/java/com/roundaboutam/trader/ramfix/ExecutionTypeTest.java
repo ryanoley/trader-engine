@@ -10,7 +10,7 @@ import quickfix.field.ExecType;
 
 public class ExecutionTypeTest extends TestCase {
 
-	public void testExecutionType() {		
+	public void testRamToFixMap() {		
     
 		assertEquals(ExecutionType.NEW.toString(), "New");
 		assertEquals(ExecutionType.PARTIAL_FILL.toString(), "PartialFill");
@@ -57,8 +57,7 @@ public class ExecutionTypeTest extends TestCase {
 		assertEquals(ExecutionType.toArray().length, 13);
 	}
 
-	public void testExecutionTypeFixTags() {
-
+	public void testFixTags() {
 		assertEquals(FIXMessage.executionTypeToFIXExecType(ExecutionType.NEW).toString(), "150=0");
 		assertEquals(FIXMessage.executionTypeToFIXExecType(ExecutionType.PARTIAL_FILL).toString(), "150=1");
 		assertEquals(FIXMessage.executionTypeToFIXExecType(ExecutionType.FILL).toString(), "150=2");

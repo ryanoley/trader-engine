@@ -34,7 +34,6 @@ public class ReplaceOrderTest extends TestCase {
 
         replaceOrder.setLimitPrice(101.0);
         replaceOrder.setQuantity(500);
-
         assertFalse(replaceOrder.getLimitPrice().equals(order.getLimitPrice()));
         assertFalse(replaceOrder.getQuantity() == order.getQuantity());
 

@@ -233,7 +233,15 @@ public class OrderBasket {
 	public double getExecDollarsNet() {
 		 return execDollarsBY + execDollarsBTC - execDollarsSS - execDollarsSL;
 	}
-		
+	
+	public double getOpenDollarsAbs() {
+		 return getOpenDollarsBY() + getOpenDollarsBTC() + getOpenDollarsSS() + getOpenDollarsSL();
+	}
+
+	public double getOpenDollarsNet() {
+		 return getOpenDollarsBY() + getOpenDollarsBTC() - getOpenDollarsSS() - getOpenDollarsSL();
+	}
+	
 	public double getOpenDollarsBY() {
 		return totalDollarsBY - execDollarsBY;
 	}

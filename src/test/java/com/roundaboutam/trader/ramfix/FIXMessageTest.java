@@ -4,17 +4,9 @@ import com.roundaboutam.trader.ramfix.ExecutionType;
 import com.roundaboutam.trader.ramfix.FIXMessage;
 import com.roundaboutam.trader.ramfix.MessageType;
 import com.roundaboutam.trader.ramfix.OrderStatus;
-import com.roundaboutam.trader.rmp.OrderSide;
-import com.roundaboutam.trader.rmp.PriceType;
+
 
 import junit.framework.TestCase;
-import quickfix.field.ExecType;
-import quickfix.field.MsgType;
-import quickfix.field.OpenClose;
-import quickfix.field.OrdStatus;
-import quickfix.field.OrdType;
-import quickfix.field.Side;
-import quickfix.field.TimeInForce;
 
 
 
@@ -47,7 +39,6 @@ public class FIXMessageTest extends TestCase {
     	assertEquals(FIXMessage.getTifMap().getFirstToSecondSize(), FIXMessage.getTifMap().getSecondToFirstSize());
     	assertEquals(FIXMessage.getTifMap().getFirstToSecondSize(), OrderTIF.toArray().length);
 	}
-
 
 	public void testOpenCloseMap() {
     	assertEquals(FIXMessage.getOpenCloseMap().getFirstToSecondSize(), FIXMessage.getOpenCloseMap().getSecondToFirstSize());

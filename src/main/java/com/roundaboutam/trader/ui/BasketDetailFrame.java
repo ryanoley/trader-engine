@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -33,6 +34,7 @@ public class BasketDetailFrame {
 	private JButton submitBasketButton;
 	private JButton cancelAllButton;
 	private JButton deleteButton;
+	private DecimalFormat df = new DecimalFormat("#.##");
 
 	public static BasketDetailFrame getInstance(OrderBasket orderBasket, TraderApplication application) {
 		if (instance == null) {
@@ -119,15 +121,15 @@ public class BasketDetailFrame {
 
 	private JTable basketSummaryPanel(OrderBasket orderBasket) {
 		String[] columns = new String[] {"Basket Summary", "BY", "SS", "BTC", "SL", "Total"};
-
+		
 		Object[][] data = new Object[][] {
 			{"Orders", orderBasket.nOrdersBY, orderBasket.nOrdersSS, 
 						orderBasket.nOrdersBTC, orderBasket.nOrdersSL, 
 						orderBasket.getOrderCount()},
 	
-			{"Traded Dollars (Net)", orderBasket.execDollarsBY, -orderBasket.execDollarsSS, 
-									orderBasket.execDollarsBTC, -orderBasket.execDollarsSL, 
-									orderBasket.getExecDollarsNet()},
+			{"Open Dollars (Net)", df.format(orderBasket.getOpenDollarsBY()), df.format(-orderBasket.getOpenDollarsSS()), 
+							df.format(orderBasket.getOpenDollarsBTC()), df.format(-orderBasket.getOpenDollarsSL()), 
+							df.format(orderBasket.getOpenDollarsNet())},
 
 			{"Open Shares", orderBasket.getOpenSharesBY(), orderBasket.getOpenSharesSS(), 
 									orderBasket.getOpenSharesBTC(), orderBasket.getOpenSharesSL(), 

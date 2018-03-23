@@ -130,8 +130,17 @@ public class OrderBookTest extends TestCase {
 		SessionID sessionID = new SessionID("FIX.4.2:ROUNDTEST02->REALTICK2:RYAN");
 		
 		orderBook.addOrder(order1);
+		assertFalse(order1.isAcknowledged());
+		assertEquals(order1.getCumQty(), 600);
+		assertEquals(order1.getLeavesQty(), 9400);
+		assertEquals(order1.getQuantity(), 10000);
+
 		orderBook.processExecutionReport(partialFillContainer, sessionID);
-	
+		
+		assertTrue(order1.isAcknowledged());
+		assertEquals(order1.getCumQty(), 700);
+		assertEquals(order1.getLeavesQty(), 9300);
+		assertEquals(order1.getQuantity(), 10000);
 	}
 	
 	

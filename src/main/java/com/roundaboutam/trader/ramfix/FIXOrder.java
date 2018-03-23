@@ -39,7 +39,7 @@ public class FIXOrder {
 
 	private static Message formatNormalOrder(Order order, boolean isProd) {
 		NewOrderSingle fixOrder = getNewOrderSingle(order);
-		// TODO ML_SMARTDMA rejects in UAT, maybe should be used in PROD
+		// ML_SMARTDMA should be used in PROD, Rejects in UAT
 		if (isProd)
 			fixOrder.setString(TargetSubID.FIELD, "ML_SMARTDMA");		
 		else

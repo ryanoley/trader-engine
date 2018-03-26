@@ -401,7 +401,7 @@ public class TraderApplication implements Application {
 
     public void stopZMQServer() {
     	if (zmqServer != null) {
-    		zmqServer.shutdown();
+    		zmqServer.setShutdown(true);
     		zmqServer = null;
     	}
     }

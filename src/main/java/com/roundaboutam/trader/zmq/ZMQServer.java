@@ -28,12 +28,12 @@ public class ZMQServer implements Runnable{
 	public static final char Parsing = 'P';
 	
 	private ZMQ.Context context = null;
+	private ZMQ.Socket responder;
 	private Boolean started = false;
 	private Boolean connected = false;
 	volatile Boolean shutdown = false;
 	private HashSet<String> rmpConnections;
 	private BufferedWriter zmqLogFile;
-	private ZMQ.Socket responder;
 	private transient TraderApplication application = null;
 
 	public ZMQServer(TraderApplication application, Integer port, String logFilePath) {
@@ -43,7 +43,13 @@ public class ZMQServer implements Runnable{
 		setLogFile(logFilePath);
 		this.application = application;
 	}
-
+	
+	public ZMQServer(Integer port) {
+		context = ZMQ.context(1);
+		rmpConnections = new HashSet<String>();
+		startServer(port);
+	}
+	
 	private void startServer(int port) {
 		this.responder = context.socket(ZMQ.REP);
 		this.responder.setReceiveTimeOut(5000);
@@ -70,16 +76,17 @@ public class ZMQServer implements Runnable{
 		    	// Send reply back to client
 		        replyString = processFormattedRequest(requestString);
 		        responder.send(replyString.getBytes(), 0);
+		        if(replyString.equals("ACK"))
+	    			application.fromRMP(requestString);
 	        }
 	        setConnected(rmpConnections.size() > 0 ? true : false);
 	        toLog(replyString, Outbound);
 	    }
-	    System.out.println("ZMQ Server shutdown");
-		responder.close();
-	    context.term();
+		closeZMQLogs();
+	    closeZMQSocket();
 	}
 
-	private String processFormattedRequest(String requestString){
+	public String processFormattedRequest(String requestString){
 		String replyString;
     	HashMap<Integer, String> fieldMap = Parser.getFieldMap(requestString);
     	MessageClass messageClass = MessageClass.parse(fieldMap.get(MessageClass.RMPFieldID));
@@ -94,8 +101,7 @@ public class ZMQServer implements Runnable{
     			replyString = "1=RMP|3=CRC|4=TRADERENGINE|5=" + sourceApp;
     		}
     	} else if (rmpConnections.contains(sourceApp)) {
-    		application.fromRMP(requestString);
-    		replyString = "Acked";
+    		replyString = "ACK";
     	}
     	else {
     		replyString = "Unknown SourceApp: " + sourceApp;
@@ -104,20 +110,12 @@ public class ZMQServer implements Runnable{
     	return replyString;
 	}
 
-	public void setLogFile(String filePath) {
+	private void setLogFile(String filePath) {
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		Date date = new Date();
 		String zmqLogPath = filePath + "\\zmq\\" + dateFormat.format(date) + ".zmq.txt";
 		try {
 			zmqLogFile = new BufferedWriter(new FileWriter(zmqLogPath, true));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void closeZMQLogs() {
-		try {
-			zmqLogFile.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -130,6 +128,14 @@ public class ZMQServer implements Runnable{
 			String timeStamp = timeFormat.format(System.currentTimeMillis());
 			zmqLogFile.write(dir + "|"+ timeStamp + "|" + zmqString + "\n");
 			zmqLogFile.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void closeZMQLogs() {
+		try {
+			zmqLogFile.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -150,10 +156,28 @@ public class ZMQServer implements Runnable{
 	private void setStarted(Boolean bool) {
 		started = bool;
 	}
+
+    public void setShutdown(Boolean bool) {
+        shutdown = bool;
+    }
+
+	public String zmqRecieve(){
+        byte[] request = responder.recv(0);
+        if (request == null | !started)
+        	return null;
+        else
+        	return new String(request);
+	}
 	
-    public void shutdown() {
-    	closeZMQLogs();
-        shutdown = true;
+	public void zmqSend(String sendString){
+        if (started)
+        	responder.send(sendString.getBytes(), 0);
+	}
+
+    public void closeZMQSocket() {
+    	System.out.println("ZMQ Server shutdown");
+		responder.close();
+	    context.term();
     }
 
 }

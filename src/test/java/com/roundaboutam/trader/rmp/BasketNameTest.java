@@ -10,11 +10,10 @@ public class BasketNameTest extends TestCase {
 		
 	public void testBasketName() {		
 		assertEquals(testBasketName.toString(), "TestBasket");
-
 	}
 
 	public void testBasketNameFixTags() {
-		assertEquals(testBasketName.getRmpTag(), "6=TestBasket");
+		assertEquals(testBasketName.getRmpTag(), BasketName.RMPFieldID + "=TestBasket");
 	}
 
 }

@@ -202,9 +202,12 @@ public class TraderFrame extends JFrame {
 		btnExport = new JButton("Export Trades");
 		btnExport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
 				String outputLocation = JOptionPane.showInputDialog(TraderEngine.get().getTraderFrame(), 
-																	"Export Location", "C:/temp/trade_report.csv");
-				application.writeOrderBookToCSV(outputLocation);
+																	"Export Location", 
+																	"\\\\qadirect\\MarketQA\\QUANT\\data\\trader-engine\\trade_reports\\" + timeStamp + "_execs.csv");
+				if (outputLocation != null)
+					application.writeOrderBookToCSV(outputLocation);
 			}
 		});
 		return btnExport;

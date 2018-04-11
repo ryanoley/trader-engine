@@ -205,7 +205,7 @@ public class TraderFrame extends JFrame {
 				String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
 				String outputLocation = JOptionPane.showInputDialog(TraderEngine.get().getTraderFrame(), 
 																	"Export Location", 
-																	"\\\\qadirect\\MarketQA\\QUANT\\data\\trader-engine\\trade_reports\\" + timeStamp + "_execs.csv");
+																	"\\\\qadirect\\MarketQA\\QUANT\\data\\trader-engine\\trade_reports\\" + timeStamp + "_te_report.csv");
 				if (outputLocation != null)
 					application.writeOrderBookToCSV(outputLocation);
 			}

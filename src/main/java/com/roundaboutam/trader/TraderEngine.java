@@ -61,11 +61,11 @@ public class TraderEngine {
 		String rootpath;
 		if (launchEnv.equals("prod")){
 			inputStream = TraderEngine.class.getResourceAsStream("FIXConfigPROD.cfg");
-			rootpath = "C:\\FIX\\LOGS";
+			rootpath = System.getenv("DATA") + "\\trader-engine\\LOGS";
 		}
 		else {
 			inputStream = TraderEngine.class.getResourceAsStream("FIXConfig.cfg");
-			rootpath = System.getenv("DATA") + "\\trader-engine\\LOGS";
+			rootpath = "C:\\FIX\\LOGS";
 		}
 
         SessionSettings settings = new SessionSettings(inputStream);

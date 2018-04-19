@@ -99,7 +99,10 @@ public class Order {
 		exportHash.put("OrderID", this.orderID);
 		exportHash.put("Symbol", this.symbol);
 		exportHash.put("Suffix", this.suffix);
-		exportHash.put("Side", this.orderSide.toString());
+		if (this.orderSide == OrderSide.BUY && this.orderOpenClose == OrderOpenClose.CLOSE)
+			exportHash.put("Side", OrderSide.BUY_TO_COVER.toString());
+		else
+			exportHash.put("Side", this.orderSide.toString());
 		exportHash.put("Type", this.priceType.toString());
 		exportHash.put("Quantity", this.quantity.toString());
 		exportHash.put("ExecutedShares", this.cumQty.toString());

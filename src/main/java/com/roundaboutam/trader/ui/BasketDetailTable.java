@@ -146,7 +146,9 @@ class BasketDetailTableModel extends AbstractTableModel {
         case SIDE:
         	return order.getOrderSide().toString();
         case SYMBOL:
-        	return order.getSymbol();
+        	String display_symbol = replaceNull(order.getSymbol());
+        	String display_suffix = replaceNull(order.getSuffix());
+        	return display_suffix.equals("-") ?  display_symbol : display_symbol + "." + display_suffix;
         case ORDID:
         	return order.getOrderID();
         case TYPE:
@@ -162,5 +164,14 @@ class BasketDetailTableModel extends AbstractTableModel {
         }
         return "#NA";
     }
+   
+    private static String replaceNull(String input) {
+    	if (input == null)
+    		return "-";
+    	else if (input.isEmpty())
+    		return "-";
+    	else
+    		return input.equals("null") ? "-" : input;
+    	}
 }
 

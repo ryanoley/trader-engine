@@ -105,7 +105,9 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     	Order order = rowToOrder.get(rowIndex);
     	switch (columnIndex) {
         case SYMBOL:
-        	return replaceNull(order.getSymbol());
+        	String display_symbol = replaceNull(order.getSymbol());
+        	String display_suffix = replaceNull(order.getSuffix());
+        	return display_suffix.equals("-") ?  display_symbol : display_symbol + "." + display_suffix;
         case SIDE:
         	return replaceNull(order.getOrderSide().toString());
         case QUANTITY:

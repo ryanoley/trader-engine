@@ -9,7 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.StringJoiner;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
@@ -29,8 +32,8 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
     private JTextArea seqArea;
     private JTextArea heartbeatArea;
     private Integer seqNum = 0;
-    private String sessionID = "NOT CONNECTED";
     private Date lastContact = new Date();
+    private String sessionID = "NOT CONNECTED";
 
 
 	public FIXMonitor(TraderApplication application) {
@@ -75,18 +78,17 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
     		messageMap.put(row, messageContainer);
         	timeStampMap.put(row, timeNow);
         	lastContact = timeNow;
-        	seqNum = Integer.parseInt(messageContainer.getMsgSeqNum());
+        	seqNum = messageContainer.getMsgSeqNum();
             sessionID = messageContainer.getTargetCompID();
             }
     }
-
 
 	public void update(Observable o, Object arg) {
 		Message message = (Message) arg;
         addMessage(message);
 	}
 
-
+	JFrame alertFrame;
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void run() {
@@ -96,10 +98,6 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 				sessionArea.setText("CompID: " + sessionID);
 				seqArea.setText("MsgSeqNum: " + seqNum);
 				heartbeatArea.setText("ContactDiff: " + contactDiff);
-				if (contactDiff > 60000)
-					heartbeatArea.setForeground(Color.RED);
-				else
-					heartbeatArea.setForeground(Color.BLUE);
 
 	            if (sessionID.equals("ROUNDPROD01")){
 	            	Font sessionFont = sessionArea.getFont();
@@ -111,16 +109,35 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 	            	sessionArea.setFont(sessionFont.deriveFont(attributes));
 	            }
 
-	            Thread.sleep(1000);
+				if (contactDiff > 60000)
+					heartbeatArea.setForeground(Color.RED);
+				else if (contactDiff > 120000 && contactDiff < 122000 && !sessionID.equals("NOT CONNECTED")){
+	            	alertFrame = new JFrame();
+	            	alertFrame.setLocation(500, 400);
+	        		alertFrame.setVisible(true);
+	        		alertFrame.setAlwaysOnTop(true);
+	        		StringJoiner joiner = new StringJoiner(" ");
+	        		joiner.add("No Messages recieved from");
+	        		joiner.add(sessionID);
+	        		joiner.add("for 120 seconds");
+	        		int input = JOptionPane.showOptionDialog(alertFrame, joiner.toString(), "FIX MESSAGE ALERT", 
+	        				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+	        		alertFrame.dispose();
+	            }
+				else
+					heartbeatArea.setForeground(Color.BLUE);
 
+	            Thread.sleep(1000);
 	         }
 	      }
 	      catch (Exception e) {
 	    	  e.printStackTrace();
 	      }
 	}
-
 	
-}
+	public void setSessionID(String sessionID) {
+		this.sessionID = sessionID;
+	}
 
+}
 

@@ -1,5 +1,8 @@
 package com.roundaboutam.trader.order;
 
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
+
 import quickfix.SessionID;
 
 public class ReplaceOrder {
@@ -14,7 +17,7 @@ public class ReplaceOrder {
 
     // Order related fields
     private OrderSide orderSide = null;
-    private OrderType orderType = null;
+    private PriceType priceType = null;
 
     // Order related fields
     private int quantity = 0;
@@ -32,11 +35,12 @@ public class ReplaceOrder {
     	this.orderID = IdGenerator.makeID();
     	this.origOrderID = order.getOrderID();
     	this.orderSide = order.getOrderSide();
-    	this.orderType = order.getOrderType();
+    	this.priceType = order.getPriceType();
     	this.quantity = order.getQuantity();
     	this.limitPrice = order.getLimitPrice();
     	this.stopPrice = order.getStopPrice();
     	order.setModified(true);
+    	order.setMessage("ReplaceReq");
     }
 
     public int getQuantity() {
@@ -107,8 +111,8 @@ public class ReplaceOrder {
 		return orderSide;
 	}
 
-	public OrderType getOrderType() {
-		return orderType;
+	public PriceType getPriceType() {
+		return priceType;
 	}
 
 }

@@ -1,5 +1,17 @@
 package com.roundaboutam.trader.order;
 
+
+import java.util.Map;
+import java.util.StringJoiner;
+import java.util.LinkedHashMap;
+
+import com.roundaboutam.trader.MessageContainer;
+import com.roundaboutam.trader.ramfix.ExecutionType;
+import com.roundaboutam.trader.ramfix.OrderOpenClose;
+import com.roundaboutam.trader.ramfix.OrderTIF;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
+
 import quickfix.SessionID;
 
 public class Order {
@@ -8,6 +20,7 @@ public class Order {
     private String customTag = null;
 	private String symbol = null;
     private String suffix = null;
+    private Boolean vwapFlag = false;
 
     // Trading Session related fields
 	private SessionID sessionID = null;
@@ -16,31 +29,36 @@ public class Order {
 
     // Order related fields
     private OrderSide orderSide = null;
-    private OrderType orderType = null;
+	private OrderOpenClose orderOpenClose = null;
+    private PriceType priceType = null;
     private OrderTIF orderTIF = null;
-
-    // Order related fields
-    private int quantity = 0;
+    private Integer quantity = 0;
     private Double limitPrice = null;
     private Double stopPrice = null;
+	private String startTime = "09:32:00";
+	private String endTime = "15:58:00";
+	private int participationRate = 12;
 
     // Execution related fields - Same names as FIX fields
-    private int leavesQty = 0;
-    private int cumQty = 0;
-    private double avgPx = 0.0;
-    private int orderQty = 0;
+    private Integer leavesQty = 0;
+    private Integer cumQty = 0;
+    private Double avgPx = 0.0;
+    private Integer orderQty = 0;
 
     private boolean rejected = false;
     private boolean canceled = false;
     private boolean modified = false;
     private boolean acknowledged = false;
+    private boolean oldSession = false;
 
-    private String FIXMessage = null;
     private String message = null;
+    private String orderBasketName = null;
+    private String orderBasketID = null;
 
     public Order() {
         orderID = IdGenerator.makeID();
         permanentID = orderID;
+        setMessage("Created");
     }
 
     public Order(String newID) {
@@ -48,32 +66,52 @@ public class Order {
     	permanentID = newID;
     }
 
-    public int processFill(int cumQty, int leavesQty, double avgPx, 
-    		int orderQty, String FIXMessage) {
+    public int processFill(int cumQty, int leavesQty, double avgPx, int orderQty) {
     	int fillSize = cumQty - getCumQty();
     	setCumQty(cumQty);
     	setAvgPx(avgPx);
     	setLeavesQty(leavesQty);
     	setOrderQty(orderQty);
-    	setFIXMessage(FIXMessage);
-    	setAcknowledged(true);
     	checkExecution();
     	return fillSize;
     }
 
+	public void updateMessage(MessageContainer messageContainer) {
+		ExecutionType executionType = messageContainer.getExecutionType();
+		StringJoiner joiner = new StringJoiner(" ");
+		if (isOldSession())
+			joiner.add("Old Session -");
+		joiner.add(executionType.toString());
+		setMessage(joiner.toString());
+	}
+
     private void checkExecution() {
-    	if (quantity != orderQty) {
-    		this.message = "Quantity Mismatch";
+    	if (!quantity.equals(orderQty)) {
+    		setMessage("Quantity Mismatch");
     		System.out.println("Quantity Mismatch: " + symbol);
     	}
     }
 
-	public String getCustomTag() {
-		return customTag;
-	}
-
-	public void setCustomTag(String customTag) {
-		this.customTag = customTag;
+	public Map<String, String> getExportHash() {
+		
+		Map<String, String> exportHash = new LinkedHashMap<String, String>();
+		
+		exportHash.put("OrderID", this.orderID);
+		exportHash.put("Symbol", this.symbol);
+		exportHash.put("Suffix", this.suffix);
+		if (this.orderSide == OrderSide.BUY && this.orderOpenClose == OrderOpenClose.CLOSE)
+			exportHash.put("Side", OrderSide.BUY_TO_COVER.toString());
+		else
+			exportHash.put("Side", this.orderSide.toString());
+		exportHash.put("Type", this.priceType.toString());
+		exportHash.put("Quantity", this.quantity.toString());
+		exportHash.put("ExecutedShares", this.cumQty.toString());
+		exportHash.put("OpenShares", this.leavesQty.toString());
+		exportHash.put("AveragePrice", this.avgPx.toString());
+		exportHash.put("BasketID", this.orderBasketID);
+		exportHash.put("BasketName", this.orderBasketName);
+		
+		return exportHash;
 	}
 
 	public String getSymbol() {
@@ -124,12 +162,12 @@ public class Order {
 		this.orderSide = orderSide;
 	}
 
-	public OrderType getOrderType() {
-		return orderType;
+	public PriceType getPriceType() {
+		return priceType;
 	}
 
-	public void setOrderType(OrderType orderType) {
-		this.orderType = orderType;
+	public void setPriceType(PriceType priceType) {
+		this.priceType = priceType;
 	}
 
 	public OrderTIF getOrderTIF() {
@@ -162,6 +200,14 @@ public class Order {
 
 	public void setStopPrice(Double stopPrice) {
 		this.stopPrice = stopPrice;
+	}
+
+	public String getCustomTag() {
+		return customTag;
+	}
+
+	public void setCustomTag(String customTag) {
+		this.customTag = customTag;
 	}
 
 	public int getLeavesQty() {
@@ -227,6 +273,14 @@ public class Order {
 	public void setAcknowledged(boolean acknowledged) {
 		this.acknowledged = acknowledged;
 	}
+	
+	public boolean isOldSession() {
+		return oldSession;
+	}
+
+	public void setOldSession(boolean acknowledged) {
+		this.oldSession = acknowledged;
+	}
 
 	public String getMessage() {
 		return message;
@@ -236,12 +290,62 @@ public class Order {
 		this.message = message;
 	}
 
-	public String getFIXMessage() {
-		return FIXMessage;
+	public OrderOpenClose getOrderOpenClose() {
+		return orderOpenClose;
 	}
 
-	public void setFIXMessage(String FIXMessage) {
-		this.FIXMessage = FIXMessage;
+	public void setOrderOpenClose(OrderOpenClose orderOpenClose) {
+		this.orderOpenClose = orderOpenClose;
 	}
 
+	public String getOrderBasketName() {
+		return orderBasketName;
+	}
+
+	public void setOrderBasketName(String orderBasketName) {
+		this.orderBasketName = orderBasketName;
+	}
+	
+	public String getOrderBasketID() {
+		return orderBasketID;
+	}
+
+	public void setOrderBasketID(String orderBasketID) {
+		this.orderBasketID = orderBasketID;
+	}
+	
+	// Vwap order realated fields
+	public Boolean getVwapFlag() {
+		return vwapFlag;
+	}
+
+	public void setVwapFlag(Boolean vwapFlag) {
+		this.vwapFlag = vwapFlag;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+
+	public int getParticipationRate() {
+		return participationRate;
+	}
+
+	public void setParticipationRate(int participationRate) {
+		this.participationRate = participationRate;
+	}
+
+	
 }

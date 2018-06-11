@@ -1,498 +1,338 @@
 package com.roundaboutam.trader;
 
-import java.util.HashMap;
+import com.roundaboutam.trader.ramfix.ExecutionType;
+import com.roundaboutam.trader.ramfix.FIXMessage;
+import com.roundaboutam.trader.ramfix.MessageType;
+import com.roundaboutam.trader.ramfix.OrderOpenClose;
+import com.roundaboutam.trader.ramfix.OrderStatus;
+import com.roundaboutam.trader.ramfix.OrderTIF;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import quickfix.FieldNotFound;
 import quickfix.Message;
-import quickfix.field.AvgPx;
-import quickfix.field.CumQty;
-import quickfix.field.LeavesQty;
+import quickfix.Message.Header;
+import quickfix.field.ExecType;
+import quickfix.field.MsgType;
+import quickfix.field.OpenClose;
+import quickfix.field.OrdStatus;
+import quickfix.field.OrdType;
+import quickfix.field.Side;
+import quickfix.field.TimeInForce;
 
 
 
 public class MessageContainer {
 
 	private final Message message;
-	private final Message.Header Header;
-	public HashMap<String, String> rawValues;
-	private final String MsgType;
-	private final String SenderCompID;
-	private final String TargetCompID;
-	private final String Direction;
-	private final String ClOrdID;
-	private final String OrigClOrdID;
-	private final String OrdType;
-	private final String OrderID;
-	private final String Symbol;
-	private final String Side;
-	private final String OrderQty;
-	private final String OrdStatus;
-	private final String ExecType;
-	private final String LastShares;
-	private final String Text;
-	private final String CumQty;
-	private final String LeavesQty;
-	private final String AvgPx;
-	private final String MsgSeqNum;
+	private final Message.Header header;
+	private MessageType messageType;
+	private OrderStatus orderStatus;
+	private ExecutionType executionType;
+	private OrderSide orderSide;
+	private PriceType priceType;
+	private OrderOpenClose orderOpenClose;
+	private OrderTIF orderTIF;
+
+	private int msgSeqNum;
+	private String senderCompID;
+	private String targetCompID;
+	private String direction;
+	private String clOrdID;
+	private String origClOrdID;
+	private String orderID;
+	private String symbol;
+	private String symbolSfx;
+	private String sendingTime;
+	private String transactTime;
+	private String text;
+	
+	private Integer orderQty;
+	private Integer lastShares;
+	private Integer cumQty;
+	private Integer leavesQty;
+	private Double avgPx;
+	private Double lastPx;
+
 
 
 	public MessageContainer(Message message) {
 		this.message = message;
-		Header = message.getHeader();
-		rawValues = new HashMap<String, String>();
-		MsgType = resolveMsgType(message);
-		SenderCompID = resolveSenderCompID(message);
-		TargetCompID = resolveTargetCompID(message);
-		MsgSeqNum = resolveMsgSeqNum(message);
-		Direction = resolveDirection();
-		ClOrdID = resolveClOrdID(message);
-		OrigClOrdID = resolveOrigClOrdID(message);
-		OrdType = resolveOrdType(message);
-		OrderID = resolveOrderID(message);
-		Symbol = resolveSymbol(message);
-		Side = resolveSide(message);
-		OrdStatus = resolveOrdStatus(message);
-		ExecType = resolveExecType(message);
-		OrderQty = resolveOrderQty(message);
-		LastShares = resolveLastShares(message);
-		Text = resolveText(message);
-		CumQty = resolveCumQty(message);
-		LeavesQty = resolveLeavesQty(message);
-		AvgPx = resolveAvgPx(message);
+		header = message.getHeader();
+		resolveMsgType(message);
+		resolveExecType(message);
+		resolveOrdStatus(message);
+		resolveSide(message);
+		resolvePriceType(message);
+		resolveOpenClose(message);
+		resolveOrderTIF(message);
+	
+		senderCompID = resolveHeaderField(header, quickfix.field.SenderCompID.FIELD);
+		targetCompID = resolveHeaderField(header, quickfix.field.TargetCompID.FIELD);
+		sendingTime = resolveHeaderField(header, quickfix.field.SendingTime.FIELD);
+		msgSeqNum = Integer.parseInt(resolveHeaderField(header, quickfix.field.MsgSeqNum.FIELD));
+
+		orderID = resolveMessageField(message, quickfix.field.OrderID.FIELD);
+		clOrdID = resolveMessageField(message, quickfix.field.ClOrdID.FIELD);
+		origClOrdID = resolveMessageField(message, quickfix.field.OrigClOrdID.FIELD);
+		symbol = resolveMessageField(message, quickfix.field.Symbol.FIELD);
+		symbolSfx = resolveMessageField(message, quickfix.field.SymbolSfx.FIELD);
+		text = resolveMessageField(message, quickfix.field.Text.FIELD);
+		transactTime = resolveMessageField(message, quickfix.field.TransactTime.FIELD);
+
+		orderQty = toInt(resolveMessageField(message, quickfix.field.OrderQty.FIELD));
+		lastShares = toInt(resolveMessageField(message, quickfix.field.LastShares.FIELD));
+		cumQty = toInt(resolveMessageField(message, quickfix.field.CumQty.FIELD));
+		leavesQty = toInt(resolveMessageField(message, quickfix.field.LeavesQty.FIELD));
+		avgPx = toDouble(resolveMessageField(message, quickfix.field.AvgPx.FIELD));
+		lastPx = toDouble(resolveMessageField(message, quickfix.field.LastPx.FIELD));
+
+		resolveDirection();
     }
+		
+	private void resolveMsgType(Message message) {
+        try {
+        	MsgType fixMsgType = (MsgType) message.getHeader().getField(new MsgType());
+        	this.messageType = FIXMessage.FIXMsgTypeToMessageType(fixMsgType);
+		} catch (FieldNotFound e) {
+			this.messageType = null;
+		}
+	}
 
+	private void resolveExecType(Message message) {
+        try {
+        	ExecType fixExecType = (ExecType) message.getField(new ExecType());
+        	this.executionType = FIXMessage.FIXExecTypeToExecutionType(fixExecType);
+		} catch (FieldNotFound e) {
+			this.executionType = null;
+		}
+	}
 
-	public String getDisplayID() {
-    	String msgTypeVal = rawValues.get("MsgType");
-    	switch(msgTypeVal) {
-		case quickfix.field.MsgType.EXECUTION_REPORT:
-			return OrderID;
-		case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
-			return OrderID;
-		case quickfix.field.MsgType.ORDER_SINGLE:
-			return "-";
-		case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-			return "-";
-		case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
-			return "-";
-		case quickfix.field.MsgType.HEARTBEAT:
-			return "-";
-		case quickfix.field.MsgType.LOGON:
-			return "-";	
+	private void resolveOrdStatus(Message message) {
+        try {
+        	OrdStatus fixOrdStatus = (OrdStatus) message.getField(new OrdStatus());
+        	this.orderStatus = FIXMessage.FIXOrdStatusToOrderStatus(fixOrdStatus);
+		} catch (FieldNotFound e) {
+			this.orderStatus = null;
+		}
+	}
+
+	private void resolveSide(Message message) {
+        try {
+        	Side fixSide = (Side) message.getField(new Side());
+        	this.orderSide = FIXMessage.FIXSideToOrderSide(fixSide);
+		} catch (FieldNotFound e) {
+			this.orderSide = null;
+		}
+	}
+
+	private void resolvePriceType(Message message) {
+        try {
+        	OrdType fixOrdType = (OrdType) message.getField(new OrdType());
+        	this.priceType = FIXMessage.FIXOrdTypeToPriceType(fixOrdType);
+		} catch (FieldNotFound e) {
+			this.priceType = null;
+		}
+	}
+
+	private void resolveOpenClose(Message message) {
+        try {
+        	OpenClose fixOpenClose = (OpenClose) message.getField(new OpenClose());
+        	this.orderOpenClose = FIXMessage.FIXOpenCloseToOrderOpenClose(fixOpenClose);
+		} catch (FieldNotFound e) {
+			this.orderOpenClose = null;
+		}
+	}
+
+	private void resolveOrderTIF(Message message) {
+        try {
+        	TimeInForce fixTimeInForce = (TimeInForce) message.getField(new TimeInForce());
+        	this.orderTIF = FIXMessage.FIXTifToOrderTif(fixTimeInForce);
+		} catch (FieldNotFound e) {
+			this.orderTIF = null;
+		}
+	}
+
+	private String resolveHeaderField(Header header, int fieldInt) {
+        try {
+        	String fieldVal = header.getString(fieldInt);
+        	return fieldVal;
+		} catch (FieldNotFound e) {
+			return null;
+		}
+	}	
+
+	private String resolveMessageField(Message message, int fieldInt) {
+        try {
+        	String fieldVal = message.getString(fieldInt);
+        	return fieldVal;
+		} catch (FieldNotFound e) {
+			return null;
+		}
+	}
+
+	private static Integer toInt(String inString) {
+    	if (inString != null) {
+    		return Integer.parseInt(inString);
     	}
-    	return OrderID;
-    }
-
-
-	public String getMsgQty() {
-    	String execTypeVal = rawValues.get("ExecType");
-    	char execTypeChar = execTypeVal.charAt(0);
-    	switch(execTypeChar) {
-    	case quickfix.field.ExecType.PARTIAL_FILL:
-    		return LastShares;
-    	case quickfix.field.ExecType.FILL:
-    		return LastShares;
-    	}
-    	return OrderQty;
-    }
-
-    public String getStatus() {
-    	String msgTypeVal = rawValues.get("MsgType");
-    	switch(msgTypeVal) {
-    	case quickfix.field.MsgType.EXECUTION_REPORT:
-    		return ExecType;
-    	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
-    		return OrdStatus;
-    	case quickfix.field.MsgType.ORDER_SINGLE:
-    		return Side;
-    	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-    		return Side;
-    	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
-    		return Side;	
-    	}
-    	return "FieldNotFound";
-    }
-
-	private String resolveMsgType(Message message) {
-        try {
-        	String msgTypeVal = message.getHeader().getString(quickfix.field.MsgType.FIELD);
-        	rawValues.put("MsgType", msgTypeVal);
-        	switch (msgTypeVal) {
-        	case quickfix.field.MsgType.EXECUTION_REPORT:
-        		return "ExecRept";
-        	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
-        		return "CancelOrReject";
-        	case quickfix.field.MsgType.ORDER_SINGLE:
-        		return "NewOrder";
-        	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-        		return "ReplaceOrder";
-        	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
-        		return "CancelOrder";
-        	case quickfix.field.MsgType.LOGON:
-        		return "Logon";
-        	case quickfix.field.MsgType.HEARTBEAT:
-        		return "Heartbeat";
-        	}
-        	return msgTypeVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("MsgTpye", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveExecType(Message message) {
-        try {
-        	char execTypeVal = message.getChar(quickfix.field.ExecType.FIELD);
-        	rawValues.put("ExecType", String.valueOf(execTypeVal));
-        	switch (execTypeVal) {
-        	case quickfix.field.ExecType.NEW:
-        		return "OrderAck";
-        	case quickfix.field.ExecType.PARTIAL_FILL:
-        		return "PartialFill";	
-        	case quickfix.field.ExecType.FILL:
-        		return "Filled";	
-        	case quickfix.field.ExecType.DONE_FOR_DAY:
-        		return "DoneForDay";
-        	case quickfix.field.ExecType.CANCELED:
-        		return "CancelAck";
-        	case quickfix.field.ExecType.REPLACE:
-        		return "ReplaceAck";
-        	case quickfix.field.ExecType.STOPPED:
-        		return "Stopped";
-        	case quickfix.field.ExecType.SUSPENDED:
-        		return "Suspended";
-        	case quickfix.field.ExecType.REJECTED:
-        		return "Rejected";
-        	case quickfix.field.ExecType.PENDING_CANCEL:
-        		return "PendingCancel";
-        	case quickfix.field.ExecType.PENDING_REPLACE:
-        		return "PendingReplace";
-        	case quickfix.field.ExecType.PENDING_NEW:
-        		return "PendingNew";
-        	case quickfix.field.ExecType.TRADE_IN_A_CLEARING_HOLD:
-        		return "ClearingHold";
-        	}
-        	return String.valueOf(execTypeVal);
-		} catch (FieldNotFound e) {
-			rawValues.put("ExecType", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveOrdStatus(Message message) {
-        try {
-        	char ordStatusVal = message.getChar(quickfix.field.OrdStatus.FIELD);
-        	rawValues.put("OrdStatus", String.valueOf(ordStatusVal));
-        	switch (ordStatusVal) {
-        	case quickfix.field.OrdStatus.NEW:
-        		return "OrderAck";
-        	case quickfix.field.OrdStatus.PARTIALLY_FILLED:
-        		return "PartialFill";	
-        	case quickfix.field.OrdStatus.FILLED:
-        		return "Filled";	
-        	case quickfix.field.OrdStatus.DONE_FOR_DAY:
-        		return "DoneForDay";
-        	case quickfix.field.OrdStatus.CANCELED:
-        		return "Canceled";
-        	case quickfix.field.OrdStatus.REPLACED:
-        		return "Replaced";
-        	case quickfix.field.OrdStatus.REJECTED:
-        		return "Rejected";
-        	case quickfix.field.OrdStatus.PENDING_CANCEL:
-        		return "PendingCancel";
-        	case quickfix.field.OrdStatus.PENDING_REPLACE:
-        		return "PendingReplace";
-        	case quickfix.field.OrdStatus.PENDING_NEW:
-        		return "PendingNew";
-        	}
-        	return String.valueOf(ordStatusVal);
-		} catch (FieldNotFound e) {
-			rawValues.put("OrdStatus", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveSide(Message message) {
-        try {
-        	char sideVal = message.getChar(quickfix.field.Side.FIELD);
-        	rawValues.put("Symbol", String.valueOf(sideVal));
-        	switch (sideVal) {
-        	case quickfix.field.Side.BUY:
-        		return "Buy";
-        	case quickfix.field.Side.SELL:
-        		return "Sell";
-        	case quickfix.field.Side.SELL_SHORT:
-        		return "SellShort";
-        	case quickfix.field.Side.SELL_SHORT_EXEMPT:
-        		return "SellShortExempt";
-        	}
-        	return String.valueOf(sideVal);
-		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveSenderCompID(Message message) {
-        try {
-        	String senderCompIDVal = message.getHeader().getString(quickfix.field.SenderCompID.FIELD);
-        	rawValues.put("SenderCompID", senderCompIDVal);
-        	return senderCompIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("SenderCompID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveTargetCompID(Message message) {
-        try {
-        	String tenderCompIDVal = message.getHeader().getString(quickfix.field.TargetCompID.FIELD);
-        	rawValues.put("TenderCompID", tenderCompIDVal);
-        	return tenderCompIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("TenderCompID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveMsgSeqNum(Message message) {
-        try {
-        	String msgSeqNumVal = message.getHeader().getString(quickfix.field.MsgSeqNum.FIELD);
-        	rawValues.put("MsgSeqNum", msgSeqNumVal);
-        	return msgSeqNumVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("MsgSeqNum", "FieldNotFound");
-			return "FieldNotFound";
-		}
+    	return null;
 	}
 	
-	private String resolveSymbol(Message message) {
-        try {
-        	String symbolVal = message.getString(quickfix.field.Symbol.FIELD);
-        	rawValues.put("Symbol", symbolVal);
-        	return symbolVal;
-		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveOrderQty(Message message) {
-        try {
-        	String orderQtyVal = message.getString(quickfix.field.OrderQty.FIELD);
-        	rawValues.put("OrderQty", orderQtyVal);
-        	return orderQtyVal;
-		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveLastShares(Message message) {
-        try {
-        	String lastSharesVal = message.getString(quickfix.field.LastShares.FIELD);
-        	rawValues.put("LastShares", lastSharesVal);
-        	return lastSharesVal;
-		} catch (FieldNotFound e) {
-        	rawValues.put("Symbol", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveOrderID(Message message) {
-        try {
-        	String orderIDVal = message.getString(quickfix.field.OrderID.FIELD);
-        	rawValues.put("OrderID", orderIDVal);
-        	return orderIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("OrderID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveClOrdID(Message message) {
-        try {
-        	String clOrdIDVal = message.getString(quickfix.field.ClOrdID.FIELD);
-        	rawValues.put("ClOrdID", clOrdIDVal);
-        	return clOrdIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("ClOrdID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveOrigClOrdID(Message message) {
-        try {
-        	String origClOrdIDVal = message.getString(quickfix.field.OrigClOrdID.FIELD);
-        	rawValues.put("OrigClOrdID", origClOrdIDVal);
-        	return origClOrdIDVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("OrigClOrdID", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveOrdType(Message message) {
-        try {
-        	String ordTypeVal = message.getString(quickfix.field.OrdType.FIELD);
-        	rawValues.put("OrdType", ordTypeVal);
-        	return ordTypeVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("OrdType", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveText(Message message) {
-        try {
-        	String textVal = message.getString(quickfix.field.Text.FIELD);
-        	rawValues.put("Text", textVal);
-        	return textVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("Text", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveCumQty(Message message) {
-        try {
-        	String cumQtyVal = message.getString(quickfix.field.CumQty.FIELD);
-        	rawValues.put("CumQty", cumQtyVal);
-        	return cumQtyVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("CumQty", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveLeavesQty(Message message) {
-        try {
-        	String leavesQtyVal = message.getString(quickfix.field.LeavesQty.FIELD);
-        	rawValues.put("LeavesQty", leavesQtyVal);
-        	return leavesQtyVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("LeavesQty", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveAvgPx(Message message) {
-        try {
-        	String avgPxVal = message.getString(quickfix.field.AvgPx.FIELD);
-        	rawValues.put("AvgPx", avgPxVal);
-        	return avgPxVal;
-		} catch (FieldNotFound e) {
-			rawValues.put("AvgPx", "FieldNotFound");
-			return "FieldNotFound";
-		}
-	}
-
-	private String resolveDirection() {
-    	String msgTypeVal = (String) rawValues.get("MsgType");
-    	switch(msgTypeVal) {
-    	case quickfix.field.MsgType.LOGON:
-    		return "Inbound";
-    	case quickfix.field.MsgType.HEARTBEAT:
-    		return "Inbound";
-    	case quickfix.field.MsgType.EXECUTION_REPORT:
-    		return "Inbound";
-    	case quickfix.field.MsgType.ORDER_CANCEL_REJECT:
-    		return "Inbound";
-    	case quickfix.field.MsgType.ORDER_SINGLE:
-    		return "Outbound";
-    	case quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST:
-    		return "Outbound";
-    	case quickfix.field.MsgType.ORDER_CANCEL_REQUEST:
-    		return "Outbound";	
+	private static Double toDouble(String inString) {
+    	if (inString != null) {
+    		return Double.parseDouble(inString);
     	}
-    	return "Inbound";
+    	return null;
 	}
+
+	private void resolveDirection() {
+		if (messageType == MessageType.LOGON ||  messageType == MessageType.EXECUTION_REPORT || 
+				messageType == MessageType.ORDER_CANCEL_REJECT) {
+			this.direction = "Inbound";
+		} else if (messageType == MessageType.NEW_ORDER || messageType == MessageType.REPLACE_ORDER 
+				|| messageType == MessageType.CANCEL_ORDER){
+    		this.direction = "Outbound";
+    	} else {
+    		this.direction = "Inbound";
+    	}
+	}
+
+	public String getDisplayID() {
+		if (messageType == MessageType.EXECUTION_REPORT || messageType == MessageType.ORDER_CANCEL_REJECT) {
+			return orderID;
+    	} else {
+    		return  "-";
+    	}
+    }
+
+	public Integer getDisplayQty() {
+		if (executionType == ExecutionType.PARTIAL_FILL || executionType == ExecutionType.FILL) {
+			return lastShares;
+    	} else {
+    		return orderQty;
+    	}
+    }
+
+    public String getDisplayStatus() {
+		if (messageType == MessageType.EXECUTION_REPORT) {
+    		return executionType.toString();
+    	} else if (messageType == MessageType.ORDER_CANCEL_REJECT) {
+    		return orderStatus.toString();
+    	} else if (messageType == MessageType.NEW_ORDER || messageType == MessageType.REPLACE_ORDER 
+				|| messageType == MessageType.CANCEL_ORDER){
+    		return orderSide.toString();
+    	} else {
+    		return "-";
+    	}
+    }
 
     public Message getMessage() {
         	return this.message;
         }
    
     public Message.Header getMessageHeader() {
-    	return Header;
-    }        
+    	return header;
+    }   
 
-    public String getMsgType() {
-    	return MsgType;
+    public MessageType getMessageType() {
+    	return messageType;
     }
 
     public String getDirection() {
-    	return Direction;
+    	return direction;
     }
 
     public String getClOrdID() {
-    	return ClOrdID;
+    	return clOrdID;
     }
 
     public String getOrigClOrdID() {
-    	return OrigClOrdID;
+    	return origClOrdID;
     }
 
     public String getOrderID() {
-    	return OrderID;
+    	return orderID;
     }
 
     public String getSymbol() {
-    	return Symbol;
+    	return symbol;
     }
 
-    public String getSide() {
-    	return Side;
+    public String getSymbolSfx() {
+    	return symbolSfx;
     }
 
-    public String getOrdStatus() {
-    	return OrdStatus;
+    public OrderSide getOrderSide() {
+    	return orderSide;
     }
 
-    public String getOrderQty() {
-    	return OrderQty;
+    public OrderStatus getOrderStatus() {
+    	return orderStatus;
     }
 
-    public String getExecType() {
-    	return ExecType;
+    public OrderTIF getOrderTIF() {
+    	return orderTIF;
     }
 
-    public String getLastShares() {
-    	return LastShares;
+    public Integer getOrderQty() {
+    	return orderQty;
     }
 
-    public String getOrdType() {
-    	return OrdType;
+    public ExecutionType getExecutionType() {
+    	return executionType;
+    }
+
+    public Integer getLastShares() {
+    	return lastShares;
+    }
+
+    public PriceType getPriceType() {
+    	return priceType;
     }
 
     public String getText() {
-    	if ("FieldNotFound".equals(Text))
-    		return "-";
-    	else
-    		return Text;
+    		return text;
     }
 
-    public String getCumQty() {
-    	return CumQty;
+    public Integer getCumQty() {
+    	return cumQty;
     }
 
-    public String getLeavesQty() {
-    	return LeavesQty;
+    public Integer getLeavesQty() {
+    	return leavesQty;
     }
 
-    public String getAvgPx() {
-    	return AvgPx;
+    public Double getAvgPx() {
+    	return avgPx;
     }
 
     public String getSenderCompID() {
-    	return SenderCompID;
+    	return senderCompID;
     }
 
     public String getTargetCompID() {
-    	return TargetCompID;
+    	return targetCompID;
     }
     
-    public String getMsgSeqNum() {
-    	return MsgSeqNum;
+    public Integer getMsgSeqNum() {
+    	return msgSeqNum;
     }
+
+    public String getTransactTime() {
+    	return transactTime;
+    }
+
+    public String getSendingTime() {
+    	return sendingTime;
+    }
+    
+    public Double getLastPx() {
+    	return lastPx;
+    }
+
+    public OrderOpenClose getOpenClose() {
+    	return orderOpenClose;
+    } 
+
 }
 

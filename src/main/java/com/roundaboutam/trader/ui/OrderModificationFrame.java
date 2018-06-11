@@ -3,25 +3,24 @@ package com.roundaboutam.trader.ui;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.StringJoiner;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.TraderEngine;
 import com.roundaboutam.trader.order.CancelOrder;
 import com.roundaboutam.trader.order.Order;
-import com.roundaboutam.trader.order.OrderSide;
-import com.roundaboutam.trader.order.OrderTIF;
-import com.roundaboutam.trader.order.OrderType;
 import com.roundaboutam.trader.order.ReplaceOrder;
-import com.roundaboutam.trader.order.VwapOrder;
-
-import quickfix.SessionID;
+import com.roundaboutam.trader.rmp.PriceType;
 
 
 public class OrderModificationFrame {
@@ -31,7 +30,7 @@ public class OrderModificationFrame {
 
 	private static OrderModificationFrame instance = null;
 	private transient TraderApplication application = null;
-	private static Order order = null;
+	private Order order = null;
 
 	JTextField tickerField = new JTextField();
 	JTextField limitPriceField = new JTextField("");
@@ -55,9 +54,11 @@ public class OrderModificationFrame {
 	private void makeOrderModiciationFrame() {
 
 		frame = new JFrame();
+		Point traderEngineLoc = TraderEngine.get().getTraderFrame().getLocationOnScreen();
+		frame.setLocation(traderEngineLoc.x + 50, traderEngineLoc.y + 50);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Order Modification Ticket");
-		frame.setSize(400, 600);
+		frame.setSize(300, 400);
 		frame.setResizable(false);
 
 		panel = new JPanel(new GridBagLayout());
@@ -87,7 +88,7 @@ public class OrderModificationFrame {
 	    panel.add(new JLabel("Limit Price:"), c);
 	    c.gridx = 0;
 	    c.gridy = 5;
-	    if (order.getOrderType() == OrderType.LIMIT)
+	    if (order.getPriceType() == PriceType.LIMIT)
 	    	limitPriceField.setText(String.valueOf(order.getLimitPrice()));
 	    else
 	    	enableTextField(limitPriceField, false);
@@ -95,23 +96,23 @@ public class OrderModificationFrame {
 
 	    c.gridx = 0;
 	    c.gridy = 6;
-	    JButton btnModifySubmit = new JButton("Modify Order");
-	    btnModifySubmit.addActionListener(new ActionListener() {
+	    JButton btnModifyOrder = new JButton("Modify Order");
+	    btnModifyOrder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				makeModifyTransmitOrder();
+				confirmModifyCancelOrder("Modify");
 			}
 		});
-	    panel.add(btnModifySubmit, c);
+	    panel.add(btnModifyOrder, c);
 
 	    c.gridx = 0;
 	    c.gridy = 7;
-	    JButton btnCancelSubmit = new JButton("Cancel Order");
-	    btnCancelSubmit.addActionListener(new ActionListener() {
+	    JButton btnCancelOrder = new JButton("Cancel Order");
+	    btnCancelOrder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				makeCancelTransmitOrder();
+				confirmModifyCancelOrder("Cancel");
 			}
 		});
-	    panel.add(btnCancelSubmit, c);
+	    panel.add(btnCancelOrder, c);
 
 	    c.gridx = 0;
 	    c.gridy = 8;
@@ -136,20 +137,31 @@ public class OrderModificationFrame {
         field.setForeground(labelColor);
     }
 
-	private void makeCancelTransmitOrder() {
-        application.cancel(new CancelOrder(order));
-		instance = null;
-        frame.dispose();
+	private void confirmModifyCancelOrder(String string) {
+		StringJoiner joiner = new StringJoiner(" ");
+		joiner.add(string);
+		joiner.add(order.getSymbol());
+		joiner.add("(" + order.getPriceType().toString() + ") Order?");
+		
+		int choice = JOptionPane.showOptionDialog(frame, joiner.toString(), "Confirm?", 
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		
+		if (choice == JOptionPane.YES_OPTION) {
+			if (string.toUpperCase().equals("CANCEL")) {
+				application.sendCancelOrder(new CancelOrder(order));
+			}
+			else if (string.toUpperCase().equals("MODIFY")) {
+				ReplaceOrder replaceOrder = new ReplaceOrder(order);
+				replaceOrder.setQuantity(Integer.parseInt(quantityField.getText()));
+		        if (order.getPriceType() == PriceType.LIMIT) {
+		    		replaceOrder.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
+		        }
+		        application.sendReplaceOrder(replaceOrder);
+			}
+			instance = null;
+	        frame.dispose();
+		}
 	}
 
-	private void makeModifyTransmitOrder() {
-		ReplaceOrder replaceOrder = new ReplaceOrder(order);
-		replaceOrder.setQuantity(Integer.parseInt(quantityField.getText()));
-        if (order.getOrderType() == OrderType.LIMIT) {
-    		replaceOrder.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
-        }
-        application.replace(replaceOrder);
-        instance = null;
-        frame.dispose();
-	}
+	
 }

@@ -10,7 +10,7 @@ public class OrderTest extends TestCase {
 		assertFalse(order1.getOrderID().equals(order2.getOrderID()));
 	}
 	
-	public void testOrderSetSymbolParse() {
+	public void testOrderSetSymbolSuffix() {
 		Order order = new Order();
 		order.setSymbol("BRK.B");
 		assertEquals(order.getSymbol(), "BRK");
@@ -30,4 +30,13 @@ public class OrderTest extends TestCase {
 		assertFalse(order.getOrderID().equals(order.getPermanentID()));
 	}
 
+	public void testOrderProcessFill() {
+		Order order = new Order();
+		order.setCumQty(200);
+		int fill = order.processFill(300, 100, 50.50, 400);
+		assertEquals(fill, 100);
+		assertEquals(order.getCumQty(), 300);		
+	}
+
 }
+

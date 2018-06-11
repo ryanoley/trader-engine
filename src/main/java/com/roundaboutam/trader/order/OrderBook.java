@@ -2,6 +2,13 @@ package com.roundaboutam.trader.order;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.StringJoiner;
+
+import com.roundaboutam.trader.MessageContainer;
+import com.roundaboutam.trader.ramfix.ExecutionType;
+import com.roundaboutam.trader.rmp.OrderSide;
+import com.roundaboutam.trader.rmp.PriceType;
 
 import quickfix.SessionID;
 
@@ -33,8 +40,55 @@ public class OrderBook {
 			return orderMap.get(orderID);
 	}
 
-	public void cancelReplaceRejected(String orderID) {
-		// TODO: Log these rejects
+	public int processExecutionReport(MessageContainer messageContainer, SessionID sessionID) {
+		Order order;
+		String orderID = messageContainer.getClOrdID();
+		int cumQty = messageContainer.getCumQty();
+		int leavesQty = messageContainer.getLeavesQty();
+		int orderQty = messageContainer.getOrderQty();
+		double avgPx = messageContainer.getAvgPx();
+
+		if (replaceOrderMap.containsKey(orderID)) {
+			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
+			replaceOrder.setAcknowledged(true);
+			order = orderMap.get(replaceOrder.getOrigOrderID());
+			order.setQuantity(replaceOrder.getQuantity());
+			order.setLimitPrice(replaceOrder.getLimitPrice());
+			order.setStopPrice(replaceOrder.getStopPrice());
+			order.setModified(true);
+			orderMap.put(replaceOrder.getOrderID(), order);
+
+		} else if (cancelOrderMap.containsKey(orderID)) {
+			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
+			cancelOrder.setAcknowledged(true);
+			order = orderMap.get(cancelOrder.getOrigOrderID());
+			order.setCanceled(true);
+			orderMap.put(cancelOrder.getOrderID(), order);
+
+		} else if (orderMap.containsKey(orderID)) {
+			order = orderMap.get(orderID);
+			order.setAcknowledged(true);
+
+		} else {
+			order = new Order(orderID);
+			OrderSide orderSide = messageContainer.getOrderSide();
+			PriceType priceType = messageContainer.getPriceType();
+			order.setSymbol(messageContainer.getSymbol());
+			order.setOrderID(orderID);
+			order.setOrderSide(orderSide);
+			order.setQuantity(orderQty);
+			order.setPriceType(priceType);
+			order.setSessionID(sessionID);
+			order.setOldSession(true);
+			order.setAcknowledged(true);
+			addOrder(order);
+		}
+
+		order.updateMessage(messageContainer);
+		return order.processFill(cumQty, leavesQty, avgPx, orderQty);
+	}
+
+	public void processOrderCancelReject(String orderID) {
 		if (replaceOrderMap.containsKey(orderID)) {
 			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
 			replaceOrder.setRejected(true);
@@ -48,57 +102,11 @@ public class OrderBook {
 		}
 	}
 
-	public int processExecutionReport(String orderID, String symbol, int orderQty, int cumQty, 
-			int leavesQty, double avgPx, OrderSide orderSide, OrderType orderType, 
-			SessionID sessionID, String FIXMessage) {
-
-		Order order = null;
-
-		if (replaceOrderMap.containsKey(orderID)) {
-			ReplaceOrder replaceOrder = replaceOrderMap.remove(orderID);
-			// TODO: This should be logged
-			replaceOrder.setAcknowledged(true);
-
-			order = orderMap.get(replaceOrder.getOrigOrderID());
-
-			order.setQuantity(replaceOrder.getQuantity());
-			order.setLimitPrice(replaceOrder.getLimitPrice());
-			order.setStopPrice(replaceOrder.getStopPrice());
-
-			orderMap.put(replaceOrder.getOrderID(), order);
-
-		} else if (cancelOrderMap.containsKey(orderID)) {
-			CancelOrder cancelOrder = cancelOrderMap.remove(orderID);
-			// TODO: This should be logged
-			cancelOrder.setAcknowledged(true);
-
-			order = orderMap.get(cancelOrder.getOrigOrderID());
-			order.setCanceled(true);
-			orderMap.put(cancelOrder.getOrderID(), order);
-
-		} else if (orderMap.containsKey(orderID)) {
-			order = orderMap.get(orderID);
-
-		} else {
-			order = new Order(orderID);
-			order.setSymbol(symbol);
-			order.setOrderID(orderID);
-			order.setOrderSide(orderSide);
-			order.setQuantity(orderQty);
-			order.setOrderType(orderType);
-			order.setSessionID(sessionID);
-			order.setMessage("Order from old session");
-			addOrder(order);
-		}
-
-		return order.processFill(cumQty, leavesQty, avgPx, orderQty, FIXMessage);
-	}
-
 	public void orderRejected(String orderID) {
-		// TODO: Log this?
 		Order order = orderMap.get(orderID);
 		order.setRejected(true);
 		order.setLeavesQty(0);
+		order.setMessage("Rejected");
 	}
 
 	public ArrayList<Order> getAllOpenOrders() {
@@ -110,4 +118,28 @@ public class OrderBook {
 		return openOrders;
 	}
 
+	public String getOrderBookCSV() {
+		
+		StringJoiner bookJoiner = new StringJoiner("\n");
+		
+		for (Order order : orderMap.values()) {
+			StringJoiner columnJoiner = new StringJoiner(",");
+			StringJoiner fieldJoiner = new StringJoiner(",");
+		    for (Map.Entry<String, String> orderFieldMap : order.getExportHash().entrySet()) {
+		    	String field = orderFieldMap.getKey();
+		    	String value = orderFieldMap.getValue();
+		    	columnJoiner.add(field);
+		    	fieldJoiner.add(value);
+		    }
+		    if(bookJoiner.length() == 0)
+		    	bookJoiner.add(columnJoiner.toString());
+		    bookJoiner.add(fieldJoiner.toString());
+		}
+		return bookJoiner.toString();
+	}
+
+	
+	
+
 }
+

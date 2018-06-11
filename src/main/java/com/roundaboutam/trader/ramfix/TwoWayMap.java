@@ -1,4 +1,4 @@
-package com.roundaboutam.trader;
+package com.roundaboutam.trader.ramfix;
 
 import java.util.HashMap;
 
@@ -24,4 +24,11 @@ public class TwoWayMap {
         return firstToSecond.toString() + "\n" + secondToFirst.toString();
     }
 
+    public int getFirstToSecondSize() {
+        return firstToSecond.size();
+    }
+
+    public int getSecondToFirstSize() {
+        return secondToFirst.size();
+    }
 }

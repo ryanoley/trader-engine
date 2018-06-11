@@ -2,6 +2,9 @@ package com.roundaboutam.trader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.UIManager;
@@ -33,6 +36,7 @@ public class TraderEngine {
 	private static TraderEngine traderEngine;
 	private static Initiator initiator;
 	private TraderApplication application;
+	private TraderFrame frame;
 
 	public TraderEngine(String launchEnv) throws Exception {
 		System.out.println(launchEnv);
@@ -40,7 +44,7 @@ public class TraderEngine {
 		application = new TraderApplication(settings);
 
         initiator = new SocketInitiator(
-        		application, 
+        		application,
         		new FileStoreFactory(settings), 
         		settings, 
         		new FileLogFactory(settings),
@@ -48,7 +52,8 @@ public class TraderEngine {
 
         JmxExporter exporter = new JmxExporter();
         exporter.register(initiator);
-        new TraderFrame(application);
+        frame = new TraderFrame(application);
+        startLogOnMonitor(launchEnv);
 	}
 
 	private SessionSettings getSettings(String launchEnv) throws ConfigError, IOException {
@@ -56,11 +61,11 @@ public class TraderEngine {
 		String rootpath;
 		if (launchEnv.equals("prod")){
 			inputStream = TraderEngine.class.getResourceAsStream("FIXConfigPROD.cfg");
-			rootpath = "C:\\FIX\\LOGS";
+			rootpath = System.getenv("DATA") + "\\trader-engine\\LOGS";
 		}
 		else {
 			inputStream = TraderEngine.class.getResourceAsStream("FIXConfig.cfg");
-			rootpath = System.getenv("DATA") + "\\trader-engine\\LOGS";
+			rootpath = "C:\\FIX\\LOGS";
 		}
 
         SessionSettings settings = new SessionSettings(inputStream);
@@ -70,6 +75,7 @@ public class TraderEngine {
         settings.setString("FileStorePath", rootpath + "\\fileStore");
         settings.setString("FileLogPath", rootpath + "\\logs");
         settings.setString("CustomLogPath", rootpath + "\\custom");
+        settings.setString("LaunchEnvironment", launchEnv);
         return settings;
 	}
 
@@ -110,7 +116,7 @@ public class TraderEngine {
     	System.out.println("TraderEngine.shutdown() invoked");
     	if (initiatorStarted)
     		stopInitiator();
-        while (application.getSessionIDs().size() > 0) {
+        while (application.getSessionID() != null) {
         	try { Thread.sleep(1000); } catch (InterruptedException e) { }
         }
         shutdownLatch.countDown();
@@ -119,6 +125,38 @@ public class TraderEngine {
 
 	public static TraderEngine get() {
 		return traderEngine;
+	}
+
+    public TraderFrame getTraderFrame() {
+    	return frame;
+    }
+
+	private void startLogOnMonitor(String launchEnv) {
+		class LogOnMonitor implements Runnable {
+			int currentTime;
+			public LogOnMonitor() {
+			}
+			public void run() {
+				try {
+					SimpleDateFormat timeFormat = new SimpleDateFormat("HHmm");
+					timeFormat.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+					while (true) {
+						currentTime = Integer.parseInt(timeFormat.format(new Date()));
+						if (currentTime >= 1730 && getInitiatorState()) {
+							shutdown();
+						}
+			            Thread.sleep(300000);
+			         }
+			      }
+			      catch (Exception e) {e.printStackTrace();}
+			}
+		}
+		if (launchEnv.equals("prod")){
+			logon();
+			frame.setFixButtonText("Stop FIX");
+			Thread t = new Thread(new LogOnMonitor());
+			t.start();
+		}
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -130,7 +168,7 @@ public class TraderEngine {
         String launchArg;
         if (args.length == 0)
         	launchArg = "uat";
-        else if (args[0].equals("PROD"))
+        else if (args[0].toUpperCase().equals("PROD"))
         	launchArg = "prod";
         else
         	launchArg = "uat";

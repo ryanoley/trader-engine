@@ -11,20 +11,21 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.MatteBorder;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
+import com.roundaboutam.trader.ramfix.MessageType;
 import com.roundaboutam.trader.MessageContainer;
 
 import quickfix.Message;
-
 
 
 
@@ -70,7 +71,7 @@ class MessageTableModel extends AbstractTableModel implements Observer {
     private void addMessage(Message message) {
     	int row = rowToMessage.size();
     	MessageContainer messageContainer = new MessageContainer(message);
-    	if (!"Heartbeat".equals(messageContainer.getMsgType())) {
+    	if (messageContainer.getMessageType() != MessageType.HEARTBEAT) {
 	    	rowToMessage.put(row, messageContainer);
 	    	rowToTimeStamp.put(row, new Date(System.currentTimeMillis()));
 	        fireTableRowsInserted(row, row);
@@ -106,22 +107,35 @@ class MessageTableModel extends AbstractTableModel implements Observer {
         	SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.S");  
         	return sdf.format(timeStamp);
         case MSGTYPE:
-        	return messageContainer.getMsgType();
+        	MessageType messageType = messageContainer.getMessageType();
+        	String typeString = (messageType == null) ? null : messageType.toString();
+        	return replaceNull(typeString);
         case SYMBOL:
-        	return messageContainer.getSymbol();
+        	return replaceNull(messageContainer.getSymbol());
         case ORDID:
-        	return messageContainer.getDisplayID();
+        	return replaceNull(messageContainer.getDisplayID());
         case ORDQTY:
-        	return messageContainer.getMsgQty();
+        	Integer dispQty = messageContainer.getDisplayQty();
+        	String qtyString = (dispQty == null) ? null : dispQty.toString();
+        	return replaceNull(qtyString);
         case STATUS:
-        	return messageContainer.getStatus();
+        	return replaceNull(messageContainer.getDisplayStatus());
         case TEXT:
-        	return messageContainer.getText();
+        	return replaceNull(messageContainer.getText());
         case MESSAGE:
-            return messageContainer.getMessage().toString();
+            return replaceNull(messageContainer.getMessage().toString());
         }
         return "#NA";
     }
+
+    private static String replaceNull(String input) {
+    	if (input == null)
+    		return "-";
+    	else if (input.isEmpty())
+    		return "-";
+    	else
+    		return input.equals("null") ? "-" : input;
+    	}
 
 	public void update(Observable o, Object arg) {
 		Message message = (Message) arg;
@@ -129,7 +143,6 @@ class MessageTableModel extends AbstractTableModel implements Observer {
 	}
 
 }
-
 
 
 
@@ -146,45 +159,49 @@ class MessageTable extends JTable implements MouseListener {
 	private void initColumnWidths() {
 		TableColumnModel model = this.getColumnModel();
         TableColumn column = model.getColumn(0);
-        column.setPreferredWidth((int) (80));
-        column = model.getColumn(1);
         column.setPreferredWidth((int) (60));
+        column = model.getColumn(1);
+        column.setPreferredWidth((int) (80));
         column = model.getColumn(2);
         column.setPreferredWidth((int) (80));
         column = model.getColumn(3);
-        column.setPreferredWidth((int) (40));
+        column.setPreferredWidth((int) (30));
         column = model.getColumn(4);
         column.setPreferredWidth((int) (50));
         column = model.getColumn(5);
         column.setPreferredWidth((int) (30));
         column = model.getColumn(6);
-        column.setPreferredWidth((int) (30));
+        column.setPreferredWidth((int) (50));
         column = model.getColumn(7);
-        column.setPreferredWidth((int) (200));
+        column.setPreferredWidth((int) (150));
 	}
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
-        int viewIdx = row;
-        int modelIdx = convertRowIndexToModel(viewIdx);
-
+        int modelIdx = convertRowIndexToModel(row);
     	MessageContainer messaingeContainer = ((MessageTableModel) getModel()).getMessage(modelIdx);
         String direction = messaingeContainer.getDirection();
-        DefaultTableCellRenderer r = (DefaultTableCellRenderer) renderer;
+        Component c = super.prepareRenderer(renderer, row, column); 
 
         if ("Outbound".equals(direction))
-        	r.setForeground(Color.blue);
+        	c.setForeground(Color.blue);
         else
-        	r.setForeground(Color.black);
+        	c.setForeground(Color.black);
+    
+        JComponent jc = (JComponent) c;
+        if (isRowSelected(row)){
+          c.setBackground(Color.white);
+          int left = column == 0 ? 1:0;
+          int right = column == getColumnCount() - 1 ? 1:0;
+          jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 
+        }
+        else
+          jc.setBorder(null);
 
-        return super.prepareRenderer(renderer, row, column);
+        return c;
     }
 
-    public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() != 2)
-            return;
-        //int row = rowAtPoint(e.getPoint());
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     public void mouseEntered(MouseEvent e) {}
 

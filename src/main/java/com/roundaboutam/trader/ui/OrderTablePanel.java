@@ -9,12 +9,15 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.MatteBorder;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import com.roundaboutam.trader.TraderApplication;
 import com.roundaboutam.trader.order.Order;
@@ -35,13 +38,13 @@ public class OrderTablePanel extends JPanel {
 class OrderTableModel extends AbstractTableModel implements Observer {
 
     private final static int SYMBOL = 0;
-    private final static int QUANTITY = 1;
-    private final static int OPEN = 2;
-    private final static int EXECUTED = 3;
-    private final static int SIDE = 4;
-    private final static int TYPE = 5;
-    private final static int LIMITPRICE = 6;
-    private final static int STOPPRICE = 7;
+    private final static int SIDE = 1;
+    private final static int QUANTITY = 2;
+    private final static int PARENTBASKET = 3;
+    private final static int OPEN = 4;
+    private final static int EXECUTED = 5;
+    private final static int TYPE = 6;
+    private final static int LIMITPRICE = 7;
     private final static int AVGPX = 8;
     private final static int MESSAGE = 9;
 
@@ -49,8 +52,8 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     private final HashMap<String, Integer> idToRow;
     private final HashMap<String, Order> idToOrder;
 
-    private final String[] headers = new String[] {"Symbol", "Quantity", "Open", 
-    		"Executed", "Side", "Type", "Limit", "Stop", "AvgPx", "Message"};
+    private final String[] headers = new String[] {"Symbol", "Side", "Quantity", 
+    		"Basket", "Open", "Executed", "Type", "Limit", "AvgPx", "Message"};
 
     public OrderTableModel(TraderApplication application) {
     	application.addOrderObserver(this);
@@ -92,7 +95,8 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     public int getColumnCount() {
         return headers.length;
     }
-
+    
+    @Override
     public String getColumnName(int columnIndex) {
         return headers[columnIndex];
     }
@@ -101,29 +105,40 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     	Order order = rowToOrder.get(rowIndex);
     	switch (columnIndex) {
         case SYMBOL:
-            return order.getSymbol();
-        case QUANTITY:
-            return order.getQuantity();
-        case OPEN:
-            return order.getLeavesQty();
-        case EXECUTED:
-            return order.getCumQty();
+        	String display_symbol = replaceNull(order.getSymbol());
+        	String display_suffix = replaceNull(order.getSuffix());
+        	return display_suffix.equals("-") ?  display_symbol : display_symbol + "." + display_suffix;
         case SIDE:
-            return order.getOrderSide();
+        	return replaceNull(order.getOrderSide().toString());
+        case QUANTITY:
+        	return replaceNull(String.valueOf(order.getQuantity()));
+        case PARENTBASKET:
+        	return replaceNull(order.getOrderBasketName());
+        case OPEN:
+        	return replaceNull(String.valueOf(order.getLeavesQty()));
+        case EXECUTED:
+        	return replaceNull(String.valueOf(order.getCumQty()));
         case TYPE:
-            return order.getOrderType();
+        	return replaceNull(order.getPriceType().toString());
         case LIMITPRICE:
-            return order.getLimitPrice();
-        case STOPPRICE:
-            return order.getStopPrice();
+        	return replaceNull(String.valueOf(order.getLimitPrice()));
         case AVGPX:
-            return order.getAvgPx();
+        	return replaceNull(String.valueOf(order.getAvgPx()));
         case MESSAGE:
-        	return order.getMessage();
+        	return replaceNull(order.getMessage());
         }
-        return "";
+    	return "-";
     }
 
+    private static String replaceNull(String input) {
+    	if (input == null)
+    		return "-";
+    	else if (input.isEmpty())
+    		return "-";
+    	else
+    		return input.equals("null") ? "-" : input;
+    	}
+    
 	public void update(Observable o, Object arg) {
     	Order order = (Order) arg;
     	if (!idToOrder.containsKey(order.getPermanentID())) {
@@ -131,7 +146,7 @@ class OrderTableModel extends AbstractTableModel implements Observer {
     		return;
     	}
     	int row = idToRow.get(order.getPermanentID());
-    	fireTableRowsInserted(row, row);
+    	fireTableRowsUpdated(row, row);
 	}
 
 }
@@ -139,46 +154,82 @@ class OrderTableModel extends AbstractTableModel implements Observer {
 
 @SuppressWarnings("serial")
 class OrderTable extends JTable implements MouseListener {
-
+	
 	private transient TraderApplication application;
 
     public OrderTable(TraderApplication application) {
         super(new OrderTableModel(application));
         this.application = application;
+        initColumnWidths();
         addMouseListener(this);
+        this.setAutoCreateRowSorter(true);
     }
+
+	private void initColumnWidths() {
+		TableColumnModel model = this.getColumnModel();
+        TableColumn column = model.getColumn(0);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(1);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(2);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(3);
+        column.setPreferredWidth((int) (70));
+        column = model.getColumn(4);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(5);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(6);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(7);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(8);
+        column.setPreferredWidth((int) (50));
+        column = model.getColumn(9);
+        column.setPreferredWidth((int) (70));
+	}
 
     public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 
-    	Order order = ((OrderTableModel) dataModel).getOrder(row);
-
+        int modelIdx = convertRowIndexToModel(row);
+        
+    	Order order = ((OrderTableModel) dataModel).getOrder(modelIdx);
         int open = order.getLeavesQty();
         boolean rejected = order.isRejected();
         boolean canceled = order.isCanceled();
         boolean acknowledged = order.isAcknowledged();
 
-        DefaultTableCellRenderer r = (DefaultTableCellRenderer) renderer;
-        r.setForeground(Color.black);
-
+        Component c = super.prepareRenderer(renderer, row, column); 
+        c.setForeground(Color.black);
         if (rejected)
-            r.setBackground(Color.red);
+            c.setBackground(Color.red);
         else if (canceled)
-            r.setBackground(Color.white);
+            c.setBackground(Color.lightGray);
         else if (!acknowledged)
-            r.setBackground(Color.yellow);
+            c.setBackground(Color.yellow);
         else if (open > 0)
-            r.setBackground(Color.green);
+            c.setBackground(Color.white);
         else if (open == 0)
-            r.setBackground(Color.white);
+            c.setBackground(Color.lightGray);
 
-        return super.prepareRenderer(renderer, row, column);
+        JComponent jc = (JComponent) c;
+        if (isRowSelected(row)){
+          int left = column == 0 ? 1:0;
+          int right = column == getColumnCount() - 1 ? 1:0;
+          jc.setBorder(new MatteBorder(1, left, 1, right, Color.blue)); 
+        }
+        else
+          jc.setBorder(null);
+
+        return c;
     }
 
     public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() != 2)
             return;
         int row = rowAtPoint(e.getPoint());
-        Order order = ((OrderTableModel) dataModel).getOrder(row);
+        int modelIdx = convertRowIndexToModel(row);
+        Order order = ((OrderTableModel) dataModel).getOrder(modelIdx);
         OrderModificationFrame.getInstance(application, order);
     }
 

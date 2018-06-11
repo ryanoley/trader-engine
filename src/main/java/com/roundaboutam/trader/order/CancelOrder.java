@@ -1,5 +1,7 @@
 package com.roundaboutam.trader.order;
 
+import com.roundaboutam.trader.rmp.OrderSide;
+
 import quickfix.SessionID;
 
 public class CancelOrder {
@@ -14,8 +16,6 @@ public class CancelOrder {
 
     // Order related fields
     private OrderSide orderSide = null;
-
-    // Order related fields
     private int quantity = 0;
 
     // Execution related fields
@@ -31,6 +31,7 @@ public class CancelOrder {
     	this.orderSide = order.getOrderSide();
     	this.quantity = order.getQuantity();
     	order.setCanceled(true);
+    	order.setMessage("CancelReq");
     }
 
 	public String getSymbol() {

@@ -87,7 +87,6 @@ public class FIXOrder {
     	}
 
     	fixOrder.setField(new OrderQty(order.getQuantity()));
-    	fixOrder.setField(FIXMessage.orderTifToFIXTif(order.getOrderTIF()));
     	fixOrder.setField(FIXMessage.orderOpenCloseToFIXOpenClose(order.getOrderOpenClose()));
 
         if (order.getOrderSide() == OrderSide.SHORT_SELL) {
@@ -95,10 +94,14 @@ public class FIXOrder {
         	fixOrder.setString(5700, "BAML");
         }
 
-        if (order.getPriceType() == PriceType.LIMIT) {
+        if (order.getPriceType() == PriceType.LIMIT | order.getPriceType() == PriceType.LIMIT_ON_CLOSE) {
         	fixOrder.setField(new Price(order.getLimitPrice()));
         }
 
+        if (order.getPriceType() == PriceType.LIMIT | order.getPriceType() == PriceType.MARKET) {
+        	fixOrder.setField(FIXMessage.orderTifToFIXTif(order.getOrderTIF()));
+        }
+        
         if (order.getOrderBasketName() != null) {
         	fixOrder.setString(1, order.getOrderBasketName());
         }

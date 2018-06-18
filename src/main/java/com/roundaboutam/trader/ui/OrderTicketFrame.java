@@ -55,6 +55,8 @@ public class OrderTicketFrame {
     private boolean symbolEntered = false;
     private boolean quantityEntered = false;
     private boolean limitEntered = false;
+    private boolean startTimeEntered = true;
+    private boolean endTimeEntered = true;
     private boolean sessionEntered = false;
     
     JButton submitButton;
@@ -223,6 +225,8 @@ public class OrderTicketFrame {
         symbolField.addKeyListener(activator);
         quantityField.addKeyListener(activator);
         limitPriceField.addKeyListener(activator);
+        startTimeField.addKeyListener(activator);
+        endTimeField.addKeyListener(activator);
         sessionIDCombo.addItemListener(activator);
 
         frame.add(panel);	    
@@ -279,7 +283,7 @@ public class OrderTicketFrame {
         else if (priceType == "LIMIT" | priceType == "LOC")
             submitButton.setEnabled(activate && limitEntered);
         else if (priceType == "VWAP")
-            submitButton.setEnabled(activate);
+            submitButton.setEnabled(activate && startTimeEntered && endTimeEntered);
     }
 
     private class SubmitActivator implements KeyListener, ItemListener {
@@ -291,6 +295,10 @@ public class OrderTicketFrame {
                 quantityEntered = testField(obj);
             } else if (obj == limitPriceField) {
                 limitEntered = testField(obj);
+            } else if (obj == startTimeField) {
+                startTimeEntered = testField(obj);
+            } else if (obj == endTimeField) {
+                endTimeEntered = testField(obj);
             }
             activateSubmit();
         }

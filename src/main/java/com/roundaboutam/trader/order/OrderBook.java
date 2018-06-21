@@ -121,11 +121,20 @@ public class OrderBook {
 	public String getOrderBookCSV() {
 		
 		StringJoiner bookJoiner = new StringJoiner("\n");
+		ArrayList<String> processedIDs = new ArrayList<String>();
 		
 		for (Order order : orderMap.values()) {
 			StringJoiner columnJoiner = new StringJoiner(",");
 			StringJoiner fieldJoiner = new StringJoiner(",");
-		    for (Map.Entry<String, String> orderFieldMap : order.getExportHash().entrySet()) {
+			
+			// Check to make sure not already processed, replaced orders will write twice
+			String orderID = order.getPermanentID();
+			if (processedIDs.contains(orderID)) {
+				continue;
+			}
+			processedIDs.add(orderID);
+		    // Create csv string for order
+			for (Map.Entry<String, String> orderFieldMap : order.getExportHash().entrySet()) {
 		    	String field = orderFieldMap.getKey();
 		    	String value = orderFieldMap.getValue();
 		    	columnJoiner.add(field);

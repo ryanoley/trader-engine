@@ -131,7 +131,7 @@ public class Parser {
 		}
 
 		// Add TIF for Market and Limit orders
-		if (priceType == PriceType.LIMIT | priceType == PriceType.MARKET) {
+		if (priceType == PriceType.LIMIT | priceType == PriceType.MARKET | priceType == PriceType.VWAP) {
 			order.setOrderTIF(OrderTIF.DAY);
 		} 
 

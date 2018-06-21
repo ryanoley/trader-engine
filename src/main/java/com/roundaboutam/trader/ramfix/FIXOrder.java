@@ -65,6 +65,10 @@ public class FIXOrder {
     	algoParams = algoParams + ";6403=" + vwapOrder.getParticipationRate();
     	algoParams = algoParams + ";6168=" + startTimeString;
     	algoParams = algoParams + ";126=" + endTimeString;
+    	// If End Time is 4:00pm then participate in the close
+    	if(vwapOrder.getEndTime().equals("16:00:00")) {
+    		algoParams = algoParams + ";6412=A";
+    	}
     	algoParams = algoParams + ";9682=v4.3.0BRT;";
     	fixOrder.setString(9999, algoParams);
 

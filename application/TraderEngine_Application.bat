@@ -15,15 +15,17 @@ ECHO --------------- Trader Engine Application Manager -------------
 ECHO ---------------------------------------------------------------
 ECHO.
 ECHO ------------------------ INSTRUCTIONS -------------------------
-ECHO Select an item from the menu.
+ECHO Select an item from the menu. This application starts and stops
+ECHO 		 on a schedule, this should only be used for abnormal cases
 ECHO.
-ECHO -------------------TRADE IMPLEMENTAION TASKS---------------------
+ECHO ------------------------ LAUCH OPTIONS ------------------------
 ECHO.
 ECHO 1.  PROD Trader Engine: This launches the Trader Engine in
-ECHO.		 Production configuration.  Do not Launch if already Running.
+ECHO		 Production configuration.  DO NOT LAUNCH if Trader Engine
+echo 		 is already Running.
 ECHO.
 ECHO 2.  TEST Trader Engine:  This launches the Trader Engine in Test
-ECHO.		 configuration.
+ECHO		 configuration.
 ECHO.
 ECHO 3.  Exit this application
 ECHO ----------------------------------------------------------------

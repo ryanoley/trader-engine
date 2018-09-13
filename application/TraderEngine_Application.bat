@@ -45,7 +45,7 @@ ECHO.
 ECHO.
 ECHO --LAUNCHING PROD--
 ECHO.
-start java -jar %TRADERENGINE_APP%\trader-engine-1.0.jar -prod
+start java -jar %TRADERENGINE_APP%\trader-engine-1.0.jar prod
 GOTO SPACING
 
 :RUNTEST
@@ -53,7 +53,7 @@ ECHO.
 ECHO.
 ECHO --LAUNCHING TEST--
 ECHO.
-start java -jar %TRADERENGINE_APP%\trader-engine-1.0.jar -uat
+start java -jar %TRADERENGINE_APP%\trader-engine-1.0.jar uat
 GOTO SPACING
 
 :SPACING

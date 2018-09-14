@@ -98,34 +98,48 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 				sessionArea.setText("CompID: " + sessionID);
 				seqArea.setText("MsgSeqNum: " + seqNum);
 				heartbeatArea.setText("ContactDiff: " + contactDiff);
-
+				
 	            if (sessionID.equals("ROUNDPROD01")){
+	            	sessionArea.setForeground(Color.RED);
 	            	Font sessionFont = sessionArea.getFont();
 					Map attributes = sessionFont.getAttributes();
 	            	attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
 	            	attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_ULTRABOLD);
-	            	attributes.put(TextAttribute.SIZE, 18L);
-	            	sessionArea.setForeground(Color.RED);
+	            	attributes.put(TextAttribute.SIZE, 16L);
 	            	sessionArea.setFont(sessionFont.deriveFont(attributes));
 	            }
-
-				if (contactDiff > 60000)
+	            
+	            // If no contact after 30 seconds change font
+				if (contactDiff > 30000){
 					heartbeatArea.setForeground(Color.RED);
-				else if (contactDiff > 120000 && contactDiff < 122000 && !sessionID.equals("NOT CONNECTED")){
+	            	Font heartbeatFont = heartbeatArea.getFont();
+					Map attributes = heartbeatFont.getAttributes();
+	            	attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+	            	attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_ULTRABOLD);
+	            	attributes.put(TextAttribute.SIZE, 16L);
+	            	heartbeatArea.setFont(heartbeatFont.deriveFont(attributes));
+				}
+				else{
+					heartbeatArea.setForeground(Color.BLUE);
+	            	Font heartbeatFont = heartbeatArea.getFont();
+					Map attributes = heartbeatFont.getAttributes();
+	            	attributes.put(TextAttribute.UNDERLINE, -1);
+	            	attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
+	            	attributes.put(TextAttribute.SIZE, 12L);
+	            	heartbeatArea.setFont(heartbeatFont.deriveFont(attributes));
+				}
+				
+				// If no contact for one minute alert
+				if (contactDiff > 60000 && contactDiff < 62000){
 	            	alertFrame = new JFrame();
 	            	alertFrame.setLocation(500, 400);
 	        		alertFrame.setVisible(true);
 	        		alertFrame.setAlwaysOnTop(true);
-	        		StringJoiner joiner = new StringJoiner(" ");
-	        		joiner.add("No Messages recieved from");
-	        		joiner.add(sessionID);
-	        		joiner.add("for 120 seconds");
-	        		int input = JOptionPane.showOptionDialog(alertFrame, joiner.toString(), "FIX MESSAGE ALERT", 
+	        		String alertMessage = "FIX ISSUE: No messages recieved in last 60 seconds";
+	        		int input = JOptionPane.showOptionDialog(alertFrame, alertMessage, "FIX MESSAGE ALERT", 
 	        				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
 	        		alertFrame.dispose();
 	            }
-				else
-					heartbeatArea.setForeground(Color.BLUE);
 
 	            Thread.sleep(1000);
 	         }

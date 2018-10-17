@@ -65,8 +65,14 @@ public class FIXOrder {
     	algoParams = algoParams + ";6403=" + vwapOrder.getParticipationRate();
     	algoParams = algoParams + ";6168=" + startTimeString;
     	algoParams = algoParams + ";126=" + endTimeString;
-    	// If End Time is 4:00pm then participate in the close
-    	if(vwapOrder.getEndTime().equals("16:00:00")) {
+
+    	// If End Time is 4:00pm AND Current Time is before 3:45pm participate in the close
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+		formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        String currentTime = formatter.format(new Date());
+        int currentTimeInt = Integer.parseInt(currentTime.replace(":",  ""));   
+
+        if(vwapOrder.getEndTime().equals("16:00:00") && currentTimeInt < 154458) {
     		algoParams = algoParams + ";6412=A";
     	}
     	algoParams = algoParams + ";9682=v4.3.0BRT;";

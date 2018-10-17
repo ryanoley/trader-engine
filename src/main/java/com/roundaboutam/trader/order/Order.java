@@ -314,7 +314,7 @@ public class Order {
 		this.orderBasketID = orderBasketID;
 	}
 	
-	// Vwap order realated fields
+	// Vwap order related fields
 	public Boolean getVwapFlag() {
 		return vwapFlag;
 	}

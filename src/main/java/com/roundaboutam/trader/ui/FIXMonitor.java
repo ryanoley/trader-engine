@@ -46,11 +46,32 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 		timeStampMap = new HashMap<Integer, Date>();
 	}
 
+	@SuppressWarnings("unchecked")
+	private Font getInitFont(JTextArea textArea) {
+    	Font initFont = textArea.getFont();
+		Map<TextAttribute, Object>  initAttributes = (Map<TextAttribute, Object>) initFont.getAttributes();
+		initAttributes.put(TextAttribute.UNDERLINE, -1);
+		initAttributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
+		initAttributes.put(TextAttribute.SIZE, 12L);
+		return initFont.deriveFont(initAttributes);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Font getWarningFont(JTextArea textArea) {
+    	Font warnFont = textArea.getFont();
+		Map<TextAttribute, Object>  warnAttributes = (Map<TextAttribute, Object>) warnFont.getAttributes();
+		warnAttributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+		warnAttributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_ULTRABOLD);
+		warnAttributes.put(TextAttribute.SIZE, 16L);
+		return warnFont.deriveFont(warnAttributes);
+	}
+	
 	private JTextArea setSessionArea(String areaText) {
 		sessionArea = new JTextArea();
 		sessionArea.setBackground(Color.LIGHT_GRAY);
 		sessionArea.setForeground(Color.BLUE);
 		sessionArea.setText("CompID: " + areaText);
+		sessionArea.setFont(getInitFont(sessionArea));
 		return sessionArea;
 	}
 
@@ -59,6 +80,7 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 		seqArea.setBackground(Color.LIGHT_GRAY);
 		seqArea.setForeground(Color.BLUE);
 		seqArea.setText("MsgSeqNum: " + areaNum);
+		seqArea.setFont(getInitFont(seqArea));
 		return seqArea;
 	}
 
@@ -67,6 +89,7 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 		heartbeatArea.setBackground(Color.LIGHT_GRAY);
 		heartbeatArea.setForeground(Color.BLUE);
 		heartbeatArea.setText("ContactDiff: -");
+		heartbeatArea.setFont(getInitFont(heartbeatArea));
 		return heartbeatArea;
 	}
 
@@ -89,7 +112,6 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 	}
 
 	JFrame alertFrame;
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void run() {
 		try {
@@ -98,34 +120,33 @@ public class FIXMonitor extends JPanel implements Observer, Runnable  {
 				sessionArea.setText("CompID: " + sessionID);
 				seqArea.setText("MsgSeqNum: " + seqNum);
 				heartbeatArea.setText("ContactDiff: " + contactDiff);
-
+				
 	            if (sessionID.equals("ROUNDPROD01")){
-	            	Font sessionFont = sessionArea.getFont();
-					Map attributes = sessionFont.getAttributes();
-	            	attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-	            	attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_ULTRABOLD);
-	            	attributes.put(TextAttribute.SIZE, 18L);
-	            	sessionArea.setForeground(Color.RED);
-	            	sessionArea.setFont(sessionFont.deriveFont(attributes));
+	            	sessionArea.setFont(getWarningFont(sessionArea));
+	            	sessionArea.setForeground(new Color(5, 114, 11));
 	            }
-
-				if (contactDiff > 60000)
+	            
+	            // If no contact after 30 seconds change font
+				if (contactDiff > 30000){
+					heartbeatArea.setFont(getWarningFont(heartbeatArea));
 					heartbeatArea.setForeground(Color.RED);
-				else if (contactDiff > 120000 && contactDiff < 122000 && !sessionID.equals("NOT CONNECTED")){
+				}
+				else {
+	            	heartbeatArea.setFont(getInitFont(heartbeatArea));
+	            	heartbeatArea.setForeground(Color.BLUE);
+				}
+				
+				// If no contact for one minute alert
+				if (contactDiff > 60000 && contactDiff < 62000){
 	            	alertFrame = new JFrame();
 	            	alertFrame.setLocation(500, 400);
 	        		alertFrame.setVisible(true);
 	        		alertFrame.setAlwaysOnTop(true);
-	        		StringJoiner joiner = new StringJoiner(" ");
-	        		joiner.add("No Messages recieved from");
-	        		joiner.add(sessionID);
-	        		joiner.add("for 120 seconds");
-	        		int input = JOptionPane.showOptionDialog(alertFrame, joiner.toString(), "FIX MESSAGE ALERT", 
+	        		String alertMessage = "FIX ISSUE: No messages recieved in last 60 seconds";
+	        		int input = JOptionPane.showOptionDialog(alertFrame, alertMessage, "FIX MESSAGE ALERT", 
 	        				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
 	        		alertFrame.dispose();
 	            }
-				else
-					heartbeatArea.setForeground(Color.BLUE);
 
 	            Thread.sleep(1000);
 	         }

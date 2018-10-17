@@ -89,9 +89,7 @@ public class Parser {
 
 	private static Order newOrder(HashMap<Integer, String> fieldMap) {
 		Order order = new Order();		
-		// TODO This is a hard coded TIF as this is all that is used
-		order.setOrderTIF(OrderTIF.DAY);
-		
+
 		PriceType priceType = PriceType.parse(fieldMap.get(PriceType.RMPFieldID));
 		OrderSide orderSide = OrderSide.parse(fieldMap.get(OrderSide.RMPFieldID));
 		BasketName basketName = BasketName.parse(fieldMap.get(BasketName.RMPFieldID));
@@ -102,7 +100,7 @@ public class Parser {
 		order.setPriceType(priceType);
 		order.setSymbol(symbol.toString());
 		order.setQuantity(quantity.getQuantity());
-
+		
 		// Interpret Order Side
 		if (orderSide == OrderSide.BUY | orderSide == OrderSide.SHORT_SELL) {
 			order.setOrderOpenClose(OrderOpenClose.OPEN);
@@ -114,7 +112,7 @@ public class Parser {
 		}
 		
 		// Interpret PriceType, set VWAP fields depending
-		if (priceType == PriceType.LIMIT) {
+		if (priceType == PriceType.LIMIT | priceType == PriceType.LIMIT_ON_CLOSE) {
 			PriceLimit priceLimit = PriceLimit.parse(fieldMap.get(PriceLimit.RMPFieldID));
 			order.setLimitPrice(priceLimit.getPriceLimit());
 		} else if (priceType == PriceType.VWAP) {
@@ -131,6 +129,11 @@ public class Parser {
 			Integer prtInt = (prtString == null) ? order.getParticipationRate() : Integer.parseInt(prtString);
 			order.setParticipationRate(prtInt);
 		}
+
+		// Add TIF for Market and Limit orders
+		if (priceType == PriceType.LIMIT | priceType == PriceType.MARKET | priceType == PriceType.VWAP) {
+			order.setOrderTIF(OrderTIF.DAY);
+		} 
 
 		// Interpret Basket information
 		if (basketName != null) {

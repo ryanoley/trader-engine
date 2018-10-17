@@ -33,7 +33,7 @@ import quickfix.SessionID;
 
 public class OrderTicketFrame {
 
-	private static String[] allowableOrderTypes = {"LIMIT", "VWAP", "MARKET"};
+	private static String[] allowableOrderTypes = {"LIMIT", "VWAP", "MARKET", "MOC", "LOC"};
 
 	private static JFrame frame;
 	private static JPanel panel;
@@ -55,6 +55,8 @@ public class OrderTicketFrame {
     private boolean symbolEntered = false;
     private boolean quantityEntered = false;
     private boolean limitEntered = false;
+    private boolean startTimeEntered = true;
+    private boolean endTimeEntered = true;
     private boolean sessionEntered = false;
     
     JButton submitButton;
@@ -216,7 +218,6 @@ public class OrderTicketFrame {
 			}
 		});
 	    panel.add(btnClose, c);
-
 	    
 	    checkFields();
 
@@ -224,6 +225,8 @@ public class OrderTicketFrame {
         symbolField.addKeyListener(activator);
         quantityField.addKeyListener(activator);
         limitPriceField.addKeyListener(activator);
+        startTimeField.addKeyListener(activator);
+        endTimeField.addKeyListener(activator);
         sessionIDCombo.addItemListener(activator);
 
         frame.add(panel);	    
@@ -244,12 +247,12 @@ public class OrderTicketFrame {
 		sessionIDCombo.addItem(application.getSessionID());
 		// Enable certain fields dependent on OrderType
         String item = (String) orderTypesCombo.getSelectedItem();
-        if (item == "MARKET") {
+        if (item == "MARKET" | item == "MOC") {
             enableTextField(limitPriceField, false);
             enableTextField(participationRateField, false);
             enableTextField(startTimeField, false);
             enableTextField(endTimeField, false);
-        } else if (item == "LIMIT") {
+        } else if (item == "LIMIT" | item == "LOC") {
             enableTextField(limitPriceField, true);
             enableTextField(participationRateField, false);
             enableTextField(startTimeField, false);
@@ -275,14 +278,14 @@ public class OrderTicketFrame {
         sessionEntered = sessionIDCombo.getSelectedItem() != null;
         String priceType = (String) orderTypesCombo.getSelectedItem();
         boolean activate = symbolEntered && quantityEntered && sessionEntered;
-        if (priceType == "MARKET")
+        if (priceType == "MARKET" | priceType == "MOC")
             submitButton.setEnabled(activate);
-        else if (priceType == "LIMIT")
+        else if (priceType == "LIMIT" | priceType == "LOC")
             submitButton.setEnabled(activate && limitEntered);
         else if (priceType == "VWAP")
-            submitButton.setEnabled(activate);
+            submitButton.setEnabled(activate && startTimeEntered && endTimeEntered);
     }
-	
+
     private class SubmitActivator implements KeyListener, ItemListener {
         public void keyReleased(KeyEvent e) {
             Object obj = e.getSource();
@@ -292,6 +295,10 @@ public class OrderTicketFrame {
                 quantityEntered = testField(obj);
             } else if (obj == limitPriceField) {
                 limitEntered = testField(obj);
+            } else if (obj == startTimeField) {
+                startTimeEntered = testField(obj);
+            } else if (obj == endTimeField) {
+                endTimeEntered = testField(obj);
             }
             activateSubmit();
         }
@@ -331,6 +338,7 @@ public class OrderTicketFrame {
 
         String orderTypeText = (String) orderTypesCombo.getSelectedItem();
         Order order = new Order();
+
         if (orderTypeText.equals("VWAP")) {
             order.setVwapFlag(true);
             order.setStartTime(startTimeField.getText());
@@ -340,8 +348,13 @@ public class OrderTicketFrame {
         } else if (orderTypeText.equals("LIMIT")) {
             order.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
             order.setPriceType(PriceType.LIMIT);
+        } else if (orderTypeText.equals("LOC")) {
+            order.setLimitPrice(Double.parseDouble(limitPriceField.getText()));
+            order.setPriceType(PriceType.LIMIT_ON_CLOSE);
         } else if (orderTypeText.equals("MARKET")) {
             order.setPriceType(PriceType.MARKET);
+        } else if (orderTypeText.equals("MOC")) {
+            order.setPriceType(PriceType.MARKET_ON_CLOSE);
         }
         order.setSymbol(ticker);
         order.setQuantity(quantity);

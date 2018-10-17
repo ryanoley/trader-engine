@@ -475,9 +475,11 @@ public class TraderApplication implements Application {
     	// FOR TESTING - NOT CALLED UNLESS EXPLICITLY CHANGED
     	String newBasketString = "1=RMP|2=20170313-13:54:44|3=NB|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket";
 		fromRMP(newBasketString);
-		String newOrderString = "1=RMP|2=20170313-14:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|9=BY|10=100|11=M|12=115.20";
+		String newVwapString = "1=RMP|2=20170313-14:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|9=BY|10=100|11=V|13=15:45:00|14=16:00:00|15=20";
+		fromRMP(newVwapString);
+		String newOrderString = "1=RMP|2=20170313-14:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=IBM|9=BY|10=100|11=MOC";
 		fromRMP(newOrderString);
-		String newLimitOrderString = "1=RMP|2=20170313-15:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|9=SL|10=175|11=L|12=117.05";
+		String newLimitOrderString = "1=RMP|2=20170313-15:54:44|3=NO|4=TESTSENDER|5=TRADERENGINE|6=ParseBasket|7=GLD|9=SL|10=175|11=LOC|12=117.05";
 		fromRMP(newLimitOrderString);
     }
 
